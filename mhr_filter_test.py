@@ -47,21 +47,27 @@ with tempfile.TemporaryDirectory() as tmp:
   with (rec.path/filename).open() as f:assert len(list(csv.DictReader(f)))==count
  np.testing.assert_array_equal(frame['pose']['pred_global_rots'],second['pred_global_rots'])
 print('PASS: MHR independent filtering, raw data, projection mask, resets, legacy profiles and CSV/JSONL export')
-# Both targets coexist; each filters raw predictions, never each other's output.
-from smpl_stage import SmplStage
-path=Path('outputs/intrinsics-validation/fast384/standing/calibrated/person_00.npz')
-both=replace(config,smpl_enabled=True,smpl_smoothing=True,one_euro_target='both')
-smpl=SmplStage(both);mhr=MhrFilterStage(both)
-with np.load(path,allow_pickle=False) as data:original={k:data[k].copy() for k in data.files}
-for i in range(6):
- p={k:v.copy() for k,v in original.items()}
- if 'pred_vertices' not in p:p['pred_vertices']=p['vertices']
- command=dict(type='stream',stream_id='both',host_received_monotonic=10+i*.12,frame_index=i)
- smpl.process(p,command);mhr.process(p,command,dict(matrix=K));pose=extract_pose(p)
- assert int(pose['smpl_one_euro_history_frames'])==i+1==int(pose['mhr_one_euro_history_frames'])
- assert int(pose['smpl_smooth_source_frame_index'])==max(0,i-2)
- for key in ('pred_keypoints_3d','pred_joint_coords','pred_global_rots','pred_cam_t'):np.testing.assert_array_equal(pose[key],original[key])
-# Enabling conversion while selecting MHR only must not also create SMPL Euro output.
-conversion=SmplStage(replace(both,one_euro_target='mhr',smpl_smoothing=False))
-assert conversion.euro is None
-print('PASS: combined MHR/SMPL/MLP states and conversion with MHR-only target')
+# Optional model acceptance uses an explicitly supplied private fixture.
+import argparse
+parser=argparse.ArgumentParser(description=__doc__)
+parser.add_argument('--smpl-input',type=Path,help='Optional local prediction NPZ; requires SMPL conversion assets')
+args=parser.parse_args()
+if args.smpl_input is not None:
+    # Both targets coexist; each filters raw predictions, never each other's output.
+    from smpl_stage import SmplStage
+    path=args.smpl_input
+    both=replace(config,smpl_enabled=True,smpl_smoothing=True,one_euro_target='both')
+    smpl=SmplStage(both);mhr=MhrFilterStage(both)
+    with np.load(path,allow_pickle=False) as data:original={k:data[k].copy() for k in data.files}
+    for i in range(6):
+     p={k:v.copy() for k,v in original.items()}
+     if 'pred_vertices' not in p:p['pred_vertices']=p['vertices']
+     command=dict(type='stream',stream_id='both',host_received_monotonic=10+i*.12,frame_index=i)
+     smpl.process(p,command);mhr.process(p,command,dict(matrix=K));pose=extract_pose(p)
+     assert int(pose['smpl_one_euro_history_frames'])==i+1==int(pose['mhr_one_euro_history_frames'])
+     assert int(pose['smpl_smooth_source_frame_index'])==max(0,i-2)
+     for key in ('pred_keypoints_3d','pred_joint_coords','pred_global_rots','pred_cam_t'):np.testing.assert_array_equal(pose[key],original[key])
+    # Enabling conversion while selecting MHR only must not also create SMPL Euro output.
+    conversion=SmplStage(replace(both,one_euro_target='mhr',smpl_smoothing=False))
+    assert conversion.euro is None
+    print('PASS: combined MHR/SMPL/MLP states and conversion with MHR-only target')

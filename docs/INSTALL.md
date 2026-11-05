@@ -111,6 +111,8 @@ python3 scripts/check_inference.py --backend fast
 python3 scripts/check_inference.py --backend fast --eager
 ```
 
+`mhr_filter_test.py` 默认只使用合成数据；若要验证 SMPL／MHR 共存，可在具备模型的环境显式运行 `python mhr_filter_test.py --smpl-input /absolute/path/to/person_00.npz`。
+
 检查会启动独立 worker，校验配置、就绪信号、输出顶点形状和有限性，最后退出并释放模型。默认使用上游 dancing 示例，不随本仓库复制。结果仅保存在 `outputs/release-validation/`。不涉及相机实拍、机器人控制或精度数据集评测。
 
 无 GPU GUI 启动检查：激活 GUI 环境后运行 `QT_QPA_PLATFORM=offscreen python tests/gui_startup.py`。离屏检查不验证 OpenGL 场景渲染；正常桌面运行需要真实 OpenGL。安装桌面入口用 `python3 scripts/install_desktop.py --desktop`，GNOME 可能需要右键“允许启动”。
