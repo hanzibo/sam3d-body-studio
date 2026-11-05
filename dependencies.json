@@ -1,0 +1,33 @@
+[
+  {
+    "key": "official_repo",
+    "url": "https://github.com/facebookresearch/sam-3d-body.git",
+    "commit": "b5c765a0d89d789985e186d396315e7590887b94"
+  },
+  {
+    "key": "fast_repo",
+    "url": "https://github.com/yangtiming/Fast-SAM-3D-Body.git",
+    "commit": "d72aa36913a1673ace029d345f437561a85ec9e2"
+  },
+  {
+    "key": "comfy_repo",
+    "url": "https://github.com/Comfy-Org/ComfyUI.git",
+    "commit": "858fd58dcd47b1407a6778e0920f02a9b40fd538"
+  },
+  {
+    "key": "detectron2",
+    "url": "https://github.com/facebookresearch/detectron2.git",
+    "commit": "a1ce2f956a1d2212ad672e3c47d53405c2fe4312"
+  },
+  {
+    "key": "sam3_repo",
+    "url": "https://github.com/facebookresearch/sam3.git",
+    "commit": "0570b3a5be9c4e694f23d85232fb55f4a6f1f7fc",
+    "optional": true
+  },
+  {
+    "key": "dinov3_repo",
+    "url": "https://github.com/facebookresearch/dinov3.git",
+    "commit": "6876159a11b4df116f30f667f8c9888617df0751"
+  }
+]

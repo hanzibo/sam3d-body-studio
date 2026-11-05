@@ -1,0 +1,6 @@
+# After upstream Fast dependencies and a compatible CUDA PyTorch are installed.
+ultralytics==8.3.228
+onnx==1.19.1
+onnxruntime-gpu==1.31.1
+tensorrt-cu12==10.16.1.11
+nvtx

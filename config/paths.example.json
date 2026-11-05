@@ -1,0 +1,19 @@
+{
+  "official_repo": "third_party/sam-3d-body",
+  "fast_repo": "third_party/Fast-SAM-3D-Body",
+  "comfy_repo": "third_party/ComfyUI",
+  "sam3_repo": "third_party/sam3",
+  "standard_python": "envs/standard/bin/python",
+  "fast_python": "envs/fast/bin/python",
+  "camera_python": "envs/camera/bin/python",
+  "sam3_python": "envs/sam3/bin/python",
+  "standard_checkpoint": "models/sam_3d_body_dinov3_bf16.safetensors",
+  "sam3_checkpoint": "models/sam3/sam3.pt",
+  "backbone_engine_512": "models/engines/512/backbone_dinov3_fp16.engine",
+  "backbone_engine_384": "models/engines/384/backbone_dinov3_fp16.engine",
+  "torch_home": "models/torch-hub",
+  "inductor_cache": "models/torch-cache/fast",
+  "yolo_config": "outputs/yolo-config",
+  "smpl_assets": "assets/smpl",
+  "engine_registry": "config/local.engines.json"
+}

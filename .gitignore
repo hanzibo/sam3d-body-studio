@@ -1,0 +1,87 @@
+# SAM 3D Body Studio: source only; local data stays local.
+# Generated runs: photos, RGB-D, masks, meshes, history, recordings, reports, logs.
+/outputs/
+/backups/
+/Log/
+/logs/
+*.log
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.cache/
+build/
+dist/
+*.egg-info/
+
+# Dependencies fetched separately at pinned revisions (manifest + setup script).
+/ComfyUI/
+/detectron2/
+/third_party/
+
+# Model assets and machine-specific accelerators.
+/assets/smpl/*
+!/assets/smpl/README.md
+/checkpoints/
+/models/
+/engines/
+*.pt
+*.pth
+*.ckpt
+*.safetensors
+*.engine
+*.plan
+*.onnx
+*.pkl
+
+# Historical analysis includes real photos / predicted meshes / reports.
+/camera-analysis/
+/community-review/
+/fast-analysis/
+/cloned-before.txt
+/pip-check.txt
+/missing-weights-check.json
+
+# Local machine configuration / credentials / user preset exports.
+.env
+.env.*
+!.env.example
+config/local.*
+config/gemini336l_rgb.json
+/profiles/*
+!/profiles/README.md
+.venv/
+venv/
+envs/
+.idea/
+.vscode/
+.DS_Store
+
+# Do not globally ignore JSON, CSV, NPZ, PNG, or SVG:
+# reviewed config templates, dependency locks, mappings, tests and docs may need them.
+# Imported data/assets still require per-file provenance/license review.
+
+# Local deployment notes and obsolete environment freezes
+/deployment-before-comfy.md
+/overview.*
+/requirements-*-lock.txt
+/requirements-lock.txt
+/analyze_intrinsics.py
+/intrinsics_ab_test.py
+/render_intrinsics_mesh_comparison.py
+/run.py
+/run.sh
+/gui/*_test.py
+/gui/sam3_final_validation.py
+/smpl_validation.py
+*.zip
+*.tar.gz
+*.ply
+*.obj
+*.npz
+*.npy
+
+# Historical acceptance scripts requiring private local fixtures
+/mhr_lab_test.py
+/euro_test.py
