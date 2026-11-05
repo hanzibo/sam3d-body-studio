@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-only
+# Copyright (c) 2026 hanzibo and contributors.
 """Offline visible-surface evaluation, isolated EGL process, no model loading."""
 import os
 os.environ['PYOPENGL_PLATFORM']='egl'

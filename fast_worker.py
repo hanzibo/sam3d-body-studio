@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-only
+# Copyright (c) 2026 hanzibo and contributors.
 """Persistent configurable Fast worker using the verified loader and Studio protocol."""
 from gpu_lease import acquire_gpu_lease
 _GPU_LEASE = acquire_gpu_lease('body')

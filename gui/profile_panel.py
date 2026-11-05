@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-only
+# Copyright (c) 2026 hanzibo and contributors.
 """Launch settings UI, with presets and explicit application by the main window."""
 from dataclasses import replace
 import json

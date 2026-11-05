@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+# SPDX-License-Identifier: GPL-3.0-only
+# Copyright (c) 2026 hanzibo and contributors.
 """Check tracked publication scope. Reports filenames only, never secret contents.
 
 This is a narrow release guard, not a comprehensive security scanner.

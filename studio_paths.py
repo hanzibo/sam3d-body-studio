@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-only
+# Copyright (c) 2026 hanzibo and contributors.
 """Machine-local paths and process environments; no model imports at GUI startup.
 
 Copy config/paths.example.json to config/local.json, or set SAM3D_STUDIO_PATHS.

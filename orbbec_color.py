@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-only
+# Copyright (c) 2026 hanzibo and contributors.
 """Orbbec frame decoding for isolated acquisition workers (no GUI imports)."""
 import cv2
 import numpy as np

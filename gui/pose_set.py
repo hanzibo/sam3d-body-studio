@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-only
+# Copyright (c) 2026 hanzibo and contributors.
 """Pose-set UI and serial batch orchestration around the existing RGB-D workspace."""
 from datetime import datetime
 import json

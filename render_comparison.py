@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-only
+# Copyright (c) 2026 hanzibo and contributors.
 """Generate comparison after the GUI has already received the mesh."""
 import json
 from pathlib import Path

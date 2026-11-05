@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-only
+# Copyright (c) 2026 hanzibo and contributors.
 """Adapt Fast's unpinned torch.hub request to the existing local DINOv3 source.
 
 HF_HUB_OFFLINE does not cover torch.hub's GitHub default-branch probe. Keep this

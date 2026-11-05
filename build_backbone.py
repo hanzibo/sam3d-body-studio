@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-only
+# Copyright (c) 2026 hanzibo and contributors.
 """Build only the DINOv3 backbone, keeping upstream code and full MHR unloaded."""
 import argparse
 import gc

@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-only
+# Copyright (c) 2026 hanzibo and contributors.
 """ROI selection must keep each person's wrist keypoints and reject ambiguity."""
 import unittest
 import numpy as np

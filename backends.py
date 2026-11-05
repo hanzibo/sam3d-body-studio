@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-only
+# Copyright (c) 2026 hanzibo and contributors.
 """Studio backend resources; inference packages stay in isolated processes."""
 from pathlib import Path
 from studio_paths import path

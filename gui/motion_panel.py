@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-only
+# Copyright (c) 2026 hanzibo and contributors.
 """Shared pose layers, angles and recording controls for still/live results."""
 from pathlib import Path
 from PyQt5 import QtCore, QtGui, QtWidgets

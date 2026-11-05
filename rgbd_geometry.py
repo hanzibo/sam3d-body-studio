@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-only
+# Copyright (c) 2026 hanzibo and contributors.
 """Metric RGB-D geometry. All arrays use colour camera CV axes, metres.
 
 No alignment or shape fitting is performed. Projection is into a rectified colour

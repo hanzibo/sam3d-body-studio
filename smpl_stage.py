@@ -1,3 +1,11 @@
+# SPDX-License-Identifier: GPL-3.0-only
+# Copyright (c) 2026 hanzibo and contributors, Studio modifications.
+# Copyright (c) 2026 Fast SAM 3D Body Authors, upstream conversion workflow.
+# Adapted preprocessing/output conventions from mhr2smpl/multi_view/
+# infer_multiview.py and multiview_net.py at
+# d72aa36913a1673ace029d345f437561a85ec9e2; retain LICENSES/Fast-SAM-3D-Body-MIT.txt.
+# Modified: NumPy sampling/FK, joint-only asset access, raw/filtered outputs,
+# explicit temporal resets and Studio protocol. Networks are imported separately.
 """Optional single-view community MHR->SMPL and center-window SmootherMLP.
 
 No robot transport or retargeting. Raw parameters remain independent of smoothed

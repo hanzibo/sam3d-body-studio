@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-only
+# Copyright (c) 2026 hanzibo and contributors.
 """MHR-only editor. Native units internally; preview arrays use Studio camera axes/metres."""
 from pathlib import Path
 import importlib.util

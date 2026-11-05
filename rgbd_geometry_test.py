@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-only
+# Copyright (c) 2026 hanzibo and contributors.
 """Geometry acceptance: analytic depth/registration, occlusion, metric scoring."""
 import numpy as np
 from rgbd_geometry import register_depth,depth_metrics,surface_distances

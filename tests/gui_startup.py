@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-only
+# Copyright (c) 2026 hanzibo and contributors.
 """Construct all Studio tabs without GPU/model loading; isolate user settings."""
 import os
 from pathlib import Path

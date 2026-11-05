@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-only
+# Copyright (c) 2026 hanzibo and contributors.
 """Latest-frame-only scheduling on the Qt thread; inference remains in its worker."""
 import base64
 from collections import deque

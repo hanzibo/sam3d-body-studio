@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-only
+# Copyright (c) 2026 hanzibo and contributors.
 """Versioned launch configuration shared by the GUI and isolated workers."""
 from dataclasses import dataclass, asdict, replace
 import hashlib

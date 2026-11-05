@@ -1,3 +1,9 @@
+# SPDX-License-Identifier: GPL-3.0-only
+# Copyright (c) 2026 hanzibo and contributors, Studio modifications.
+# Copyright (c) 2012 University of North Carolina at Chapel Hill.
+# Luke Campagnola and pyqtgraph contributors; see LICENSES/pyqtgraph-MIT.txt.
+# Adapted MeshData.vertexNormals cache/index interface from pyqtgraph 0.13.7;
+# modified normal accumulation to vectorized NumPy operations.
 """Vectorized equivalent of pyqtgraph's smooth vertex normals."""
 import numpy as np
 from pyqtgraph.opengl import MeshData

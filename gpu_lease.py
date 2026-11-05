@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-only
+# Copyright (c) 2026 hanzibo and contributors.
 """OS-enforced Studio model lease: SAM3 excludes all body/MHR GPU models.
 
 No CUDA imports. Leases survive Python object cleanup and close only explicitly

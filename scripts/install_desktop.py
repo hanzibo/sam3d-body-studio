@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+# SPDX-License-Identifier: GPL-3.0-only
+# Copyright (c) 2026 hanzibo and contributors.
 """Install a desktop menu entry for this checkout, optionally on the desktop."""
 import argparse
 from pathlib import Path

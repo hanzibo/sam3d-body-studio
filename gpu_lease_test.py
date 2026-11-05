@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-only
+# Copyright (c) 2026 hanzibo and contributors.
 """Prove cross-process exclusion and automatic release after hard process death."""
 import subprocess
 import sys

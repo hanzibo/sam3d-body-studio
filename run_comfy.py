@@ -1,3 +1,9 @@
+# SPDX-License-Identifier: GPL-3.0-only
+# Copyright (c) 2026 hanzibo and contributors, Studio modifications.
+# Loader adapted from ComfyUI contributors' SAM3DBody_Loader.execute in
+# comfy_extras/nodes_sam3d_body.py, revision
+# 858fd58dcd47b1407a6778e0920f02a9b40fd538; upstream GPLv3, see LICENSE.
+# Modified: command-line single-image workflow, strict loading, timings/export.
 """Single-image SAM 3D Body inference with the ComfyUI adaptation."""
 import argparse
 import gc

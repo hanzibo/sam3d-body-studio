@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-only
+# Copyright (c) 2026 hanzibo and contributors.
 """Select one detected person without discarding YOLO wrist keypoints."""
 import numpy as np
 

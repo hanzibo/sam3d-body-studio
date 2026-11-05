@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-only
+# Copyright (c) 2026 hanzibo and contributors.
 """Per-image camera selection; independent of the resident model launch profile."""
 import json
 from pathlib import Path

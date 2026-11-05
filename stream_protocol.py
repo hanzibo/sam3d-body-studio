@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-only
+# Copyright (c) 2026 hanzibo and contributors.
 """Bounded per-frame protocol shared by both resident model workers."""
 import base64
 from pathlib import Path

@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-only
+# Copyright (c) 2026 hanzibo and contributors.
 """Isolated Gemini RGB-D acquisition; stdout is a bounded JSON event stream."""
 import argparse
 import base64

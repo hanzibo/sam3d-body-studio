@@ -1,3 +1,10 @@
+# SPDX-License-Identifier: LicenseRef-SAM-3D-Body
+# Copyright (c) Meta Platforms, Inc. and affiliates.
+# Modifications Copyright (c) 2026 hanzibo and contributors.
+# Adapted from SAM 3D Body renderer.py and tools/vis_utils.py at
+# b5c765a0d89d789985e186d396315e7590887b94 (see docs/LICENSE_AUDIT.md).
+# Modified: exact fx/fy/cx/cy, renderer cleanup, single-person panel composition.
+# This file is governed by LICENSES/SAM-3D-Body.txt, not the root GPL grant.
 """Comparison panels with the exact RGB pinhole matrix used for inference."""
 import cv2
 import numpy as np

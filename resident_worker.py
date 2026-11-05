@@ -1,3 +1,10 @@
+# SPDX-License-Identifier: GPL-3.0-only
+# Copyright (c) 2026 hanzibo and contributors, Studio modifications.
+# Loader adapted from ComfyUI contributors' SAM3DBody_Loader.execute in
+# comfy_extras/nodes_sam3d_body.py, revision
+# 858fd58dcd47b1407a6778e0920f02a9b40fd538; upstream GPLv3, see LICENSE.
+# Modified: persistent process protocol, strict loading, dtype selection,
+# warmup, timing, camera calibration and asynchronous result export.
 """Persistent SAM model. JSON commands on stdin; prefixed events on stdout."""
 from gpu_lease import acquire_gpu_lease
 _GPU_LEASE = acquire_gpu_lease('body')

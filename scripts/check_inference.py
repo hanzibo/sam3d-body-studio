@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+# SPDX-License-Identifier: GPL-3.0-only
+# Copyright (c) 2026 hanzibo and contributors.
 """Real one-image GPU acceptance; writes private artifacts only under outputs/."""
 import argparse
 from dataclasses import replace

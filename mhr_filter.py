@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-only
+# Copyright (c) 2026 hanzibo and contributors.
 """Independent causal MHR position filtering. Raw model fields are never replaced."""
 import time
 import numpy as np

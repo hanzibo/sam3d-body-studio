@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-only
+# Copyright (c) 2026 hanzibo and contributors.
 """One-shot point-prompt SAM3 segmentation. Exits to fully release GPU memory."""
 import argparse
 import hashlib

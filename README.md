@@ -77,4 +77,6 @@ python rgbd_geometry_test.py
 
 ## 许可证
 
-本仓库自编写的 Studio 集成代码采用 **GPL-3.0-only**，见 [LICENSE](LICENSE)。第三方源码、模型、数据和人体资产不由本许可证重新授权，仍受各自条款约束；它们单独获取、不随本仓库分发。特别是 SAM License、SMPL 授权及可选 YOLO 许可须分别遵守，详见 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)。
+本仓库原创的 Studio 集成代码默认采用 **GPL-3.0-only**，见 [LICENSE](LICENSE)，文件头另有声明的除外。`calibrated_visualization.py` 改写自官方渲染代码，按 **SAM License** 标注；ComfyUI 加载器及 Fast 转换流程的改写来源也已单独声明。第三方权重、数据和人体资产不随本仓库发布，本许可证不重新授权这些内容。
+
+**许可审查尚有未决项：** GPL、SAM／DINOv3 自定义许可及可选 AGPL 组件的组合分发尚未确认兼容；分进程、单独下载和补齐署名不能自动解决这些问题。不要将整个运行栈理解为已确认可统一 GPL 发布或商业交付。逐项依据、已完成的修正和后续需要确认的授权，见 [许可证与来源审查](docs/LICENSE_AUDIT.md)、[逐文件清单](docs/provenance.json) 和 [第三方说明](THIRD_PARTY_NOTICES.md)。

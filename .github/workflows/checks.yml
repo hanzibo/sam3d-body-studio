@@ -11,6 +11,7 @@ jobs:
         with:
           python-version: '3.11'
       - run: python scripts/audit_release.py
+      - run: python scripts/audit_provenance.py
       - run: python -m compileall -q -x 'third_party|outputs|envs' .
       - run: python -m unittest discover -s tests -v
       - run: pip install -r requirements/gui.txt

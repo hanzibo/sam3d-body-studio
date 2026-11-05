@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-only
+# Copyright (c) 2026 hanzibo and contributors.
 """Local image-to-body desktop application. Inference runs in a separate process."""
 from datetime import datetime
 import json

@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-only
+# Copyright (c) 2026 hanzibo and contributors.
 """Hash pinning for locally built TensorRT engines, which are GPU/version specific.
 
 Registration is a user trust decision, not a malware scan. Only register an

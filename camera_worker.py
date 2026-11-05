@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-only
+# Copyright (c) 2026 hanzibo and contributors.
 """RGB-only Orbbec worker. SDK stays in its existing Python environment."""
 import argparse
 import base64

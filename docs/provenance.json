@@ -1,0 +1,610 @@
+{
+  "reviewed_at": "2026-11-05",
+  "baseline_commit": "e4efd99aaee9d7248fd5e91382aae96a225ab60f",
+  "scope": "Tracked source and documentation; engineering provenance assessment, not legal clearance or a transitive dependency/asset SBOM. No-match is not proof of independent authorship. Combined-work licensing and asset authorization remain unresolved; see docs/LICENSE_AUDIT.md.",
+  "default_original_contributions_license": "GPL-3.0-only",
+  "license_snapshots": {
+    "LICENSE": {
+      "source": "https://github.com/Comfy-Org/ComfyUI/blob/858fd58dcd47b1407a6778e0920f02a9b40fd538/LICENSE",
+      "scope": "Standard GPLv3 license text; default Studio grant is GPL-3.0-only, with explicit file exceptions.",
+      "sha256": "3972dc9744f6499f0f9b2dbf76696f2ae7ad8af9b23dde66d6af86c9dfb36986"
+    },
+    "LICENSES/SAM-3D-Body.txt": {
+      "source": "https://github.com/facebookresearch/sam-3d-body/blob/b5c765a0d89d789985e186d396315e7590887b94/LICENSE",
+      "scope": "SAM 3D Body adaptation and separately acquired official materials.",
+      "sha256": "b3a5a0e2d973ab80e6610ccf1cffc40756050d0ace3cd4fec879b3ec290b2e9b"
+    },
+    "LICENSES/Fast-SAM-3D-Body-MIT.txt": {
+      "source": "https://github.com/yangtiming/Fast-SAM-3D-Body/blob/d72aa36913a1673ace029d345f437561a85ec9e2/LICENSE",
+      "scope": "Fast authors contributions only; inherited materials retain upstream terms.",
+      "sha256": "5746733e7690ed3a97c235065c33bd65251ec977d57e656015cf1f4dc4b51312"
+    },
+    "LICENSES/SAM3.txt": {
+      "source": "https://github.com/facebookresearch/sam3/blob/0570b3a5be9c4e694f23d85232fb55f4a6f1f7fc/LICENSE",
+      "scope": "Reference snapshot for optional separately obtained SAM3; not a Studio-wide grant.",
+      "sha256": "4dea99bfaa016e21bc860d73f344236bd1e5c4977d1a9a8fd32f822b500ae1be"
+    },
+    "LICENSES/DINOv3.txt": {
+      "source": "https://github.com/facebookresearch/dinov3/blob/6876159a11b4df116f30f667f8c9888617df0751/LICENSE.md",
+      "scope": "Reference snapshot for separately obtained DINOv3; not a Studio-wide grant.",
+      "sha256": "25d122eb8f5b880fd23c736fb6ea8018ee45c12237e00b8a86d14c653904999e"
+    },
+    "LICENSES/pyqtgraph-MIT.txt": {
+      "source": "https://github.com/pyqtgraph/pyqtgraph/blob/pyqtgraph-0.13.7/LICENSE.txt",
+      "scope": "MeshData cache/index interface adaptation; copied from installed pyqtgraph 0.13.7 distribution.",
+      "sha256": "b4ed24d468da61df9028a52abe9283a592e63f315943a1c86cd96a9ea5b62079"
+    }
+  },
+  "files": {
+    ".github/workflows/checks.yml": {
+      "kind": "Studio documentation/configuration",
+      "license": "GPL-3.0-only",
+      "basis": "Studio-authored documentation, configuration, workflow or original SVG asset; named external sources retain their terms.",
+      "sources": []
+    },
+    ".gitignore": {
+      "kind": "Studio documentation/configuration",
+      "license": "GPL-3.0-only",
+      "basis": "Studio-authored documentation, configuration, workflow or original SVG asset; named external sources retain their terms.",
+      "sources": []
+    },
+    "CITATIONS.bib": {
+      "kind": "Bibliographic attribution",
+      "license": "Upstream bibliographic entries; attribution retained",
+      "basis": "Entries reproduced from the two upstream README citation sections; not claimed as original research.",
+      "sources": [
+        "https://github.com/facebookresearch/sam-3d-body/blob/b5c765a0d89d789985e186d396315e7590887b94/README.md",
+        "https://github.com/yangtiming/Fast-SAM-3D-Body/blob/d72aa36913a1673ace029d345f437561a85ec9e2/README.md"
+      ]
+    },
+    "LICENSE": {
+      "kind": "Verbatim license text",
+      "license": "License text, unmodified",
+      "basis": "Standard GPLv3 license text; default Studio grant is GPL-3.0-only, with explicit file exceptions.",
+      "sources": [
+        "https://github.com/Comfy-Org/ComfyUI/blob/858fd58dcd47b1407a6778e0920f02a9b40fd538/LICENSE"
+      ]
+    },
+    "LICENSES/DINOv3.txt": {
+      "kind": "Verbatim license text",
+      "license": "License text, unmodified",
+      "basis": "Reference snapshot for separately obtained DINOv3; not a Studio-wide grant.",
+      "sources": [
+        "https://github.com/facebookresearch/dinov3/blob/6876159a11b4df116f30f667f8c9888617df0751/LICENSE.md"
+      ]
+    },
+    "LICENSES/Fast-SAM-3D-Body-MIT.txt": {
+      "kind": "Verbatim license text",
+      "license": "License text, unmodified",
+      "basis": "Fast authors contributions only; inherited materials retain upstream terms.",
+      "sources": [
+        "https://github.com/yangtiming/Fast-SAM-3D-Body/blob/d72aa36913a1673ace029d345f437561a85ec9e2/LICENSE"
+      ]
+    },
+    "LICENSES/README.md": {
+      "kind": "Studio documentation/configuration",
+      "license": "GPL-3.0-only",
+      "basis": "Studio-authored documentation, configuration, workflow or original SVG asset; named external sources retain their terms.",
+      "sources": []
+    },
+    "LICENSES/SAM-3D-Body.txt": {
+      "kind": "Verbatim license text",
+      "license": "License text, unmodified",
+      "basis": "SAM 3D Body adaptation and separately acquired official materials.",
+      "sources": [
+        "https://github.com/facebookresearch/sam-3d-body/blob/b5c765a0d89d789985e186d396315e7590887b94/LICENSE"
+      ]
+    },
+    "LICENSES/SAM3.txt": {
+      "kind": "Verbatim license text",
+      "license": "License text, unmodified",
+      "basis": "Reference snapshot for optional separately obtained SAM3; not a Studio-wide grant.",
+      "sources": [
+        "https://github.com/facebookresearch/sam3/blob/0570b3a5be9c4e694f23d85232fb55f4a6f1f7fc/LICENSE"
+      ]
+    },
+    "LICENSES/pyqtgraph-MIT.txt": {
+      "kind": "Verbatim license text",
+      "license": "License text, unmodified",
+      "basis": "MeshData cache/index interface adaptation; copied from installed pyqtgraph 0.13.7 distribution.",
+      "sources": [
+        "https://github.com/pyqtgraph/pyqtgraph/blob/pyqtgraph-0.13.7/LICENSE.txt"
+      ]
+    },
+    "README.md": {
+      "kind": "Studio documentation/configuration",
+      "license": "GPL-3.0-only",
+      "basis": "Studio-authored documentation, configuration, workflow or original SVG asset; named external sources retain their terms.",
+      "sources": []
+    },
+    "THIRD_PARTY_NOTICES.md": {
+      "kind": "Studio documentation/configuration",
+      "license": "GPL-3.0-only",
+      "basis": "Studio-authored documentation, configuration, workflow or original SVG asset; named external sources retain their terms.",
+      "sources": []
+    },
+    "assets/smpl/README.md": {
+      "kind": "Studio documentation/configuration",
+      "license": "GPL-3.0-only",
+      "basis": "Studio-authored documentation, configuration, workflow or original SVG asset; named external sources retain their terms.",
+      "sources": []
+    },
+    "backends.py": {
+      "kind": "Studio source",
+      "license": "GPL-3.0-only",
+      "basis": "Studio backend resources; inference packages stay in isolated processes. Studio integration implementation; no substantial upstream source copy identified in this review; preliminary engineering classification.",
+      "sources": []
+    },
+    "build-backbone.sh": {
+      "kind": "Studio source",
+      "license": "GPL-3.0-only",
+      "basis": "Studio launcher: interpreter/path/environment selection and process invocation; no model implementation bundled.",
+      "sources": []
+    },
+    "build_backbone.py": {
+      "kind": "Studio compatibility / runtime API adapter",
+      "license": "GPL-3.0-only",
+      "basis": "Studio build entry dynamically imports external Fast converter functions; no ONNX/TensorRT converter implementation bundled. Uses external SAM/DINO backbone.",
+      "sources": [
+        "https://github.com/yangtiming/Fast-SAM-3D-Body/tree/d72aa36913a1673ace029d345f437561a85ec9e2"
+      ]
+    },
+    "calibrated_visualization.py": {
+      "kind": "SAM rendering adaptation",
+      "license": "LicenseRef-SAM-3D-Body",
+      "basis": "Adapted Renderer.__call__ and visualize_sample_together: scene/camera conventions and panel layout; changed exact intrinsics, cleanup, single-person output. Explicit exception to root GPL.",
+      "sources": [
+        "https://github.com/facebookresearch/sam-3d-body/blob/b5c765a0d89d789985e186d396315e7590887b94/sam_3d_body/visualization/renderer.py",
+        "https://github.com/facebookresearch/sam-3d-body/blob/b5c765a0d89d789985e186d396315e7590887b94/tools/vis_utils.py"
+      ]
+    },
+    "camera_intrinsics.py": {
+      "kind": "Studio source",
+      "license": "GPL-3.0-only",
+      "basis": "Validated RGB pinhole intrinsics in original, uncropped image pixels. Studio integration implementation; no substantial upstream source copy identified in this review; preliminary engineering classification.",
+      "sources": []
+    },
+    "camera_worker.py": {
+      "kind": "Studio source",
+      "license": "GPL-3.0-only",
+      "basis": "Studio camera acquisition/API adapter; workflow references same-author Gemini examples. Frame conversion is self-contained; no SDK implementation or binaries bundled.",
+      "sources": [
+        "https://github.com/hanzibo/orbbec-gemini-336l-python-examples/tree/0d6047f9d5c45fd717fe9905dec14182052b4368",
+        "https://github.com/orbbec/pyorbbecsdk"
+      ]
+    },
+    "config/paths.example.json": {
+      "kind": "Studio documentation/configuration",
+      "license": "GPL-3.0-only",
+      "basis": "Studio-authored documentation, configuration, workflow or original SVG asset; named external sources retain their terms.",
+      "sources": []
+    },
+    "dependencies.json": {
+      "kind": "Studio documentation/configuration",
+      "license": "GPL-3.0-only",
+      "basis": "Studio-authored documentation, configuration, workflow or original SVG asset; named external sources retain their terms.",
+      "sources": []
+    },
+    "docs/INSTALL.md": {
+      "kind": "Studio documentation/configuration",
+      "license": "GPL-3.0-only",
+      "basis": "Studio-authored documentation, configuration, workflow or original SVG asset; named external sources retain their terms.",
+      "sources": []
+    },
+    "docs/LICENSE_AUDIT.md": {
+      "kind": "Studio documentation/configuration",
+      "license": "GPL-3.0-only",
+      "basis": "Studio-authored documentation, configuration, workflow or original SVG asset; named external sources retain their terms.",
+      "sources": []
+    },
+    "docs/VALIDATION.md": {
+      "kind": "Studio documentation/configuration",
+      "license": "GPL-3.0-only",
+      "basis": "Studio-authored documentation, configuration, workflow or original SVG asset; named external sources retain their terms.",
+      "sources": []
+    },
+    "docs/provenance.json": {
+      "kind": "Studio documentation/configuration",
+      "license": "GPL-3.0-only",
+      "basis": "Studio-authored documentation, configuration, workflow or original SVG asset; named external sources retain their terms.",
+      "sources": []
+    },
+    "engine_registry.py": {
+      "kind": "Studio source",
+      "license": "GPL-3.0-only",
+      "basis": "Hash pinning for locally built TensorRT engines, which are GPU/version specific. Studio integration implementation; no substantial upstream source copy identified in this review; preliminary engineering classification.",
+      "sources": []
+    },
+    "fast_selection.py": {
+      "kind": "Studio source",
+      "license": "GPL-3.0-only",
+      "basis": "Select one detected person without discarding YOLO wrist keypoints. Studio integration implementation; no substantial upstream source copy identified in this review; preliminary engineering classification.",
+      "sources": []
+    },
+    "fast_worker.py": {
+      "kind": "Studio compatibility / runtime API adapter",
+      "license": "GPL-3.0-only",
+      "basis": "Own resident protocol, launch flags, validation and loading/configuration adapted to external Fast constructors/estimator; model implementation and inherited SAM/DINO code loaded separately. Not assumed uniformly MIT.",
+      "sources": [
+        "https://github.com/yangtiming/Fast-SAM-3D-Body/tree/d72aa36913a1673ace029d345f437561a85ec9e2"
+      ]
+    },
+    "gpu_lease.py": {
+      "kind": "Studio source",
+      "license": "GPL-3.0-only",
+      "basis": "OS-enforced Studio model lease: SAM3 excludes all body/MHR GPU models. Studio integration implementation; no substantial upstream source copy identified in this review; preliminary engineering classification.",
+      "sources": []
+    },
+    "gpu_lease_test.py": {
+      "kind": "Studio source",
+      "license": "GPL-3.0-only",
+      "basis": "Prove cross-process exclusion and automatic release after hard process death. Studio integration implementation; no substantial upstream source copy identified in this review; preliminary engineering classification.",
+      "sources": []
+    },
+    "gui/RGB-D几何验证说明.md": {
+      "kind": "Studio documentation/configuration",
+      "license": "GPL-3.0-only",
+      "basis": "Studio-authored documentation, configuration, workflow or original SVG asset; named external sources retain their terms.",
+      "sources": []
+    },
+    "gui/app.py": {
+      "kind": "Studio source",
+      "license": "GPL-3.0-only",
+      "basis": "Local image-to-body desktop application. Inference runs in a separate process. Studio integration implementation; no substantial upstream source copy identified in this review; preliminary engineering classification.",
+      "sources": []
+    },
+    "gui/camera_client.py": {
+      "kind": "Studio source",
+      "license": "GPL-3.0-only",
+      "basis": "Qt process/socket adapter; the GUI never imports the camera SDK. Studio integration implementation; no substantial upstream source copy identified in this review; preliminary engineering classification.",
+      "sources": []
+    },
+    "gui/icon.svg": {
+      "kind": "Studio documentation/configuration",
+      "license": "GPL-3.0-only",
+      "basis": "Studio-authored documentation, configuration, workflow or original SVG asset; named external sources retain their terms.",
+      "sources": []
+    },
+    "gui/live_stream.py": {
+      "kind": "Studio source",
+      "license": "GPL-3.0-only",
+      "basis": "Latest-frame-only scheduling on the Qt thread; inference remains in its worker. Studio integration implementation; no substantial upstream source copy identified in this review; preliminary engineering classification.",
+      "sources": []
+    },
+    "gui/mesh_geometry.py": {
+      "kind": "pyqtgraph interface adaptation",
+      "license": "GPL-3.0-only",
+      "basis": "MeshData.vertexNormals caching/index interface retained, vectorized NumPy accumulation replacement; pyqtgraph MIT notice retained.",
+      "sources": [
+        "https://github.com/pyqtgraph/pyqtgraph/blob/pyqtgraph-0.13.7/pyqtgraph/opengl/MeshData.py"
+      ]
+    },
+    "gui/mhr_lab.py": {
+      "kind": "Studio source",
+      "license": "GPL-3.0-only",
+      "basis": "Independent MHR parameter laboratory tab; GUI never imports torch. Studio integration implementation; no substantial upstream source copy identified in this review; preliminary engineering classification.",
+      "sources": []
+    },
+    "gui/motion_panel.py": {
+      "kind": "Studio source",
+      "license": "GPL-3.0-only",
+      "basis": "Shared pose layers, angles and recording controls for still/live results. Studio integration implementation; no substantial upstream source copy identified in this review; preliminary engineering classification.",
+      "sources": []
+    },
+    "gui/overlay_view.py": {
+      "kind": "Studio source",
+      "license": "GPL-3.0-only",
+      "basis": "Persistent GPU camera-image + calibrated body mesh display (no readback). Studio integration implementation; no substantial upstream source copy identified in this review; preliminary engineering classification.",
+      "sources": []
+    },
+    "gui/pose_set.py": {
+      "kind": "Studio source",
+      "license": "GPL-3.0-only",
+      "basis": "Pose-set UI and serial batch orchestration around the existing RGB-D workspace. Studio integration implementation; no substantial upstream source copy identified in this review; preliminary engineering classification.",
+      "sources": []
+    },
+    "gui/profile_panel.py": {
+      "kind": "Studio source",
+      "license": "GPL-3.0-only",
+      "basis": "Launch settings UI, with presets and explicit application by the main window. Studio integration implementation; no substantial upstream source copy identified in this review; preliminary engineering classification.",
+      "sources": []
+    },
+    "gui/record_history.py": {
+      "kind": "Studio source",
+      "license": "GPL-3.0-only",
+      "basis": "Read-only inspection of frozen RGB-D run records; never loads model weights. Studio integration implementation; no substantial upstream source copy identified in this review; preliminary engineering classification.",
+      "sources": []
+    },
+    "gui/rgbd_validation.py": {
+      "kind": "Studio source",
+      "license": "GPL-3.0-only",
+      "basis": "Frozen RGB-D validation workspace. Reuses Studio's resident inference worker. Studio integration implementation; no substantial upstream source copy identified in this review; preliminary engineering classification.",
+      "sources": []
+    },
+    "gui/run_history.py": {
+      "kind": "Studio source",
+      "license": "GPL-3.0-only",
+      "basis": "Local run history with CSV export and immutable report links. Studio integration implementation; no substantial upstream source copy identified in this review; preliminary engineering classification.",
+      "sources": []
+    },
+    "gui/使用说明.md": {
+      "kind": "Studio documentation/configuration",
+      "license": "GPL-3.0-only",
+      "basis": "Studio-authored documentation, configuration, workflow or original SVG asset; named external sources retain their terms.",
+      "sources": []
+    },
+    "gui_camera.py": {
+      "kind": "Studio source",
+      "license": "GPL-3.0-only",
+      "basis": "Per-image camera selection; independent of the resident model launch profile. Studio integration implementation; no substantial upstream source copy identified in this review; preliminary engineering classification.",
+      "sources": []
+    },
+    "launch_camera.sh": {
+      "kind": "Studio source",
+      "license": "GPL-3.0-only",
+      "basis": "Studio launcher: interpreter/path/environment selection and process invocation; no model implementation bundled.",
+      "sources": []
+    },
+    "launch_config.py": {
+      "kind": "Studio source",
+      "license": "GPL-3.0-only",
+      "basis": "Versioned launch configuration shared by the GUI and isolated workers. Studio integration implementation; no substantial upstream source copy identified in this review; preliminary engineering classification.",
+      "sources": []
+    },
+    "launch_fast_model.sh": {
+      "kind": "Studio source",
+      "license": "GPL-3.0-only",
+      "basis": "Studio launcher: interpreter/path/environment selection and process invocation; no model implementation bundled.",
+      "sources": []
+    },
+    "launch_gui.sh": {
+      "kind": "Studio source",
+      "license": "GPL-3.0-only",
+      "basis": "Studio launcher: interpreter/path/environment selection and process invocation; no model implementation bundled.",
+      "sources": []
+    },
+    "launch_model.sh": {
+      "kind": "Studio source",
+      "license": "GPL-3.0-only",
+      "basis": "Studio launcher: interpreter/path/environment selection and process invocation; no model implementation bundled.",
+      "sources": []
+    },
+    "launch_render.sh": {
+      "kind": "Studio source",
+      "license": "GPL-3.0-only",
+      "basis": "Studio launcher: interpreter/path/environment selection and process invocation; no model implementation bundled.",
+      "sources": []
+    },
+    "mhr_filter.py": {
+      "kind": "Studio source",
+      "license": "GPL-3.0-only",
+      "basis": "Independent causal MHR position filtering. Raw model fields are never replaced. Studio integration implementation; no substantial upstream source copy identified in this review; preliminary engineering classification.",
+      "sources": []
+    },
+    "mhr_filter_test.py": {
+      "kind": "Studio source",
+      "license": "GPL-3.0-only",
+      "basis": "MHR filtering independence, projection, raw preservation, reset and export. Studio integration implementation; no substantial upstream source copy identified in this review; preliminary engineering classification.",
+      "sources": []
+    },
+    "mhr_lab_engine.py": {
+      "kind": "Studio compatibility / runtime API adapter",
+      "license": "GPL-3.0-only",
+      "basis": "Reads and invokes external MHR asset API, reconstructs compatible parameter layout using external Fast hand mapping; no rig/skinning network implementation bundled. Exact asset rights and combined-work classification remain unresolved.",
+      "sources": [
+        "https://github.com/yangtiming/Fast-SAM-3D-Body/tree/d72aa36913a1673ace029d345f437561a85ec9e2"
+      ]
+    },
+    "mhr_lab_worker.py": {
+      "kind": "Studio source",
+      "license": "GPL-3.0-only",
+      "basis": "JSON-lines process boundary for the Studio parameter laboratory. Studio integration implementation; no substantial upstream source copy identified in this review; preliminary engineering classification.",
+      "sources": []
+    },
+    "motion_recording.py": {
+      "kind": "Studio source",
+      "license": "GPL-3.0-only",
+      "basis": "Bounded asynchronous raw motion recording, readable JSONL and CSV. Studio integration implementation; no substantial upstream source copy identified in this review; preliminary engineering classification.",
+      "sources": []
+    },
+    "offline_dinov3.py": {
+      "kind": "Studio compatibility / runtime API adapter",
+      "license": "GPL-3.0-only",
+      "basis": "Scoped torch.hub routing to separately configured local DINO source; no backbone implementation copied.",
+      "sources": [
+        "https://github.com/facebookresearch/dinov3/tree/6876159a11b4df116f30f667f8c9888617df0751"
+      ]
+    },
+    "one_euro.py": {
+      "kind": "Studio source",
+      "license": "GPL-3.0-only",
+      "basis": "Studio array/timestamp implementation of the One Euro filter equations; standard mathematics/algorithm reference is not treated as proof of upstream code copying.",
+      "sources": []
+    },
+    "orbbec_color.py": {
+      "kind": "Studio source",
+      "license": "GPL-3.0-only",
+      "basis": "Studio camera acquisition/API adapter; workflow references same-author Gemini examples. Frame conversion is self-contained; no SDK implementation or binaries bundled.",
+      "sources": [
+        "https://github.com/hanzibo/orbbec-gemini-336l-python-examples/tree/0d6047f9d5c45fd717fe9905dec14182052b4368",
+        "https://github.com/orbbec/pyorbbecsdk"
+      ]
+    },
+    "pose_data.py": {
+      "kind": "Studio compatibility / runtime API adapter",
+      "license": "GPL-3.0-only",
+      "basis": "Own data schema, skeleton edges and geometric angle/export helpers; reads landmark names from separately acquired official metadata at runtime, rather than bundling the metadata module.",
+      "sources": [
+        "https://github.com/facebookresearch/sam-3d-body/tree/b5c765a0d89d789985e186d396315e7590887b94"
+      ]
+    },
+    "profiles/README.md": {
+      "kind": "Studio documentation/configuration",
+      "license": "GPL-3.0-only",
+      "basis": "Studio-authored documentation, configuration, workflow or original SVG asset; named external sources retain their terms.",
+      "sources": []
+    },
+    "render_comparison.py": {
+      "kind": "Studio source",
+      "license": "GPL-3.0-only",
+      "basis": "Generate comparison after the GUI has already received the mesh. Studio integration implementation; no substantial upstream source copy identified in this review; preliminary engineering classification.",
+      "sources": []
+    },
+    "requirements/body.txt": {
+      "kind": "Studio documentation/configuration",
+      "license": "GPL-3.0-only",
+      "basis": "Studio-authored documentation, configuration, workflow or original SVG asset; named external sources retain their terms.",
+      "sources": []
+    },
+    "requirements/fast-extra.txt": {
+      "kind": "Studio documentation/configuration",
+      "license": "GPL-3.0-only",
+      "basis": "Studio-authored documentation, configuration, workflow or original SVG asset; named external sources retain their terms.",
+      "sources": []
+    },
+    "requirements/gui.txt": {
+      "kind": "Studio documentation/configuration",
+      "license": "GPL-3.0-only",
+      "basis": "Studio-authored documentation, configuration, workflow or original SVG asset; named external sources retain their terms.",
+      "sources": []
+    },
+    "resident_worker.py": {
+      "kind": "Upstream loader adaptation + Studio orchestration",
+      "license": "GPL-3.0-only",
+      "basis": "SAM3DBody_Loader.execute loading chain adapted; Studio adds process/CLI protocol, dtype/loading checks, timings, camera input and exports.",
+      "sources": [
+        "https://github.com/Comfy-Org/ComfyUI/blob/858fd58dcd47b1407a6778e0920f02a9b40fd538/comfy_extras/nodes_sam3d_body.py"
+      ]
+    },
+    "rgbd_batch.py": {
+      "kind": "Studio source",
+      "license": "GPL-3.0-only",
+      "basis": "Portable pose-set manifest and comparable-result lookup; no GUI or GPU imports. Studio integration implementation; no substantial upstream source copy identified in this review; preliminary engineering classification.",
+      "sources": []
+    },
+    "rgbd_capture.py": {
+      "kind": "Studio source",
+      "license": "GPL-3.0-only",
+      "basis": "Studio camera acquisition/API adapter; workflow references same-author Gemini examples. Frame conversion is self-contained; no SDK implementation or binaries bundled.",
+      "sources": [
+        "https://github.com/hanzibo/orbbec-gemini-336l-python-examples/tree/0d6047f9d5c45fd717fe9905dec14182052b4368",
+        "https://github.com/orbbec/pyorbbecsdk"
+      ]
+    },
+    "rgbd_evaluate.py": {
+      "kind": "Studio source",
+      "license": "GPL-3.0-only",
+      "basis": "Offline visible-surface evaluation, isolated EGL process, no model loading. Studio integration implementation; no substantial upstream source copy identified in this review; preliminary engineering classification.",
+      "sources": []
+    },
+    "rgbd_geometry.py": {
+      "kind": "Studio source",
+      "license": "GPL-3.0-only",
+      "basis": "Metric RGB-D geometry. All arrays use colour camera CV axes, metres. Studio integration implementation; no substantial upstream source copy identified in this review; preliminary engineering classification.",
+      "sources": []
+    },
+    "rgbd_geometry_test.py": {
+      "kind": "Studio source",
+      "license": "GPL-3.0-only",
+      "basis": "Geometry acceptance: analytic depth/registration, occlusion, metric scoring. Studio integration implementation; no substantial upstream source copy identified in this review; preliminary engineering classification.",
+      "sources": []
+    },
+    "run_comfy.py": {
+      "kind": "Upstream loader adaptation + Studio orchestration",
+      "license": "GPL-3.0-only",
+      "basis": "SAM3DBody_Loader.execute loading chain adapted; Studio adds process/CLI protocol, dtype/loading checks, timings, camera input and exports.",
+      "sources": [
+        "https://github.com/Comfy-Org/ComfyUI/blob/858fd58dcd47b1407a6778e0920f02a9b40fd538/comfy_extras/nodes_sam3d_body.py"
+      ]
+    },
+    "run_comfy.sh": {
+      "kind": "Studio source",
+      "license": "GPL-3.0-only",
+      "basis": "Studio launcher: interpreter/path/environment selection and process invocation; no model implementation bundled.",
+      "sources": []
+    },
+    "sam3_segment.py": {
+      "kind": "Studio compatibility / runtime API adapter",
+      "license": "GPL-3.0-only",
+      "basis": "Own point-prompt process adapter invokes external SAM3 builder/predictor; no network implementation bundled.",
+      "sources": [
+        "https://github.com/facebookresearch/sam3/tree/0570b3a5be9c4e694f23d85232fb55f4a6f1f7fc"
+      ]
+    },
+    "scripts/audit_provenance.py": {
+      "kind": "Studio source",
+      "license": "GPL-3.0-only",
+      "basis": "Check inventory coverage and license snapshots, not legal compatibility. Studio integration implementation; no substantial upstream source copy identified in this review; preliminary engineering classification.",
+      "sources": []
+    },
+    "scripts/audit_release.py": {
+      "kind": "Studio source",
+      "license": "GPL-3.0-only",
+      "basis": "Check tracked publication scope. Reports filenames only, never secret contents. Studio integration implementation; no substantial upstream source copy identified in this review; preliminary engineering classification.",
+      "sources": []
+    },
+    "scripts/check_inference.py": {
+      "kind": "Studio source",
+      "license": "GPL-3.0-only",
+      "basis": "Real one-image GPU acceptance; writes private artifacts only under outputs/. Studio integration implementation; no substantial upstream source copy identified in this review; preliminary engineering classification.",
+      "sources": []
+    },
+    "scripts/fetch_dependencies.py": {
+      "kind": "Studio source",
+      "license": "GPL-3.0-only",
+      "basis": "Fetch pinned source only; never download model weights or install packages. Studio integration implementation; no substantial upstream source copy identified in this review; preliminary engineering classification.",
+      "sources": []
+    },
+    "scripts/install_desktop.py": {
+      "kind": "Studio source",
+      "license": "GPL-3.0-only",
+      "basis": "Install a desktop menu entry for this checkout, optionally on the desktop. Studio integration implementation; no substantial upstream source copy identified in this review; preliminary engineering classification.",
+      "sources": []
+    },
+    "smpl_stage.py": {
+      "kind": "Fast workflow adaptation + Studio joint processing",
+      "license": "GPL-3.0-only",
+      "basis": "Adapts Fast sampling/centering/single-view/output conventions; external network classes dynamically imported, not bundled. Own NumPy FK/raw preservation/filter orchestration. Fast MIT notice retained; SMPL/mapping/weights require separate asset terms.",
+      "sources": [
+        "https://github.com/yangtiming/Fast-SAM-3D-Body/blob/d72aa36913a1673ace029d345f437561a85ec9e2/mhr2smpl/multi_view/infer_multiview.py",
+        "https://github.com/yangtiming/Fast-SAM-3D-Body/blob/d72aa36913a1673ace029d345f437561a85ec9e2/mhr2smpl/multi_view/multiview_net.py"
+      ]
+    },
+    "stream_protocol.py": {
+      "kind": "Studio source",
+      "license": "GPL-3.0-only",
+      "basis": "Bounded per-frame protocol shared by both resident model workers. Studio integration implementation; no substantial upstream source copy identified in this review; preliminary engineering classification.",
+      "sources": []
+    },
+    "studio_paths.py": {
+      "kind": "Studio source",
+      "license": "GPL-3.0-only",
+      "basis": "Machine-local paths and process environments; no model imports at GUI startup. Studio integration implementation; no substantial upstream source copy identified in this review; preliminary engineering classification.",
+      "sources": []
+    },
+    "test_fast_selection.py": {
+      "kind": "Studio source",
+      "license": "GPL-3.0-only",
+      "basis": "ROI selection must keep each person's wrist keypoints and reject ambiguity. Studio integration implementation; no substantial upstream source copy identified in this review; preliminary engineering classification.",
+      "sources": []
+    },
+    "tests/gui_startup.py": {
+      "kind": "Studio source",
+      "license": "GPL-3.0-only",
+      "basis": "Construct all Studio tabs without GPU/model loading; isolate user settings. Studio integration implementation; no substantial upstream source copy identified in this review; preliminary engineering classification.",
+      "sources": []
+    },
+    "tests/test_portability.py": {
+      "kind": "Studio source",
+      "license": "GPL-3.0-only",
+      "basis": "No model packages required. Validate machine config and engine trust boundaries. Studio integration implementation; no substantial upstream source copy identified in this review; preliminary engineering classification.",
+      "sources": []
+    },
+    "worker_benchmark.py": {
+      "kind": "Studio source",
+      "license": "GPL-3.0-only",
+      "basis": "Synchronized inference timing; caller owns CUDA boundaries and output validation. Studio integration implementation; no substantial upstream source copy identified in this review; preliminary engineering classification.",
+      "sources": []
+    }
+  }
+}

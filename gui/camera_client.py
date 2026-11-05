@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-only
+# Copyright (c) 2026 hanzibo and contributors.
 """Qt process/socket adapter; the GUI never imports the camera SDK."""
 import base64
 import json
