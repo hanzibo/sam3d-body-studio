@@ -5,6 +5,7 @@ from dataclasses import dataclass
 from pathlib import Path
 import os
 import stat
+from recorder_session import recording_active
 
 
 OUTPUT_TYPES = {
@@ -112,6 +113,8 @@ def scan(root, cancelled=lambda: False):
             size, files, modified, warning = measure(path, cancelled)
         except ValueError as exc:
             size, files, modified, warning, deletable = 0, 0, 0., str(exc), False
+        if path.is_dir() and recording_active(path):
+            deletable=False;warning='独立 RGB-D 记录窗口正在使用此样本集'
         entries.append(Entry(path, category, description, size, files, modified, deletable, warning))
     return entries
 
@@ -122,6 +125,8 @@ def validate_delete(root, entry, protected=()):
     allowed = {p: enabled for p, _, _, enabled in candidates(root)}
     if not entry.deletable or not allowed.get(path, False):
         raise ValueError('此项只读，或已不在允许清理的目录中')
+    if path.is_dir() and recording_active(path):
+        raise ValueError('请先关闭正在使用此样本集的 RGB-D 记录窗口')
     if not path.exists():
         raise ValueError('数据已不存在，请刷新')
     for active in protected:

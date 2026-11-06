@@ -24,7 +24,7 @@ def profile(p): return dict(width=p.get_width(),height=p.get_height(),fps=p.get_
 def interrupted(*_): raise KeyboardInterrupt()
 
 
-def capture(output, delay=5, max_skew_ms=20, preview=False):
+def capture(output, delay=5, max_skew_ms=20, preview=False, depth_preview=False):
     output=Path(output)
     # Preview must not create a sample; only an explicit capture may write one.
     if not preview:output.mkdir(parents=True,exist_ok=False)
@@ -76,7 +76,18 @@ def capture(output, delay=5, max_skew_ms=20, preview=False):
                 image=color_frame_to_bgr(color)
                 small=cv2.resize(image,(800,round(image.shape[0]*800/image.shape[1])))
                 ok,jpeg=cv2.imencode('.jpg',small,[cv2.IMWRITE_JPEG_QUALITY,80])
-                if ok:emit('frame',jpeg=base64.b64encode(jpeg).decode('ascii'))
+                if ok:
+                    extra=dict(skew_ms=float(abs(color.get_timestamp()-depth.get_timestamp())))
+                    if depth_preview:
+                        raw_preview=np.frombuffer(depth.get_data(),np.uint16).reshape(depth.get_height(),depth.get_width())
+                        metre_preview=raw_preview.astype(np.float32)*depth.get_depth_scale()/1000
+                        extra['valid_depth_fraction']=float(np.mean(raw_preview>0))
+                        display=cv2.applyColorMap(np.uint8(np.clip(metre_preview/6,0,1)*255),cv2.COLORMAP_TURBO)
+                        display[raw_preview==0]=0
+                        display=cv2.resize(display,(640,round(display.shape[0]*640/display.shape[1])))
+                        depth_ok,depth_jpeg=cv2.imencode('.jpg',display,[cv2.IMWRITE_JPEG_QUALITY,75])
+                        if depth_ok:extra['depth_jpeg']=base64.b64encode(depth_jpeg).decode('ascii')
+                    emit('frame',jpeg=base64.b64encode(jpeg).decode('ascii'),**extra)
                 last_preview=last_frame
             skew=abs(color.get_timestamp()-depth.get_timestamp())
             if deadline is None or time.monotonic()<deadline or count<15 or skew>max_skew_ms:continue
@@ -108,15 +119,18 @@ def capture(output, delay=5, max_skew_ms=20, preview=False):
             depth_to_color_R=rotation.tolist(),depth_to_color_t_m=translation.tolist()),
         registration='depth Brown deprojection -> D2C -> rectified RGB pinhole; nearest Z; no hole filling',
         rgb_rectified=True,effective_distortion=[0]*8,coordinate_system='x_right_y_down_z_forward',
-        units='metres',depth_enabled=True,timestamps=selected,max_timestamp_skew_ms=max_skew_ms)
+        units='metres',depth_enabled=True,timestamps=selected,max_timestamp_skew_ms=max_skew_ms,
+        capture_quality=dict(raw_depth_valid_fraction=float(np.mean(raw>0)),
+            registered_valid_fraction=float(valid.mean()),registered_valid_points=int(valid.sum()),
+            scope='whole frame, not person-specific; not an anatomical accuracy score'))
     (output/'camera.json').write_text(json.dumps(metadata,ensure_ascii=False,indent=2))
     emit('done',directory=str(output),valid_points=int(valid.sum()),timestamps=selected)
 
 
 if __name__=='__main__':
     p=argparse.ArgumentParser();p.add_argument('--output',required=True);p.add_argument('--delay',type=float,default=5)
-    p.add_argument('--max-skew-ms',type=float,default=20);p.add_argument('--preview',action='store_true');args=p.parse_args()
+    p.add_argument('--max-skew-ms',type=float,default=20);p.add_argument('--preview',action='store_true');p.add_argument('--depth-preview',action='store_true');args=p.parse_args()
     signal.signal(signal.SIGTERM,interrupted)
-    try:capture(args.output,args.delay,args.max_skew_ms,args.preview)
+    try:capture(args.output,args.delay,args.max_skew_ms,args.preview,args.depth_preview)
     except KeyboardInterrupt:emit('cancelled');sys.exit(130)
     except Exception as exc:emit('error',message=str(exc));sys.exit(1)
