@@ -733,6 +733,22 @@
     "tests/test_recorder_session.py": {
       "license": "GPL-3.0-only",
       "basis": "Original model-free tests of recording integrity, resumption and active data deletion protection."
+    },
+    "gui/rgbd_recorder.py": {
+      "license": "GPL-3.0-only",
+      "basis": "Original model-free Qt RGB-D recorder interface and capture subprocess orchestration; uses the existing Studio capture protocol, no external UI source copied."
+    },
+    "launch_rgbd_recorder.sh": {
+      "license": "GPL-3.0-only",
+      "basis": "Original portable launcher for the independent Studio RGB-D recorder."
+    },
+    "tests/rgbd_recorder_gui.py": {
+      "license": "GPL-3.0-only",
+      "basis": "Original synthetic camera protocol acceptance covering cancellation, retakes, automatic sequence and no-model startup."
+    },
+    "docs/RGBD_RECORDER.md": {
+      "license": "GPL-3.0-only",
+      "basis": "Original recorder usage, data format and staged depth refinement scope documentation."
     }
   }
 }

@@ -81,7 +81,7 @@ def environment(kind):
 def main():
     import argparse
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--launch', choices=['gui','standard','fast','camera','render','single','build'])
+    parser.add_argument('--launch', choices=['recorder','gui','standard','fast','camera','render','single','build'])
     parser.add_argument('--doctor', action='store_true')
     args, extra = parser.parse_known_args()
     if args.doctor:
@@ -91,12 +91,12 @@ def main():
         return
     if not args.launch: parser.error('Specify --launch or --doctor')
     kind = args.launch
-    interpreter = {'gui':'standard','standard':'standard','fast':'fast','camera':'camera',
+    interpreter = {'recorder':'standard','gui':'standard','standard':'standard','fast':'fast','camera':'camera',
                    'render':'standard','single':'standard','build':'fast'}[kind]
     executable = path(interpreter+'_python')
     if not executable.is_file():
         parser.exit(1, f'Python environment missing: {executable}\nConfigure {CONFIG_FILE}; see docs/INSTALL.md\n')
-    script = {'gui':'gui/app.py','standard':'resident_worker.py','fast':'fast_worker.py',
+    script = {'recorder':'gui/rgbd_recorder.py','gui':'gui/app.py','standard':'resident_worker.py','fast':'fast_worker.py',
               'camera':'camera_worker.py','render':'render_comparison.py','single':'run_comfy.py',
               'build':'build_backbone.py'}[kind]
     if kind == 'gui':
@@ -104,6 +104,6 @@ def main():
         with (folder/'desktop.log').open('ab') as log:
             os.dup2(log.fileno(), 1); os.dup2(log.fileno(), 2)
     os.chdir(ROOT)
-    os.execve(str(executable), [str(executable), '-u', str(ROOT/script), *extra], environment(kind))
+    os.execve(str(executable), [str(executable), '-u', str(ROOT/script), *extra], environment('gui' if kind == 'recorder' else kind))
 
 if __name__ == '__main__': main()

@@ -18,3 +18,12 @@ This release was checked on the existing Ubuntu / RTX 4060 8GB deployment. No en
 The clean-export test reused existing environments, weights and accelerator caches. It is not proof of a fresh machine's dependency installation, a cold TensorRT build, camera capture, every startup combination, or an accuracy dataset evaluation. No benchmark claim is made from these single-image checks. Private logs and generated meshes stay under local `outputs/release-validation/` and are not distributed.
 
 Run the checks described in [INSTALL.md](INSTALL.md) for your own machine. GitHub Actions runs source compilation, model-free tests and offscreen GUI construction; GPU inference is intentionally not part of CPU CI.
+
+
+## Independent RGB-D recorder — 2026-11-06
+
+- Full GUI-environment unit suite: 22 passed; synthetic recorder GUI acceptance passed for preview, capture, cancellation, versioned retake, automatic progression, resumption and missing-interpreter recovery.
+- Real Gemini 336L through the recorder GUI and isolated SDK process: RGB 1280×720, raw depth uint16, registered depth/XYZ 720×1280; 15 preview updates before successful save. The selected RGB and depth timestamps differed by 0 ms; 297,239 registered valid points were saved in this particular snapshot.
+- Raw depth, original and rectified RGB, calibration, metric XYZ and a Studio-compatible pose manifest were checked. Capture imported no Torch/model packages in the GUI process. Private hardware artifacts remain under ignored `outputs/rgbd-recorder-validation/`.
+- This validates capture and storage only, not body reconstruction, anatomical accuracy, or depth-based refinement. Single snapshots are not a continuous RGB-D video recorder.
+- Existing five-tab model-free GUI startup, data-manager acceptance and analytic RGB-D geometry checks remain part of regression validation.
