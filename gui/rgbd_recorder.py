@@ -23,7 +23,7 @@ def stamp():return datetime.now().strftime('%Y%m%d-%H%M%S-%f')
 class Preview(QtWidgets.QWidget):
     def __init__(self, empty):
         super().__init__();self.image=QtGui.QImage();self.overlay='';self.empty=empty
-        self.setMinimumSize(240,180)
+        self.setMinimumSize(240,140)
         self.setSizePolicy(QtWidgets.QSizePolicy.Expanding,QtWidgets.QSizePolicy.Expanding)
 
     def paintEvent(self,event):
@@ -45,7 +45,7 @@ class Preview(QtWidgets.QWidget):
 
 class Recorder(QtWidgets.QMainWindow):
     def __init__(self, camera_python=None, capture_script=None):
-        super().__init__();self.setWindowTitle('RGB-D 姿态采集 · SAM 3D Body Studio');self.resize(1180,830)
+        super().__init__();self.setWindowTitle('RGB-D 姿态采集 · SAM 3D Body Studio');self.resize(1280,900)
         self.camera_python=str(camera_python or path('camera_python'));self.capture_script=str(capture_script or ROOT/'rgbd_capture.py')
         self.session=None;self.state='idle';self.pending=None;self.pending_index=None
         self.event=None;self.buffer='';self.cancelled=False;self.auto_sequence=False
@@ -60,7 +60,7 @@ class Recorder(QtWidgets.QMainWindow):
         sub=QtWidgets.QLabel('仅采集相机，不加载人体模型或 SAM3。关闭 Studio 的相机预览后再连接；照片不会自动上传。')
         sub.setWordWrap(True);sub.setObjectName('muted');layout.addWidget(sub)
         row=QtWidgets.QHBoxLayout();row.addWidget(QtWidgets.QLabel('姿态数量'))
-        self.count=QtWidgets.QSpinBox();self.count.setRange(1,100);self.count.setValue(8);row.addWidget(self.count)
+        self.count=QtWidgets.QSpinBox();self.count.setRange(1,100);self.count.setValue(8);self.count.setMinimumWidth(80);row.addWidget(self.count)
         self.create_btn=QtWidgets.QPushButton('新建采集');self.create_btn.clicked.connect(self.new_session);row.addWidget(self.create_btn)
         self.open_btn=QtWidgets.QPushButton('继续已有采集');self.open_btn.clicked.connect(self.open_session);row.addWidget(self.open_btn)
         self.folder_btn=QtWidgets.QPushButton('打开数据目录');self.folder_btn.clicked.connect(self.open_folder);row.addWidget(self.folder_btn)
@@ -82,11 +82,13 @@ class Recorder(QtWidgets.QMainWindow):
         self.quality=QtWidgets.QLabel('预览不保存；只有倒计时完成并成功导出后，才计为已拍摄。')
         self.quality.setWordWrap(True);pl.addWidget(self.quality)
         split.addWidget(side);split.addWidget(previews);split.setSizes([285,870])
-        row=QtWidgets.QHBoxLayout();self.connect_btn=QtWidgets.QPushButton('连接相机');self.connect_btn.clicked.connect(self.start_preview);row.addWidget(self.connect_btn)
+        row=QtWidgets.QHBoxLayout()
         row.addWidget(QtWidgets.QLabel('倒计时'));self.delay=QtWidgets.QSpinBox();self.delay.setRange(0,30);self.delay.setValue(5);self.delay.setSuffix(' 秒');row.addWidget(self.delay)
         self.auto=QtWidgets.QCheckBox('自动依次拍摄');self.auto.toggled.connect(self.refresh);row.addWidget(self.auto)
         row.addWidget(QtWidgets.QLabel('换姿势间隔'));self.gap=QtWidgets.QSpinBox();self.gap.setRange(1,60);self.gap.setValue(8);self.gap.setSuffix(' 秒');row.addWidget(self.gap)
-        self.sound=QtWidgets.QCheckBox('提示音');self.sound.setChecked(True);row.addWidget(self.sound)
+        self.sound=QtWidgets.QCheckBox('提示音');self.sound.setChecked(True);row.addWidget(self.sound);row.addStretch();layout.addLayout(row)
+        row=QtWidgets.QHBoxLayout();self.connect_btn=QtWidgets.QPushButton('连接相机');self.connect_btn.clicked.connect(self.start_preview);row.addWidget(self.connect_btn)
+        row.addStretch()
         self.capture_btn=QtWidgets.QPushButton('倒计时拍摄');self.capture_btn.setObjectName('primary');self.capture_btn.clicked.connect(self.begin_capture);row.addWidget(self.capture_btn)
         self.stop_btn=QtWidgets.QPushButton('停止 / 断开');self.stop_btn.clicked.connect(self.stop);row.addWidget(self.stop_btn)
         layout.addLayout(row)
@@ -309,19 +311,22 @@ class Recorder(QtWidgets.QMainWindow):
 
 
 STYLE='''
-QWidget { background:#101827; color:#e5edf8; font-family:"Noto Sans CJK SC","DejaVu Sans"; font-size:13px; }
-QLabel#title { font-size:25px; font-weight:bold; }
+QWidget { background:#101827; color:#e5edf8; font-family:"Noto Sans CJK SC","DejaVu Sans"; font-size:17px; }
+QLabel#title { font-size:29px; font-weight:bold; }
 QLabel#muted { color:#99abc3; }
-QLabel#poseTitle { color:#83bdff; font-size:16px; padding:5px; }
+QLabel#poseTitle { color:#83bdff; font-size:20px; padding:5px; }
 QLabel#status { background:#172941; border:1px solid #29466b; border-radius:6px; padding:9px; }
-QPushButton { background:#20324b; border:1px solid #3a5271; border-radius:6px; padding:9px 13px; }
+QPushButton { background:#20324b; border:1px solid #3a5271; border-radius:6px; padding:10px 18px; }
 QPushButton:hover { background:#2c476a; }
 QPushButton#primary { background:#216ddd; font-weight:bold; }
 QPushButton:disabled { background:#182336; color:#67758d; border-color:#28364b; }
 QSpinBox,QPlainTextEdit,QListWidget { background:#0b1220; border:1px solid #34465f; border-radius:5px; padding:5px; }
-QListWidget::item { padding:8px; }
+QListWidget::item { padding:10px; }
 QListWidget::item:selected { background:#244f80; }
-QCheckBox { spacing:6px; }
+QCheckBox { spacing:8px; }
+QCheckBox::indicator { width:20px; height:20px; }
+QSpinBox { min-width:85px; min-height:32px; }
+QPlainTextEdit { font-size:16px; }
 QProgressBar { background:#182b42; border:0; border-radius:4px; text-align:center; }
 QProgressBar::chunk { background:#247dcc; }
 QSplitter::handle { background:#263b54; height:5px; width:5px; }
