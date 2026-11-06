@@ -15,7 +15,7 @@ def stamp():return datetime.now().strftime('%Y%m%d-%H%M%S-%f')
 class PoseSetPanel(QtWidgets.QGroupBox):
     def __init__(self,workspace):
         super().__init__('多姿态样本集（可选）');self.v=workspace;self.host=workspace.host
-        self.session=None;self.job=None;self.capture_index=None;self.driving=False
+        self.session=None;self.job=None;self.capture_index=None;self.driving=False;self._pose_rows={}
         layout=QtWidgets.QVBoxLayout(self);layout.setContentsMargins(6,6,6,6)
         row=QtWidgets.QHBoxLayout();row.addWidget(QtWidgets.QLabel('照片数量'))
         self.count=QtWidgets.QSpinBox();self.count.setRange(1,100);self.count.setValue(5);row.addWidget(self.count)
@@ -52,15 +52,15 @@ class PoseSetPanel(QtWidgets.QGroupBox):
             try:self.set_session(PoseSet(directory))
             except Exception as exc:self.message('打开失败：'+str(exc))
     def set_session(self,session):
-        self.session=session;self.capture_index=None
+        self.session=session;self.capture_index=None;self._pose_rows.clear()
         self.count.setValue(len(session.poses))
         self.poses.blockSignals(True);self.poses.clear()
         for p in session.poses:self.poses.addItem(p['name'])
-        self.poses.blockSignals(False);self.select(0);self.refresh()
+        self.poses.blockSignals(False);self.select(0);self.refresh(force_poses=True)
         self.message(f'请依次拍摄 {len(session.poses)} 张不同姿态照片；当前为姿态1。每张可重拍，确认后进入下一姿态。')
     def leave_set(self):
         if not self.idle():return
-        self.session=None;self.poses.clear();self.capture_index=None;self.refresh();self.message('已退出样本集；磁盘数据保留。')
+        self.session=None;self._pose_rows.clear();self.poses.clear();self.capture_index=None;self.refresh();self.message('已退出样本集；磁盘数据保留。')
     def select(self,index):
         if not self.session or index<0 or self.active:return
         if self.v.process.state()!=QtCore.QProcess.NotRunning or self.v.pending_camera_action is not None:return
@@ -91,7 +91,43 @@ class PoseSetPanel(QtWidgets.QGroupBox):
         if self.session and self.capture_index is not None:
             i=self.capture_index;self.session.attach(i,path);self.capture_index=None;self.refresh()
             self.message(f'姿态{i+1}已保存。检查照片，满意后点击“确认，下一姿态”；全部拍完后逐张标点。')
-    def refresh(self):
+    def refresh_poses(self):
+        """Only changed rows decode a thumbnail. Polling never rereads unchanged PNGs."""
+        def signature(file):
+            try:
+                st=file.stat();return (st.st_ino,st.st_size,st.st_mtime_ns,st.st_ctime_ns)
+            except FileNotFoundError:return None
+        self.poses.blockSignals(True)
+        try:
+            for i,pose in enumerate(self.session.poses):
+                path=self.session.sample_path(pose)
+                rgb=path/'rgb.png' if path else None
+                prompt=path/'sam3_prompts.json' if path else None
+                mask=path/'mask.png' if path else None
+                rgb_key=(str(rgb),signature(rgb)) if rgb else None
+                key=(pose['name'],rgb_key,signature(prompt) if prompt else None,signature(mask) if mask else None)
+                previous=self._pose_rows.get(i)
+                if previous and previous[0]==key:continue
+                status='待拍摄';icon=QtGui.QIcon()
+                if path:
+                    status='已拍摄'
+                    if prompt.is_file():
+                        try:
+                            labels=json.loads(prompt.read_text())['point_labels'];status=f'标点 {labels.count(1)}前/{labels.count(0)}后'
+                        except (ValueError,KeyError):status='标点无效'
+                    if mask.is_file():status+=' · 有掩膜'
+                    if previous and previous[1]==rgb_key:icon=previous[2]
+                    elif rgb_key[1] is not None:
+                        reader=QtGui.QImageReader(str(rgb));size=reader.size()
+                        if size.isValid():reader.setScaledSize(size.scaled(self.poses.iconSize(),QtCore.Qt.KeepAspectRatio))
+                        image=reader.read()
+                        if not image.isNull():icon=QtGui.QIcon(QtGui.QPixmap.fromImage(image))
+                self.poses.setItemText(i,pose['name']+' · '+status)
+                if not previous or previous[1]!=rgb_key:self.poses.setItemIcon(i,icon)
+                self._pose_rows[i]=(key,rgb_key,icon)
+        finally:self.poses.blockSignals(False)
+
+    def refresh(self,force_poses=False):
         busy=not self.idle();available=self.session is not None
         self.v.profile_btn.setEnabled(not self.active)
         self.v.target_mask.setEnabled(not busy)
@@ -99,21 +135,8 @@ class PoseSetPanel(QtWidgets.QGroupBox):
         self.v.open_btn.setToolTip('退出样本集后可打开单张样本；整组请使用“打开样本集”。' if available else '')
         for w in (self.new,self.open,self.count):w.setEnabled(not busy)
         for w in (self.leave,self.poses,self.next,self.segment,self.run,self.compare,self.export,self.resume):w.setEnabled(available and not busy)
-        if self.session:
-            self.poses.blockSignals(True)
-            for i,p in enumerate(self.session.poses):
-                path=self.session.sample_path(p);status='待拍摄'
-                if path:
-                    status='已拍摄'
-                    prompt=path/'sam3_prompts.json'
-                    if prompt.is_file():
-                        try:
-                            labels=json.loads(prompt.read_text())['point_labels'];status=f'标点 {labels.count(1)}前/{labels.count(0)}后'
-                        except (ValueError,KeyError):status='标点无效'
-                    if (path/'mask.png').is_file():status+=' · 有掩膜'
-                    self.poses.setItemIcon(i,QtGui.QIcon(str(path/'rgb.png')))
-                self.poses.setItemText(i,p['name']+' · '+status)
-            self.poses.blockSignals(False)
+        # Hidden tabs keep safety/button state current, without polling thumbnail assets.
+        if self.session and (force_poses or self.isVisible()):self.refresh_poses()
         if self.active and not self.driving:
             for w in (self.v.preview_btn,self.v.capture_btn,self.v.open_btn,self.v.run_btn,self.v.segment_btn,self.v.evaluate_btn,self.v.canvas,self.v.candidates,self.v.target_mask,self.v.profile_btn):w.setEnabled(False)
             for w in (self.v.fg_btn,self.v.bg_btn,self.v.undo_point,self.v.clear_points):w.setEnabled(False)

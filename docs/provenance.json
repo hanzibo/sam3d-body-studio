@@ -317,6 +317,12 @@
       "basis": "Original Studio data-management implementation, regression fixture or documentation; uses public Python and Qt APIs.",
       "sources": []
     },
+    "gui/display_cache.py": {
+      "kind": "Studio original implementation",
+      "license": "GPL-3.0-only",
+      "basis": "Studio-authored bounded preview caches, thumbnail and rendering regression validation. No third-party renderer implementation copied.",
+      "sources": []
+    },
     "gui/icon.svg": {
       "kind": "Studio documentation/configuration",
       "license": "GPL-3.0-only",
@@ -718,6 +724,12 @@
       "basis": "Studio-authored translation-only RGB-D geometry, experiment orchestration, diagnostics or validation. No third-party fitting implementation copied.",
       "sources": []
     },
+    "tests/rgbd_preview_gui.py": {
+      "kind": "Studio original implementation",
+      "license": "GPL-3.0-only",
+      "basis": "Studio-authored bounded preview caches, thumbnail and rendering regression validation. No third-party renderer implementation copied.",
+      "sources": []
+    },
     "tests/rgbd_recorder_gui.py": {
       "license": "GPL-3.0-only",
       "basis": "Original synthetic camera protocol acceptance covering cancellation, retakes, automatic sequence and no-model startup."
@@ -732,6 +744,12 @@
       "kind": "Studio original implementation",
       "license": "GPL-3.0-only",
       "basis": "Studio-authored translation-only RGB-D geometry, experiment orchestration, diagnostics or validation. No third-party fitting implementation copied.",
+      "sources": []
+    },
+    "tests/test_display_cache.py": {
+      "kind": "Studio original implementation",
+      "license": "GPL-3.0-only",
+      "basis": "Studio-authored bounded preview caches, thumbnail and rendering regression validation. No third-party renderer implementation copied.",
       "sources": []
     },
     "tests/test_mask_prompt.py": {

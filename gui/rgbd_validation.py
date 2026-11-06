@@ -2,6 +2,8 @@
 # Copyright (c) 2026 hanzibo and contributors.
 """Frozen RGB-D validation workspace. Reuses Studio's resident inference worker."""
 from datetime import datetime
+from collections import OrderedDict
+import ctypes
 import base64
 import csv
 import hashlib
@@ -21,6 +23,7 @@ from pose_data import EDGES
 from mesh_geometry import FastMeshData
 from pose_set import PoseSetPanel
 from record_history import RecordDialog
+from display_cache import DisplayCache
 
 ROOT=Path(__file__).resolve().parents[1]
 from studio_paths import path
@@ -92,22 +95,48 @@ class MaskCanvas(QtWidgets.QWidget):
 
 
 class PointCloudItem(GLGraphicsItem):
-    """Simple depth-tested GL_POINTS; avoids legacy point-sprite texture wrappers."""
+    """Static interleaved GPU buffer; camera motion never reuploads point arrays."""
     def __init__(self):
         super().__init__();self.setGLOptions('opaque')
         self.positions=np.empty((0,3),np.float32);self.colors=np.empty((0,4),np.float32);self.size=2
+        self._packed=np.empty((0,7),np.float32);self._dirty=True;self._buffer=None;self._context=None
+        self.interacting=False;self.upload_count=0
     def setData(self,pos,color,size,pxMode=True):
         self.positions=np.ascontiguousarray(pos,dtype=np.float32)
-        self.colors=np.ascontiguousarray(color,dtype=np.float32);self.size=size;self.update()
+        self.colors=np.ascontiguousarray(color,dtype=np.float32);self.size=size
+        if self.positions.shape!=(len(self.colors),3) or self.colors.shape!=(len(self.positions),4):raise ValueError('点云坐标与颜色尺寸不一致')
+        full=np.column_stack((self.positions,self.colors))
+        # Separate, evenly sampled draw range, prepared once with full data.
+        self._packed=np.ascontiguousarray(np.concatenate((full,full[::4])),dtype=np.float32)
+        self._dirty=True;self.update()
+    def set_interacting(self,value):
+        if self.interacting!=value:self.interacting=value;self.update()
+    def release_gl(self):
+        if self._buffer is not None:self._buffer.destroy()
+        self._buffer=None;self._context=None;self._dirty=True
     def paint(self):
         if not len(self.positions):return
-        self.setupGLState();GL.glPointSize(self.size)
-        GL.glEnableClientState(GL.GL_VERTEX_ARRAY);GL.glEnableClientState(GL.GL_COLOR_ARRAY)
+        context=QtGui.QOpenGLContext.currentContext()
+        if self._context is not context or self._buffer is None:
+            self._buffer=QtGui.QOpenGLBuffer(QtGui.QOpenGLBuffer.VertexBuffer)
+            self._buffer.setUsagePattern(QtGui.QOpenGLBuffer.StaticDraw)
+            if not self._buffer.create():raise RuntimeError('无法创建点云 GPU 缓冲')
+            self._context=context;self._dirty=True
+        if not self._buffer.bind():raise RuntimeError('无法绑定点云 GPU 缓冲')
         try:
-            GL.glVertexPointerf(self.positions);GL.glColorPointerf(self.colors)
-            GL.glDrawArrays(GL.GL_POINTS,0,len(self.positions))
-        finally:
-            GL.glDisableClientState(GL.GL_COLOR_ARRAY);GL.glDisableClientState(GL.GL_VERTEX_ARRAY)
+            if self._dirty:
+                self._buffer.allocate(self._packed.tobytes(),self._packed.nbytes)
+                self._dirty=False;self.upload_count+=1
+            self.setupGLState();GL.glPointSize(self.size)
+            GL.glEnableClientState(GL.GL_VERTEX_ARRAY);GL.glEnableClientState(GL.GL_COLOR_ARRAY)
+            try:
+                GL.glVertexPointer(3,GL.GL_FLOAT,28,ctypes.c_void_p(0))
+                GL.glColorPointer(4,GL.GL_FLOAT,28,ctypes.c_void_p(12))
+                count=len(self.positions);first=count if self.interacting else 0
+                GL.glDrawArrays(GL.GL_POINTS,first,len(self._packed)-count if self.interacting else count)
+            finally:
+                GL.glDisableClientState(GL.GL_COLOR_ARRAY);GL.glDisableClientState(GL.GL_VERTEX_ARRAY)
+        finally:self._buffer.release()
 
 
 class CameraScene(gl.GLViewWidget):
@@ -116,11 +145,13 @@ class CameraScene(gl.GLViewWidget):
         self.cloud=PointCloudItem()
         self.addItem(self.cloud)
         self.bones=gl.GLLinePlotItem(width=3,mode='lines',antialias=True,color=(1,.7,.15,1));self.bones.hide();self.addItem(self.bones)
-        self.comparison=None;self.body=None;self.raw_cloud=None;self.colours=None;self.person=None
+        self.comparison=None;self.body=None;self._body_key=None;self._comparison_key=None;self._mesh_data=OrderedDict();self.raw_cloud=None;self.colours=None;self.person=None
         self.show_person=False;self.opacity=.55;self.point_size=2
         self.mesh_vertices=None;self.mesh_faces=None
         axis=gl.GLAxisItem();axis.setSize(.5,.5,.5);self.addItem(axis)
         self.opts['center']=QtGui.QVector3D(0,2,0);self.setCameraPosition(distance=4,elevation=0,azimuth=-90)
+        self.simplify_on_drag=True;self._interaction_timer=QtCore.QTimer(self);self._interaction_timer.setSingleShot(True)
+        self._interaction_timer.timeout.connect(lambda:self.cloud.set_interacting(False))
     def set_cloud(self,xyz,rgb,mask):
         good=np.isfinite(xyz).all(2)&(xyz[:,:,2]>.05)&(xyz[:,:,2]<10)
         # Deterministic pixel stride for rendering only. Full cloud used in metrics/export.
@@ -133,20 +164,48 @@ class CameraScene(gl.GLViewWidget):
         select=self.person if self.show_person else slice(None)
         colors=self.colours[select];colors=np.column_stack((colors,np.ones(len(colors))))
         self.cloud.setData(pos=self.raw_cloud[select],color=colors,size=self.point_size,pxMode=True)
-    def set_mesh(self,vertices,faces):
+    def mesh_data(self,vertices,faces,key):
+        if key is None:return FastMeshData(vertexes=to_view(vertices),faces=faces)
+        if key not in self._mesh_data:self._mesh_data[key]=FastMeshData(vertexes=to_view(vertices),faces=faces)
+        self._mesh_data.move_to_end(key)
+        while len(self._mesh_data)>6:self._mesh_data.popitem(last=False)
+        return self._mesh_data[key]
+    def set_mesh(self,vertices,faces,key=None,translation=None):
+        delta=np.zeros(3) if translation is None else np.asarray(translation)
         first=self.body is None
-        self.mesh_vertices=np.array(vertices);self.mesh_faces=np.array(faces)
-        if self.body:self.removeItem(self.body)
-        self.body=gl.GLMeshItem(meshdata=FastMeshData(vertexes=to_view(vertices),faces=faces),smooth=True,
-            shader='body_studio',color=(.68,.82,1,self.opacity),glOptions='translucent',computeNormals=True)
-        self.addItem(self.body)
+        self.mesh_vertices=np.asarray(vertices)+delta;self.mesh_faces=np.asarray(faces)
+        if self.body is None or key is None or key!=self._body_key:
+            if self.body:self.removeItem(self.body)
+            self.body=gl.GLMeshItem(meshdata=self.mesh_data(vertices,faces,key),smooth=True,
+                shader='body_studio',color=(.68,.82,1,self.opacity),glOptions='translucent',computeNormals=True)
+            self.addItem(self.body);self._body_key=key
+        self.body.resetTransform();self.body.translate(*map(float,to_view(delta.reshape(1,3))[0]))
         if first:self.front()
-    def set_comparison(self,vertices=None,faces=None):
-        if self.comparison is not None:self.removeItem(self.comparison);self.comparison=None
-        if vertices is not None:
-            self.comparison=gl.GLMeshItem(meshdata=FastMeshData(vertexes=to_view(vertices),faces=faces),smooth=True,
+    def set_comparison(self,vertices=None,faces=None,key=None,translation=None):
+        if vertices is None:
+            if self.comparison is not None:self.removeItem(self.comparison)
+            self.comparison=None;self._comparison_key=None;return
+        if self.comparison is None or key is None or key!=self._comparison_key:
+            if self.comparison is not None:self.removeItem(self.comparison)
+            self.comparison=gl.GLMeshItem(meshdata=self.mesh_data(vertices,faces,key),smooth=True,
                 shader='body_studio',color=(.2,1,.55,self.opacity),glOptions='translucent',computeNormals=True)
-            self.addItem(self.comparison)
+            self.addItem(self.comparison);self._comparison_key=key
+        self.comparison.resetTransform()
+        if translation is not None:self.comparison.translate(*map(float,to_view(np.asarray(translation).reshape(1,3))[0]))
+    def set_simplify(self,value):
+        self.simplify_on_drag=value
+        if not value:self._interaction_timer.stop();self.cloud.set_interacting(False)
+    def hideEvent(self,event):
+        self._interaction_timer.stop();self.cloud.set_interacting(False);super().hideEvent(event)
+    def mousePressEvent(self,event):
+        self._interaction_timer.stop();self.cloud.set_interacting(self.simplify_on_drag)
+        super().mousePressEvent(event)
+    def mouseReleaseEvent(self,event):
+        super().mouseReleaseEvent(event)
+        if not event.buttons():self.cloud.set_interacting(False)
+    def wheelEvent(self,event):
+        self.cloud.set_interacting(self.simplify_on_drag);super().wheelEvent(event)
+        self._interaction_timer.start(120)
     def set_opacity(self,value):
         self.opacity=value/100
         if self.body:self.body.setColor((.68,.82,1,self.opacity))
@@ -164,7 +223,7 @@ class CameraScene(gl.GLViewWidget):
 class RgbdValidation(QtWidgets.QWidget):
     def __init__(self,host):
         super().__init__();self.host=host;self.sample=None;self.metadata=None;self.xyz=None;self.rgb=None
-        self.results=[];self.expected=None;self.active_result=None;self.eval_context=None
+        self.display_cache=DisplayCache();self.results=[];self.expected=None;self.active_result=None;self.eval_context=None
         self.segmentation_pending=None;self.segmented_event=None;self.segmentation_result=None;self._applying_sam=False
         self.segment_timer=QtCore.QTimer(self);self.segment_timer.setInterval(100);self.segment_timer.timeout.connect(self.poll_segmentation)
         self.process=QtCore.QProcess(self);self.process.setProcessChannelMode(QtCore.QProcess.MergedChannels)
@@ -223,6 +282,9 @@ class RgbdValidation(QtWidgets.QWidget):
         for w in (self.cloud_check,self.mesh_check,self.skeleton_check,self.person_check):layers.addWidget(w)
         for text,slot in [('相机正面',self.scene.front),('侧面',self.scene.side)]:
             b=QtWidgets.QPushButton(text);b.clicked.connect(slot);layers.addWidget(b)
+        self.drag_lod=QtWidgets.QCheckBox('拖动时简化点云');self.drag_lod.setChecked(True)
+        self.drag_lod.setToolTip('拖动或缩放时临时显示四分之一预览点，停止后恢复正常预览密度；不影响评估与导出。')
+        self.drag_lod.toggled.connect(self.scene.set_simplify);layers.addWidget(self.drag_lod)
         rl.addLayout(layers)
         params=QtWidgets.QHBoxLayout();params.addWidget(QtWidgets.QLabel('网格透明度'))
         self.alpha=QtWidgets.QSlider(QtCore.Qt.Horizontal);self.alpha.setRange(0,100);self.alpha.setValue(55);self.alpha.valueChanged.connect(self.scene.set_opacity);params.addWidget(self.alpha)
@@ -272,7 +334,7 @@ class RgbdValidation(QtWidgets.QWidget):
         self.status.setText('点击人体添加绿点，点击误选背景添加红点；右键总是添加背景点，随后点击 SAM3 自动分割。')
     def prompts_changed(self):
         if not self.sample:return
-        rgb_sha=hashlib.sha256((self.sample/'rgb.png').read_bytes()).hexdigest()
+        rgb_sha=self.display_cache.digest(self.sample/'rgb.png')
         prompt=dict(rgb_sha256=rgb_sha,points_pixels=[p[:2] for p in self.canvas.prompts],point_labels=[p[2] for p in self.canvas.prompts])
         (self.sample/'sam3_prompts.json').write_text(json.dumps(prompt,ensure_ascii=False,indent=2))
         positive=sum(p[2] for p in self.canvas.prompts)
@@ -293,7 +355,7 @@ class RgbdValidation(QtWidgets.QWidget):
         if not Path(SAM3_PYTHON).is_file() or not path('sam3_checkpoint').is_file():
             self.status.setText('找不到本机 SAM3 环境或权重，请确认 Data 已挂载');return
         output=self.sample/'segmentations'/stamp();output.parent.mkdir(exist_ok=True)
-        request=dict(image=str(self.sample/'rgb.png'),rgb_sha256=hashlib.sha256((self.sample/'rgb.png').read_bytes()).hexdigest(),
+        request=dict(image=str(self.sample/'rgb.png'),rgb_sha256=self.display_cache.digest(self.sample/'rgb.png'),
             points_pixels=[p[:2] for p in self.canvas.prompts],point_labels=[p[2] for p in self.canvas.prompts],output=str(output))
         request_path=output.parent/(output.name+'-request.json');request_path.write_text(json.dumps(request,ensure_ascii=False,indent=2))
         self.segmentation_output=str(output);self.begin_segmentation(request_path)
@@ -346,7 +408,7 @@ class RgbdValidation(QtWidgets.QWidget):
     def restore_segmentation(self):
         self.segmentation_result=None;self.candidates.blockSignals(True);self.candidates.clear();self.candidates.addItem('尚未分割');self.candidates.blockSignals(False)
         self.seg_info.setText('先标人体前景点；右键添加背景点。分割结束后释放 SAM3，再预热人体模型。')
-        rgb_sha=hashlib.sha256((self.sample/'rgb.png').read_bytes()).hexdigest()
+        rgb_sha=self.display_cache.digest(self.sample/'rgb.png')
         prompt_file=self.sample/'sam3_prompts.json'
         if prompt_file.is_file():
             prompt=json.loads(prompt_file.read_text())
@@ -499,6 +561,7 @@ class RgbdValidation(QtWidgets.QWidget):
             try:self.load_sample(directory)
             except Exception as exc:self.status.setText('载入失败：'+str(exc))
     def clear_sample(self):
+        self.display_cache.clear();self.scene._mesh_data.clear()
         self.sample=None;self.metadata=None;self.xyz=None;self.rgb=None;self.results=[];self.active_result=None
         self.canvas.load('');self.segmentation_result=None;self.candidates.clear();self.candidates.addItem('尚未分割')
         if self.scene.body:self.scene.removeItem(self.scene.body);self.scene.body=None
@@ -509,6 +572,7 @@ class RgbdValidation(QtWidgets.QWidget):
         self.status.setText('当前姿态尚未拍摄，请开启相机预览后倒计时采集。');self.refresh_controls()
     def load_sample(self,directory):
         if self.segmenting:raise ValueError('SAM3 分割尚未退出，不能切换样本')
+        self.display_cache.clear();self.scene._mesh_data.clear()
         directory=Path(directory).resolve();meta=json.loads((directory/'camera.json').read_text())
         if meta.get('schema')!='studio_rgbd_v1' or not meta.get('rgb_rectified') or meta.get('units')!='metres':raise ValueError('样本必须为 Studio 标定配准后的 RGB-D 格式')
         with np.load(directory/'rgbd.npz',allow_pickle=False) as data:xyz=data['xyz_m'].copy();depth=data['depth_m']
@@ -586,7 +650,7 @@ class RgbdValidation(QtWidgets.QWidget):
         report=self.host.report
         result=dict(label=report.get('config_id','')+' / '+run.name,config=report.get('actual_config'),
             prediction=str(run/'person_00.npz'),inference_ms=report['inference_seconds']*1000,
-            rgb_sha256=hashlib.sha256((self.sample/'rgb.png').read_bytes()).hexdigest(),
+            rgb_sha256=self.display_cache.digest(self.sample/'rgb.png'),
             person_bbox_xyxy=self.host.canvas.bbox)
         self.results.append(result);self.save_results();self.update_table();self.table.selectRow(len(self.results)-1)
         self.status.setText('重建已完成，已保留真实尺度与相机平移；可圈选后评估，或切换方案重复重建')
@@ -657,7 +721,7 @@ class RgbdValidation(QtWidgets.QWidget):
         self.status.setText(message);return True
     def mask_hash(self):
         path=self.sample/'mask.png' if self.sample else None
-        return hashlib.sha256(path.read_bytes()).hexdigest() if path and path.is_file() else None
+        return self.display_cache.digest(path) if path and path.is_file() else None
     def update_table(self):
         selected=self.table.currentRow();self.table.blockSignals(True);self.table.setRowCount(len(self.results))
         mask_hash=self.mask_hash()
@@ -681,21 +745,22 @@ class RgbdValidation(QtWidgets.QWidget):
             valid=m.get('mask_sha256')==self.mask_hash() and ref.get('mask_sha256')==self.mask_hash()
             # Never apply a stored correction to a different prediction or RGB input.
             if valid:
-                valid=ref.get('prediction_sha256')==hashlib.sha256(Path(result['prediction']).read_bytes()).hexdigest()
-                valid=valid and ref.get('rgb_sha256')==hashlib.sha256((self.sample/'rgb.png').read_bytes()).hexdigest()
+                valid=ref.get('prediction_sha256')==self.display_cache.digest(result['prediction'])
+                valid=valid and ref.get('rgb_sha256')==self.display_cache.digest(self.sample/'rgb.png')
                 for key,file in [('rgbd_sha256','rgbd.npz'),('camera_sha256','camera.json')]:
-                    valid=valid and ref.get(key)==hashlib.sha256((self.sample/file).read_bytes()).hexdigest()
+                    valid=valid and ref.get(key)==self.display_cache.digest(self.sample/file)
             self.refinement_current=valid
             delta=np.asarray(ref.get('delta_translation_m',[0.,0.,0.])) if valid else np.zeros(3)
-            mode=self.depth_view.currentIndex();self.scene.set_comparison()
-            with np.load(result['prediction'],allow_pickle=False) as d:
-                raw=d['pred_vertices']+d['pred_cam_t'].reshape(1,3)
-                applied=delta if mode==1 else np.zeros(3)
-                self.scene.set_mesh(raw+applied,d['faces'])
-                if mode==2 and valid:self.scene.set_comparison(raw+delta,d['faces'])
-                if 'pred_keypoints_3d' in d:
-                    points=to_view(d['pred_keypoints_3d']+d['pred_cam_t'].reshape(1,3)+applied)
-                    self.scene.bones.setData(pos=points[EDGES].reshape(-1,3))
+            mode=self.depth_view.currentIndex()
+            key,d=self.display_cache.prediction(result['prediction'])
+            raw=d['pred_vertices']+d['pred_cam_t'].reshape(1,3)
+            applied=delta if mode==1 else np.zeros(3)
+            self.scene.set_mesh(raw,d['faces'],key=key,translation=applied)
+            if mode==2 and valid:self.scene.set_comparison(raw,d['faces'],key=key,translation=delta)
+            else:self.scene.set_comparison()
+            if 'pred_keypoints_3d' in d:
+                points=to_view(d['pred_keypoints_3d']+d['pred_cam_t'].reshape(1,3)+applied)
+                self.scene.bones.setData(pos=points[EDGES].reshape(-1,3))
             if valid:
                 after=ref['metrics'];offset=' / '.join(f'{v*1000:+.1f}' for v in delta)
                 reason={'accepted':'检查通过','silhouette_degraded':'轮廓变差','no_guard_improvement':'检查点未改善','coverage_degraded':'覆盖率下降','translation_bound_reached':'位移过大','insufficient_depth':'有效深度不足','insufficient_initial_overlap':'初始重合不足','insufficient_reliable_normals':'可靠法线不足'}.get(ref['reason'],ref['reason'])
@@ -743,6 +808,8 @@ class RgbdValidation(QtWidgets.QWidget):
         path,_=QtWidgets.QFileDialog.getSaveFileName(self,'保存当前场景',str(self.sample/('scene-'+stamp()+'.png')),'PNG (*.png)')
         if path:self.scene.grabFramebuffer().save(path)
     def shutdown(self):
+        if self.scene.context() is not None and self.scene.isValid():
+            self.scene.makeCurrent();self.scene.cloud.release_gl();self.scene.doneCurrent()
         self.batch.shutdown()
         self.camera_handoff.stop();self.pending_camera_action=None
         self.refresh_timer.stop();self.timeout.stop();self.segment_timer.stop();self.segmentation_pending=None;self.expected=None
