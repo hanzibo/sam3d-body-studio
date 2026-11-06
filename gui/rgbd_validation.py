@@ -116,7 +116,7 @@ class CameraScene(gl.GLViewWidget):
         self.cloud=PointCloudItem()
         self.addItem(self.cloud)
         self.bones=gl.GLLinePlotItem(width=3,mode='lines',antialias=True,color=(1,.7,.15,1));self.bones.hide();self.addItem(self.bones)
-        self.body=None;self.raw_cloud=None;self.colours=None;self.person=None
+        self.comparison=None;self.body=None;self.raw_cloud=None;self.colours=None;self.person=None
         self.show_person=False;self.opacity=.55;self.point_size=2
         self.mesh_vertices=None;self.mesh_faces=None
         axis=gl.GLAxisItem();axis.setSize(.5,.5,.5);self.addItem(axis)
@@ -141,9 +141,16 @@ class CameraScene(gl.GLViewWidget):
             shader='body_studio',color=(.68,.82,1,self.opacity),glOptions='translucent',computeNormals=True)
         self.addItem(self.body)
         if first:self.front()
+    def set_comparison(self,vertices=None,faces=None):
+        if self.comparison is not None:self.removeItem(self.comparison);self.comparison=None
+        if vertices is not None:
+            self.comparison=gl.GLMeshItem(meshdata=FastMeshData(vertexes=to_view(vertices),faces=faces),smooth=True,
+                shader='body_studio',color=(.2,1,.55,self.opacity),glOptions='translucent',computeNormals=True)
+            self.addItem(self.comparison)
     def set_opacity(self,value):
         self.opacity=value/100
         if self.body:self.body.setColor((.68,.82,1,self.opacity))
+        if self.comparison:self.comparison.setColor((.2,1,.55,self.opacity))
     def focus(self):
         if self.mesh_vertices is not None:
             world=to_view(self.mesh_vertices);center=(world.min(0)+world.max(0))/2
@@ -168,7 +175,7 @@ class RgbdValidation(QtWidgets.QWidget):
         self.preview_frames=0;self.pending_camera_action=None
         self.camera_handoff=QtCore.QTimer(self);self.camera_handoff.setInterval(100);self.camera_handoff.timeout.connect(self.poll_camera_handoff)
         root=QtWidgets.QVBoxLayout(self)
-        intro=QtWidgets.QLabel('同一份 RGB-D 对照不同启动方案 · 相机坐标 / 米制 / 原始预测不做对齐 · 仅验证可见表面')
+        intro=QtWidgets.QLabel('同一份 RGB-D 对照不同启动方案 · 相机坐标 / 米制 / 原始预测保留 · 可选深度位置校正 · 仅验证可见表面')
         intro.setWordWrap(True);root.addWidget(intro)
         row=QtWidgets.QHBoxLayout();self.preview_btn=QtWidgets.QPushButton('开启相机预览');self.preview_btn.clicked.connect(self.toggle_preview)
         self.capture_btn=QtWidgets.QPushButton('倒计时采集 RGB-D');self.capture_btn.clicked.connect(self.capture)
@@ -210,7 +217,7 @@ class RgbdValidation(QtWidgets.QWidget):
         self.scene=CameraScene();rl.addWidget(self.scene,1)
         layers=QtWidgets.QHBoxLayout();self.cloud_check=QtWidgets.QCheckBox('点云');self.cloud_check.setChecked(True)
         self.cloud_check.toggled.connect(self.scene.cloud.setVisible)
-        self.mesh_check=QtWidgets.QCheckBox('网格');self.mesh_check.setChecked(True);self.mesh_check.toggled.connect(lambda v:self.scene.body.setVisible(v) if self.scene.body else None)
+        self.mesh_check=QtWidgets.QCheckBox('网格');self.mesh_check.setChecked(True);self.mesh_check.toggled.connect(self.mesh_visibility)
         self.skeleton_check=QtWidgets.QCheckBox('骨架');self.skeleton_check.toggled.connect(self.scene.bones.setVisible)
         self.person_check=QtWidgets.QCheckBox('仅人体点云');self.person_check.toggled.connect(self.set_person)
         for w in (self.cloud_check,self.mesh_check,self.skeleton_check,self.person_check):layers.addWidget(w)
@@ -229,6 +236,14 @@ class RgbdValidation(QtWidgets.QWidget):
         self.run_btn=QtWidgets.QPushButton('用当前方案重建此样本');self.run_btn.clicked.connect(self.reconstruct);row.addWidget(self.run_btn)
         self.evaluate_btn=QtWidgets.QPushButton('评估选中结果');self.evaluate_btn.clicked.connect(self.evaluate);row.addWidget(self.evaluate_btn)
         root.addLayout(row)
+        depthrow=QtWidgets.QHBoxLayout()
+        self.refine_btn=QtWidgets.QPushButton('深度校正位置并对照');self.refine_btn.clicked.connect(lambda:self.evaluate(refine=True))
+        self.refine_btn.setToolTip('固定体形、尺度和关节姿态，只拟合三维平移；异常或遮罩变差时自动保留原始位置。无需加载人体模型。')
+        self.depth_view=QtWidgets.QComboBox();self.depth_view.addItems(['原始位置（蓝）','深度校正位置','叠加对照（蓝：原始 / 绿：校正）'])
+        self.depth_view.setMinimumWidth(300);self.depth_view.setToolTip('原始位置：蓝色；叠加对照：原始蓝色、校正绿色。回退时两者重合。')
+        self.depth_view.currentIndexChanged.connect(self.select_result)
+        self.depth_info=QtWidgets.QLabel('尚未深度校正 · 不修改骨架姿态与关节角');self.depth_info.setWordWrap(True)
+        depthrow.addWidget(self.refine_btn);depthrow.addWidget(self.depth_view);depthrow.addWidget(self.depth_info,1);root.addLayout(depthrow)
         self.table=QtWidgets.QTableWidget(0,7);self.table.setHorizontalHeaderLabels(['配置 / 时间','推理 ms','深度 MAE mm','深度 P90 mm','轮廓 IoU','覆盖率','点面 MAE mm'])
         self.table.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectRows);self.table.setSelectionMode(QtWidgets.QAbstractItemView.SingleSelection)
         self.table.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers);self.table.horizontalHeader().setSectionResizeMode(QtWidgets.QHeaderView.ResizeToContents)
@@ -355,6 +370,8 @@ class RgbdValidation(QtWidgets.QWidget):
         self.capture_btn.setEnabled(previewing or (not busy and can_camera));self.open_btn.setEnabled(not busy and not host.inference_busy)
         self.cancel_btn.setEnabled(busy);self.run_btn.setEnabled(self.sample is not None and not busy and free and host.model_state!='stopping')
         self.evaluate_btn.setEnabled(self.active_result is not None and self.canvas.mask is not None and not busy)
+        self.refine_btn.setEnabled(self.active_result is not None and self.canvas.mask is not None and not busy and not host.inference_busy)
+        self.depth_view.setEnabled(self.active_result is not None and not busy)
         config=host.draft_config()
         self.profile_label.setText('当前方案：'+(config.summary() if config else '参数组合无效，请到第一页调整'))
         self.profile_label.setToolTip(json.dumps(config.to_dict(),ensure_ascii=False,indent=2) if config else '')
@@ -426,8 +443,8 @@ class RgbdValidation(QtWidgets.QWidget):
                 elif kind=='evaluated':
                     self.done=True;self.eval_context['evaluation']=event['output'];self.eval_context['metrics']=event['metrics']
                     self.save_results();self.update_table()
-                    if self.active_result:self.display_evaluation(self.active_result)
-                    self.status.setText('评估完成 · 保留原始相机位置与尺度 · 可切换方案重建同一样本进行对照')
+                    if self.active_result:self.select_result()
+                    self.status.setText('评估完成 · 原始预测已保留；深度位置校正的接受 / 回退状态见上方说明')
             except Exception as exc:self.status.setText('结果处理失败：'+str(exc));self.done=False
     def finished(self,code,status):
         self.read_output();self.timeout.stop()
@@ -485,7 +502,7 @@ class RgbdValidation(QtWidgets.QWidget):
         self.sample=None;self.metadata=None;self.xyz=None;self.rgb=None;self.results=[];self.active_result=None
         self.canvas.load('');self.segmentation_result=None;self.candidates.clear();self.candidates.addItem('尚未分割')
         if self.scene.body:self.scene.removeItem(self.scene.body);self.scene.body=None
-        self.scene.mesh_vertices=None;self.scene.mesh_faces=None;self.scene.raw_cloud=None
+        self.scene.set_comparison();self.depth_info.setText('尚未深度校正');self.scene.mesh_vertices=None;self.scene.mesh_faces=None;self.scene.raw_cloud=None
         self.scene.cloud.setData(pos=np.empty((0,3),np.float32),color=np.empty((0,4),np.float32))
         self.scene.bones.setData(pos=np.empty((0,3),np.float32));self.table.setRowCount(0);self.preview.clear()
         self.details.setText('请拍摄当前姿态。');self.seg_info.setText('拍摄后可为当前姿态标注前景 / 背景点。')
@@ -502,7 +519,7 @@ class RgbdValidation(QtWidgets.QWidget):
         self.sample=directory;self.metadata=meta;self.xyz=xyz;self.rgb=rgb[:,:,::-1].copy()
         self.canvas.load(directory/'rgb.png',mask);self.restore_segmentation();self.scene.set_cloud(xyz,self.rgb,mask)
         if self.scene.body:self.scene.removeItem(self.scene.body);self.scene.body=None
-        self.scene.bones.setData(pos=np.empty((0,3),np.float32))
+        self.scene.set_comparison();self.depth_info.setText('尚未深度校正');self.scene.bones.setData(pos=np.empty((0,3),np.float32))
         self.scene.mesh_vertices=None;self.scene.mesh_faces=None
         self.active_result=None;self.results=[]
         if (directory/'results.json').is_file():
@@ -540,7 +557,7 @@ class RgbdValidation(QtWidgets.QWidget):
         self.scene.set_cloud(self.xyz,self.rgb,self.canvas.mask);self.canvas.update()
         # Existing evaluations remain archived, but scores for a different mask are hidden.
         self.update_table();self.refresh_controls()
-        if self.active_result:self.display_evaluation(self.active_result)
+        if self.active_result:self.select_result()
     def set_person(self,value):self.scene.show_person=value;self.scene.refresh_cloud()
     def point_size(self,value):self.scene.point_size=value;self.scene.refresh_cloud()
     def configure(self):
@@ -652,32 +669,58 @@ class RgbdValidation(QtWidgets.QWidget):
             for col,value in enumerate(vals):self.table.setItem(row,col,QtWidgets.QTableWidgetItem(value))
         self.table.blockSignals(False)
         if 0<=selected<len(self.results):self.table.selectRow(selected)
+    def mesh_visibility(self,visible):
+        if self.scene.body:self.scene.body.setVisible(visible)
+        if self.scene.comparison:self.scene.comparison.setVisible(visible)
+
     def select_result(self):
         row=self.table.currentRow()
         if not 0<=row<len(self.results):return
         try:
-            result=self.results[row]
+            result=self.results[row];m=result.get('metrics') or {};ref=m.get('depth_refinement') or {}
+            valid=m.get('mask_sha256')==self.mask_hash() and ref.get('mask_sha256')==self.mask_hash()
+            # Never apply a stored correction to a different prediction or RGB input.
+            if valid:
+                valid=ref.get('prediction_sha256')==hashlib.sha256(Path(result['prediction']).read_bytes()).hexdigest()
+                valid=valid and ref.get('rgb_sha256')==hashlib.sha256((self.sample/'rgb.png').read_bytes()).hexdigest()
+                for key,file in [('rgbd_sha256','rgbd.npz'),('camera_sha256','camera.json')]:
+                    valid=valid and ref.get(key)==hashlib.sha256((self.sample/file).read_bytes()).hexdigest()
+            self.refinement_current=valid
+            delta=np.asarray(ref.get('delta_translation_m',[0.,0.,0.])) if valid else np.zeros(3)
+            mode=self.depth_view.currentIndex();self.scene.set_comparison()
             with np.load(result['prediction'],allow_pickle=False) as d:
-                self.scene.set_mesh(d['pred_vertices']+d['pred_cam_t'].reshape(1,3),d['faces'])
+                raw=d['pred_vertices']+d['pred_cam_t'].reshape(1,3)
+                applied=delta if mode==1 else np.zeros(3)
+                self.scene.set_mesh(raw+applied,d['faces'])
+                if mode==2 and valid:self.scene.set_comparison(raw+delta,d['faces'])
                 if 'pred_keypoints_3d' in d:
-                    points=to_view(d['pred_keypoints_3d']+d['pred_cam_t'].reshape(1,3))
+                    points=to_view(d['pred_keypoints_3d']+d['pred_cam_t'].reshape(1,3)+applied)
                     self.scene.bones.setData(pos=points[EDGES].reshape(-1,3))
-            self.scene.body.setVisible(self.mesh_check.isChecked());self.active_result=result;self.display_evaluation(result)
+            if valid:
+                after=ref['metrics'];offset=' / '.join(f'{v*1000:+.1f}' for v in delta)
+                reason={'accepted':'检查通过','silhouette_degraded':'轮廓变差','no_guard_improvement':'检查点未改善','coverage_degraded':'覆盖率下降','translation_bound_reached':'位移过大','insufficient_depth':'有效深度不足','insufficient_initial_overlap':'初始重合不足','insufficient_reliable_normals':'可靠法线不足'}.get(ref['reason'],ref['reason'])
+                self.depth_info.setText(f"{'已接受' if ref['accepted'] else '已回退原始位置'} · {reason} · ΔXYZ {offset} mm\n深度 MAE {m['mae_mm']:.1f} → {after['mae_mm']:.1f} mm · 校正 {ref['total_seconds']*1000:.1f} ms（含候选渲染）")
+            else:self.depth_info.setText('尚未校正 / 输入已改变 · 当前显示原始位置')
+            self.mesh_visibility(self.mesh_check.isChecked());self.active_result=result;self.display_evaluation(result)
         except Exception as exc:self.status.setText('结果载入失败：'+str(exc))
         self.refresh_controls()
-    def evaluate(self):
+    def evaluate(self,checked=False,refine=False):
         if not self.active_result or self.canvas.mask is None or self.process.state()!=QtCore.QProcess.NotRunning:return
         out=self.sample/'evaluations'/stamp();out.parent.mkdir(exist_ok=True)
         self.eval_context=self.active_result;self.eval_context['evaluation_pending']=str(out)
-        self.status.setText('正在渲染相机视角深度并计算误差，保持原始位置与尺度…')
-        self.launch(sys.executable,'rgbd_evaluate.py',['--sample',str(self.sample),'--prediction',self.active_result['prediction'],
-            '--mask',str(self.sample/'mask.png'),'--output',str(out)],'evaluate')
+        self.status.setText('正在拟合整体位置并验证独立空间块，原始预测不会覆盖…' if refine else '正在评估原始位置与尺度…')
+        args=['--sample',str(self.sample),'--prediction',self.active_result['prediction'],'--mask',str(self.sample/'mask.png'),'--output',str(out)]
+        if refine:args.append('--refine')
+        self.launch(sys.executable,'rgbd_evaluate.py',args,'evaluate')
     def display_evaluation(self,result):
         m=result.get('metrics')
         if not m or m.get('mask_sha256')!=self.mask_hash():
             self.details.setText('当前掩膜尚未评估。原始结果不做平移、缩放或 ICP；仅验证可见表面。');self.preview.clear();return
-        self.details.setText(f"深度有符号均值 {m['signed_mean_mm']:.1f} mm（正值偏后） · 有效深度 {m['valid_depth_fraction']:.1%} · <1/2/5 cm：{m['within_10mm']:.1%} / {m['within_20mm']:.1%} / {m['within_50mm']:.1%}\n热图蓝色偏前 / 红色偏后（±50 mm），灰暗区域不参与深度误差；点面距离采样 {m['point_surface_count']} 点。")
-        pix=QtGui.QPixmap(str(Path(result['evaluation'])/'depth_error.png'));self.preview.setPixmap(pix.scaled(420,160,QtCore.Qt.KeepAspectRatio,QtCore.Qt.SmoothTransformation))
+        label='原始位置'
+        if self.depth_view.currentIndex()==1 and getattr(self,'refinement_current',False):m=m['depth_refinement']['metrics'];label='已应用深度校正'
+        self.details.setText(f"{label} · 深度有符号均值 {m['signed_mean_mm']:.1f} mm（正值偏后） · 有效深度 {m['valid_depth_fraction']:.1%} · <1/2/5 cm：{m['within_10mm']:.1%} / {m['within_20mm']:.1%} / {m['within_50mm']:.1%}\n热图蓝色偏前 / 红色偏后（±50 mm），灰暗区域不参与深度误差；点面距离采样 {m['point_surface_count']} 点。")
+        heat='depth_error_refined.png' if self.depth_view.currentIndex()==1 and getattr(self,'refinement_current',False) else 'depth_error.png'
+        pix=QtGui.QPixmap(str(Path(result['evaluation'])/heat));self.preview.setPixmap(pix.scaled(420,160,QtCore.Qt.KeepAspectRatio,QtCore.Qt.SmoothTransformation))
     def open_folder(self):
         if self.sample:QtGui.QDesktopServices.openUrl(QtCore.QUrl.fromLocalFile(str(self.sample)))
     def export_bundle(self):

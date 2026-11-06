@@ -191,10 +191,34 @@
       "basis": "Studio-authored documentation, configuration, workflow or original SVG asset; named external sources retain their terms.",
       "sources": []
     },
+    "depth_experiment.py": {
+      "kind": "Studio original implementation",
+      "license": "GPL-3.0-only",
+      "basis": "Studio-authored translation-only RGB-D geometry, experiment orchestration, diagnostics or validation. No third-party fitting implementation copied.",
+      "sources": []
+    },
+    "depth_refinement.py": {
+      "kind": "Studio original implementation",
+      "license": "GPL-3.0-only",
+      "basis": "Studio-authored translation-only RGB-D geometry, experiment orchestration, diagnostics or validation. No third-party fitting implementation copied.",
+      "sources": []
+    },
+    "depth_report.py": {
+      "kind": "Studio original implementation",
+      "license": "GPL-3.0-only",
+      "basis": "Studio-authored translation-only RGB-D geometry, experiment orchestration, diagnostics or validation. No third-party fitting implementation copied.",
+      "sources": []
+    },
     "docs/DATA_MANAGEMENT.md": {
       "kind": "Studio documentation/configuration",
       "license": "GPL-3.0-only",
       "basis": "Original Studio data-management implementation, regression fixture or documentation; uses public Python and Qt APIs.",
+      "sources": []
+    },
+    "docs/DEPTH_REFINEMENT.md": {
+      "kind": "Studio documentation/configuration",
+      "license": "GPL-3.0-only",
+      "basis": "Studio-authored translation-only RGB-D geometry, experiment orchestration, diagnostics or validation. No third-party fitting implementation copied.",
       "sources": []
     },
     "docs/INSTALL.md": {
@@ -214,6 +238,10 @@
       "license": "GPL-3.0-only",
       "basis": "Studio-authored mask snapshot validation, morphology, GUI/process orchestration or interface checks; separately installed upstream APIs are referenced without copying their implementation.",
       "sources": []
+    },
+    "docs/RGBD_RECORDER.md": {
+      "license": "GPL-3.0-only",
+      "basis": "Original recorder usage, data format and staged depth refinement scope documentation."
     },
     "docs/VALIDATION.md": {
       "kind": "Studio documentation/configuration",
@@ -351,6 +379,10 @@
       "basis": "Read-only inspection of frozen RGB-D run records; never loads model weights. Studio integration implementation; no substantial upstream source copy identified in this review; preliminary engineering classification.",
       "sources": []
     },
+    "gui/rgbd_recorder.py": {
+      "license": "GPL-3.0-only",
+      "basis": "Original model-free Qt RGB-D recorder interface and capture subprocess orchestration; uses the existing Studio capture protocol, no external UI source copied."
+    },
     "gui/rgbd_validation.py": {
       "kind": "Studio source",
       "license": "GPL-3.0-only",
@@ -416,6 +448,10 @@
       "license": "GPL-3.0-only",
       "basis": "Studio launcher: interpreter/path/environment selection and process invocation; no model implementation bundled.",
       "sources": []
+    },
+    "launch_rgbd_recorder.sh": {
+      "license": "GPL-3.0-only",
+      "basis": "Original portable launcher for the independent Studio RGB-D recorder."
     },
     "mask_prompt.py": {
       "kind": "Original Studio implementation",
@@ -491,6 +527,10 @@
       "license": "GPL-3.0-only",
       "basis": "Studio-authored documentation, configuration, workflow or original SVG asset; named external sources retain their terms.",
       "sources": []
+    },
+    "recorder_session.py": {
+      "license": "GPL-3.0-only",
+      "basis": "Original Studio implementation of resumable static RGB-D recording sessions, version retention and OS lock lifetime; no third-party source copied."
     },
     "render_comparison.py": {
       "kind": "Studio source",
@@ -569,6 +609,12 @@
       "kind": "Studio source",
       "license": "GPL-3.0-only",
       "basis": "Studio launcher: interpreter/path/environment selection and process invocation; no model implementation bundled.",
+      "sources": []
+    },
+    "sam3_person_batch.py": {
+      "kind": "Studio original implementation",
+      "license": "GPL-3.0-only",
+      "basis": "Studio-authored translation-only RGB-D geometry, experiment orchestration, diagnostics or validation. No third-party fitting implementation copied.",
       "sources": []
     },
     "sam3_segment.py": {
@@ -666,10 +712,26 @@
       "basis": "Studio-authored mask snapshot validation, morphology, GUI/process orchestration or interface checks; separately installed upstream APIs are referenced without copying their implementation.",
       "sources": []
     },
+    "tests/rgbd_depth_gui.py": {
+      "kind": "Studio original implementation",
+      "license": "GPL-3.0-only",
+      "basis": "Studio-authored translation-only RGB-D geometry, experiment orchestration, diagnostics or validation. No third-party fitting implementation copied.",
+      "sources": []
+    },
+    "tests/rgbd_recorder_gui.py": {
+      "license": "GPL-3.0-only",
+      "basis": "Original synthetic camera protocol acceptance covering cancellation, retakes, automatic sequence and no-model startup."
+    },
     "tests/test_data_catalog.py": {
       "kind": "Studio original source",
       "license": "GPL-3.0-only",
       "basis": "Original Studio data-management implementation, regression fixture or documentation; uses public Python and Qt APIs.",
+      "sources": []
+    },
+    "tests/test_depth_refinement.py": {
+      "kind": "Studio original implementation",
+      "license": "GPL-3.0-only",
+      "basis": "Studio-authored translation-only RGB-D geometry, experiment orchestration, diagnostics or validation. No third-party fitting implementation copied.",
       "sources": []
     },
     "tests/test_mask_prompt.py": {
@@ -683,6 +745,10 @@
       "license": "GPL-3.0-only",
       "basis": "No model packages required. Validate machine config and engine trust boundaries. Studio integration implementation; no substantial upstream source copy identified in this review; preliminary engineering classification.",
       "sources": []
+    },
+    "tests/test_recorder_session.py": {
+      "license": "GPL-3.0-only",
+      "basis": "Original model-free tests of recording integrity, resumption and active data deletion protection."
     },
     "tests/test_video_project.py": {
       "kind": "Studio original source",
@@ -725,30 +791,6 @@
       "license": "GPL-3.0-only",
       "basis": "Synchronized inference timing; caller owns CUDA boundaries and output validation. Studio integration implementation; no substantial upstream source copy identified in this review; preliminary engineering classification.",
       "sources": []
-    },
-    "recorder_session.py": {
-      "license": "GPL-3.0-only",
-      "basis": "Original Studio implementation of resumable static RGB-D recording sessions, version retention and OS lock lifetime; no third-party source copied."
-    },
-    "tests/test_recorder_session.py": {
-      "license": "GPL-3.0-only",
-      "basis": "Original model-free tests of recording integrity, resumption and active data deletion protection."
-    },
-    "gui/rgbd_recorder.py": {
-      "license": "GPL-3.0-only",
-      "basis": "Original model-free Qt RGB-D recorder interface and capture subprocess orchestration; uses the existing Studio capture protocol, no external UI source copied."
-    },
-    "launch_rgbd_recorder.sh": {
-      "license": "GPL-3.0-only",
-      "basis": "Original portable launcher for the independent Studio RGB-D recorder."
-    },
-    "tests/rgbd_recorder_gui.py": {
-      "license": "GPL-3.0-only",
-      "basis": "Original synthetic camera protocol acceptance covering cancellation, retakes, automatic sequence and no-model startup."
-    },
-    "docs/RGBD_RECORDER.md": {
-      "license": "GPL-3.0-only",
-      "basis": "Original recorder usage, data format and staged depth refinement scope documentation."
     }
   }
 }

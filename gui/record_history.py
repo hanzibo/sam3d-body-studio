@@ -104,6 +104,14 @@ def information(s):
                  '评估掩膜 SHA256':m.get('mask_sha256',MISSING),
                  '评估掩膜来源':m.get('mask_source',MISSING),
                  '评估与当前掩膜一致':s['mask_current'] if m else MISSING})
+    ref=m.get('depth_refinement') or {}
+    info['深度位置校正配置']=ref.get('config',MISSING)
+    info['深度位置校正接受状态']=ref.get('accepted',MISSING)
+    info['深度位置校正原因']=ref.get('reason',MISSING)
+    info['深度位置校正 ΔXYZ 米']=ref.get('delta_translation_m',MISSING)
+    info['深度位置校正总 ms']=ref['total_seconds']*1000 if 'total_seconds' in ref else MISSING
+    info['深度位置校正求解 ms']=ref['solver_seconds']*1000 if 'solver_seconds' in ref else MISSING
+    info.update({'校正后 / '+label:ref.get('metrics',{}).get(key,MISSING) for key,label in METRICS.items()})
     info['预测文件']=str(Path(s['folder'])/'person_00.npz')
     info['推理报告']=str(Path(s['folder'])/'inference.json')
     return info
