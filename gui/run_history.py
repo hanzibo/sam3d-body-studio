@@ -18,6 +18,7 @@ def record_report(directory,report):
     bench=report.get('benchmark') or {}
     row=dict(directory=str(directory),config=report['actual_config'],config_id=report['config_id'],
              image_sha256=report['image_sha256'],image=report['image'],
+             mask_prompt=report.get('mask_prompt'), bbox_xyxy=report.get('bbox_xyxy'),
              camera_intrinsics=report.get('camera_intrinsics_used'),
              camera_origin=report.get('camera_intrinsics_origin'),
              mean_ms=bench.get('mean_ms',report['inference_seconds']*1000),
@@ -32,7 +33,7 @@ def show_history(parent):
     layout=QtWidgets.QVBoxLayout(dialog)
     label=QtWidgets.QLabel('双击查看该次完整报告。单次重建只列平均栏；正式测速才提供中位数和 P95。')
     label.setWordWrap(True);layout.addWidget(label)
-    columns=['结果目录','方案','图片哈希','内参','类型','次数','平均 ms','中位数 ms','P95 ms']
+    columns=['结果目录','方案','图片哈希','内参','掩膜提示','类型','次数','平均 ms','中位数 ms','P95 ms']
     table=QtWidgets.QTableWidget(len(rows),len(columns));table.setHorizontalHeaderLabels(columns)
     table.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
     table.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectRows)
@@ -43,7 +44,9 @@ def show_history(parent):
         camera_label='未记录'
         if camera:
             camera_label=('真实相机' if camera['source']=='provided_rgb' else '默认估计')+f" · fx {camera['matrix'][0][0]:.1f}"
-        data=[Path(row['directory']).name,config.summary(),row['image_sha256'][:12],camera_label,row['kind'],row['runs'],
+        mask=row.get('mask_prompt') or {}
+        mask_label=(f"{mask.get('morphology_radius_px',0):+d} px · {mask.get('mask_sha256','')[:8]}" if mask.get('enabled') else '关闭 / 未记录')
+        data=[Path(row['directory']).name,config.summary(),row['image_sha256'][:12],camera_label,mask_label,row['kind'],row['runs'],
               round(row['mean_ms'],2),round(row['median_ms'],2) if row['median_ms'] is not None else '',
               round(row['p95_ms'],2) if row['p95_ms'] is not None else '']
         values.append(data)

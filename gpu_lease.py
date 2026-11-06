@@ -35,10 +35,10 @@ class GpuLease:
 def acquire_gpu_lease(kind):
     LOCK_PATH.parent.mkdir(parents=True,exist_ok=True)
     fd=os.open(LOCK_PATH,os.O_RDWR|os.O_CREAT|os.O_CLOEXEC,0o600)
-    operation=fcntl.LOCK_EX if kind=='sam3' else fcntl.LOCK_SH
+    operation=fcntl.LOCK_EX if kind in ('sam3','exclusive') else fcntl.LOCK_SH
     try:fcntl.flock(fd,operation|fcntl.LOCK_NB)
     except BlockingIOError:
         os.close(fd)
-        raise RuntimeError('显存互斥保护：SAM3 分割和 SAM 3D Body / MHR GPU 模型不能同时加载。请等待其他 Studio 窗口释放模型后重试。') from None
+        raise RuntimeError('显存互斥保护：SAM3 / 离线视频独占任务与其他 SAM 3D Body / MHR GPU 模型不能同时加载。请等待其他 Studio 窗口释放模型后重试。') from None
     _DESCRIPTORS.add(fd)
     return GpuLease(fd)

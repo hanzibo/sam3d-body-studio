@@ -17,3 +17,8 @@ jobs:
       - run: pip install -r requirements/gui.txt
       - run: python test_fast_selection.py && python mhr_filter_test.py
       - run: QT_QPA_PLATFORM=offscreen python tests/gui_startup.py
+      - run: QT_QPA_PLATFORM=offscreen python tests/data_manager_gui.py
+      - run: python -m unittest discover -s tests -p test_mask_prompt.py -v
+      - run: QT_QPA_PLATFORM=offscreen python tests/image_segmentation_gui.py
+      - run: QT_QPA_PLATFORM=offscreen python tests/video_reconstruction_gui.py
+      - run: python -m unittest discover -s tests -p test_video_project.py -v

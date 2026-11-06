@@ -40,7 +40,7 @@ class PoseSetPanel(QtWidgets.QGroupBox):
     def active(self):return self.job is not None
     def idle(self):
         v=self.v;h=self.host
-        return not self.active and not v.segmenting and v.process.state()==QtCore.QProcess.NotRunning and v.expected is None and v.pending_camera_action is None and not h.inference_busy and not h.camera.active and not (getattr(h,'live',None) and h.live.running)
+        return not (hasattr(h,'image_seg') and h.image_seg.active) and not self.active and not v.segmenting and v.process.state()==QtCore.QProcess.NotRunning and v.expected is None and v.pending_camera_action is None and not h.inference_busy and not h.camera.active and not (getattr(h,'live',None) and h.live.running)
     def message(self,text):self.note.setText(text)
     def new_set(self):
         if not self.idle():return

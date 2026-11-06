@@ -29,6 +29,9 @@ from mhr_lab import MhrLab
 from rgbd_validation import RgbdValidation
 from overlay_view import OverlayView
 from motion_panel import MotionPanel
+from data_manager import DataManager
+from image_segmentation import ImageSegmentation
+from video_reconstruction import VideoReconstruction
 from pose_data import EDGES, COLORS
 from smpl_stage import SMPL_EDGES
 from studio_paths import path
@@ -62,6 +65,7 @@ shaders.ShaderProgram('body_studio', [
 class ImageCanvas(QtWidgets.QWidget):
     fileDropped = QtCore.pyqtSignal(str)
     bboxChanged = QtCore.pyqtSignal()
+    promptAdded = QtCore.pyqtSignal(int, int, int)
 
     def __init__(self, selectable=False):
         super().__init__()
@@ -69,6 +73,9 @@ class ImageCanvas(QtWidgets.QWidget):
         self.bbox = None
         self.drag_start = None
         self.overlay = ''
+        self.prompt_mode = False
+        self.prompts = []
+        self.mask_overlay = QtGui.QImage()
         self.selectable = selectable
         self.selection_enabled = True
         self.setAcceptDrops(selectable)
@@ -107,6 +114,11 @@ class ImageCanvas(QtWidgets.QWidget):
         r = self.image_rect()
         p.setRenderHint(QtGui.QPainter.SmoothPixmapTransform)
         p.drawImage(r, self.image)
+        if not self.mask_overlay.isNull(): p.drawImage(r, self.mask_overlay)
+        for x, y, label in self.prompts:
+            point = QtCore.QPointF(r.x()+x/self.image.width()*r.width(), r.y()+y/self.image.height()*r.height())
+            p.setPen(QtGui.QPen(QtGui.QColor('white'), 1))
+            p.setBrush(QtGui.QColor('#36e58c' if label else '#ff6565')); p.drawEllipse(point, 5, 5)
         if self.bbox:
             x1, y1, x2, y2 = self.bbox
             box = QtCore.QRectF(r.x()+x1/self.image.width()*r.width(), r.y()+y1/self.image.height()*r.height(),
@@ -124,6 +136,11 @@ class ImageCanvas(QtWidgets.QWidget):
             p.drawText(box, QtCore.Qt.AlignCenter, self.overlay)
 
     def mousePressEvent(self, event):
+        if self.selectable and self.selection_enabled and self.prompt_mode and not self.image.isNull() and self.image_rect().contains(event.pos()):
+            if event.button() in (QtCore.Qt.LeftButton, QtCore.Qt.RightButton):
+                point = self.image_point(event.pos())
+                self.promptAdded.emit(min(self.image.width()-1, int(point.x())), min(self.image.height()-1, int(point.y())), int(event.button() == QtCore.Qt.LeftButton))
+            return
         if self.selectable and self.selection_enabled and not self.image.isNull() and event.button() == QtCore.Qt.LeftButton and self.image_rect().contains(event.pos()):
             self.drag_start = self.image_point(event.pos())
 
@@ -472,6 +489,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.reset_bbox_btn = QtWidgets.QPushButton('清除人物框 / 使用整图')
         self.reset_bbox_btn.clicked.connect(self.reset_bbox)
         ll.addWidget(self.reset_bbox_btn)
+        self.image_seg = ImageSegmentation(self)
+        ll.addWidget(self.image_seg)
         splitter.addWidget(left)
 
         right = QtWidgets.QFrame()
@@ -575,6 +594,12 @@ class MainWindow(QtWidgets.QMainWindow):
         self.workspace_tabs.addTab(self.lab, "MHR 参数实验室")
         self.rgbd = RgbdValidation(self)
         self.workspace_tabs.addTab(self.rgbd, "RGB-D 几何验证")
+        self.data_manager = DataManager(self)
+        self.workspace_tabs.addTab(self.data_manager, "数据管理")
+        self.video = VideoReconstruction(self)
+        video_scroll = QtWidgets.QScrollArea()
+        video_scroll.setWidgetResizable(True);video_scroll.setWidget(self.video)
+        self.workspace_tabs.addTab(video_scroll, "视频重建")
 
     def update_camera_controls(self):
         busy = self.inference_busy
@@ -621,10 +646,19 @@ class MainWindow(QtWidgets.QMainWindow):
         self.stream_btn.setEnabled(self.live.active or (not streaming and not busy and self.camera_state=='preview'
                                    and self.model_state=='ready' and not dirty and can_run))
 
+        if hasattr(self, 'image_seg'):
+            self.image_seg.refresh()
+            if self.image_seg.active:
+                self.canvas.selection_enabled = False
+                for widget in (self.camera_btn, self.capture_btn, self.open_btn, self.demo_btn, self.reset_bbox_btn, self.run_btn, self.preload_btn, self.benchmark_btn, self.stream_btn): widget.setEnabled(False)
         if self.sam3_blocks_models():
             for button in (self.preload_btn,self.run_btn,self.benchmark_btn,self.stream_btn):button.setEnabled(False)
         if hasattr(self,'rgbd') and self.rgbd.batch.active:
             for widget in (self.preload_btn,self.release_btn,self.run_btn,self.benchmark_btn,self.stream_btn,self.camera_btn,self.open_btn,self.demo_btn,self.profile_panel):widget.setEnabled(False)
+        if hasattr(self,'video'):
+            self.rgbd.setEnabled(not self.video.active)
+            if self.video.active:
+                for widget in (self.camera_btn,self.capture_btn,self.open_btn,self.demo_btn,self.run_btn,self.preload_btn,self.benchmark_btn,self.stream_btn,self.profile_panel):widget.setEnabled(False)
 
     def selected_camera_intrinsics(self):
         width, height = (self.canvas.image.width(), self.canvas.image.height()) if self.source_path else (1280, 800)
@@ -671,8 +705,10 @@ class MainWindow(QtWidgets.QMainWindow):
             self.start_reconstruction(True,warm.value(),runs.value())
 
     def open_camera(self):
+        if self.image_seg.active: return
         if self.camera.active or self.inference_busy or self.rgbd.mode in ('capture','preview') or self.rgbd.pending_camera_action is not None or self.rgbd.batch.active:
             return
+        self.image_seg.reset_image()
         self.camera_job = None
         self.pending_photo = None
         self.capture_metadata = None
@@ -794,14 +830,14 @@ class MainWindow(QtWidgets.QMainWindow):
             self.load_image(path)
 
     def load_image(self, path, bbox=None):
-        if self.inference_busy or self.camera_state not in ('off', 'photo'):
-            return
+        if self.image_seg.active or self.inference_busy or self.camera_state not in ('off', 'photo'): return
         reader = QtGui.QImageReader(str(path))
         reader.setAutoTransform(True)
         image = reader.read()
         if image.isNull():
             QtWidgets.QMessageBox.warning(self, '无法打开图片', '请选择有效的图片文件。\n'+reader.errorString())
             return
+        self.image_seg.reset_image()
         self.source_path = Path(path)
         self.capture_metadata = None
         self.capture_metadata_error = None
@@ -902,12 +938,17 @@ class MainWindow(QtWidgets.QMainWindow):
         if not self.canvas.image.save(str(input_path)):
             QtWidgets.QMessageBox.warning(self, '无法保存输入', '请检查输出目录是否可写。')
             return
+        try:
+            mask_prompt = self.image_seg.snapshot(self.running_dir, input_path)
+        except (ValueError, OSError) as exc:
+            self.status.setText('掩膜提示不可用：'+str(exc)); return
         if self.capture_metadata:
             (self.running_dir/'camera.json').write_text(json.dumps(self.capture_metadata, ensure_ascii=False, indent=2))
         (self.running_dir/'request.json').write_text(json.dumps({
             'source_image': str(self.source_path), 'normalized_image': str(input_path),
             'bbox_xyxy': self.canvas.bbox, 'hand_refinement': self.hand_check.isChecked(),
             'backend_id': config.backend,'launch_config':config.to_dict(),'config_id':config.config_id,
+            'mask_prompt': mask_prompt,
             'benchmark':bool(benchmark), 'use_gemini_intrinsics': self.intrinsics_check.isChecked(),
             'camera_intrinsics': camera_intrinsics, 'camera_intrinsics_origin': camera_origin}, ensure_ascii=False, indent=2))
         self.clear_result()
@@ -917,7 +958,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.set_busy(True)
         self.active_job = uuid.uuid4().hex
         self.pending_model_request = dict(type='benchmark' if benchmark else 'run', job=self.active_job, image=str(input_path),
-            output=str(self.running_dir), bbox=self.canvas.bbox,
+            output=str(self.running_dir), bbox=self.canvas.bbox, mask_prompt=mask_prompt,
             inference_type=config.mode,config_id=config.config_id,warmup_runs=warmup_runs,runs=runs,
             camera_intrinsics=camera_intrinsics, camera_intrinsics_origin=camera_origin)
         if self.model_state == 'ready':
@@ -927,7 +968,9 @@ class MainWindow(QtWidgets.QMainWindow):
         self.tick()
 
     def sam3_blocks_models(self):
-        return hasattr(self,'rgbd') and self.rgbd.segmenting
+        return ((hasattr(self,'rgbd') and self.rgbd.segmenting) or
+                (hasattr(self,'image_seg') and self.image_seg.active) or
+                (hasattr(self,'video') and self.video.active))
 
     def preload_model(self):
         if self.sam3_blocks_models():
@@ -1235,6 +1278,9 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def closeEvent(self, event):
         self.closing = True
+        self.video.shutdown()
+        self.image_seg.shutdown()
+        self.data_manager.shutdown()
         self.rgbd.shutdown()
         self.lab.shutdown()
         self.live.abort('窗口已关闭')

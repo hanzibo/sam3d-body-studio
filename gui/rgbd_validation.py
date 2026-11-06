@@ -52,7 +52,7 @@ class MaskCanvas(QtWidgets.QWidget):
             p.drawImage(r,self.live_image);p.fillRect(0,0,self.width(),42,QtGui.QColor(0,0,0,175))
             p.setPen(QtGui.QColor('white'));p.drawText(self.rect().adjusted(8,0,-8,0),QtCore.Qt.AlignTop|QtCore.Qt.AlignHCenter,self.live_text)
             return
-        if self.image.isNull():p.setPen(QtGui.QColor('white'));p.drawText(self.rect(),QtCore.Qt.AlignCenter,'请采集或打开 RGB-D 样本');return
+        if self.image.isNull():p.setPen(QtGui.QColor('white'));p.drawText(self.rect(),QtCore.Qt.AlignCenter,getattr(self,'empty_text','请采集或打开 RGB-D 样本'));return
         r=self.rectangle();p.drawImage(r,self.image)
         if self.mask is not None:
             rgba=np.zeros((*self.mask.shape,4),np.uint8);rgba[self.mask>0]=[40,220,140,80]
@@ -268,6 +268,8 @@ class RgbdValidation(QtWidgets.QWidget):
         if self.canvas.isEnabled():self.canvas.prompts=[];self.canvas.update();self.prompts_changed()
     def start_segmentation(self):
         host=self.host
+        if hasattr(host,'image_seg') and host.image_seg.active:
+            self.status.setText('第一页分割 / 采集进程尚未退出');return
         if self.sample is None or self.process.state()!=QtCore.QProcess.NotRunning or self.expected or self.segmenting:return
         if host.inference_busy or host.live.running:
             self.status.setText('请先停止人体重建 / 实时流，再运行 SAM3 分割');return
@@ -282,6 +284,8 @@ class RgbdValidation(QtWidgets.QWidget):
         self.segmentation_output=str(output);self.begin_segmentation(request_path)
     def begin_segmentation(self,request_path,mode='segment'):
         host=self.host
+        if hasattr(host,'image_seg') and host.image_seg.active:
+            self.status.setText('第一页采集 / 分割尚未结束');return
         self.segmentation_pending=dict(path=str(request_path),started=time.monotonic(),mode=mode)
         self.segmented_event=None;self.log_text=''
         # Suppress profile-change auto relaunch before releasing the body process.
@@ -342,6 +346,7 @@ class RgbdValidation(QtWidgets.QWidget):
     def refresh_controls(self):
         host=self.host
         busy=self.process.state()!=QtCore.QProcess.NotRunning or self.expected is not None or self.segmentation_pending is not None or self.pending_camera_action is not None
+        busy=busy or (hasattr(host,'image_seg') and host.image_seg.active)
         free=not host.inference_busy and host.camera_state in ('off','photo') and not host.camera.active
         previewing=self.mode=='preview' and self.process.state()==QtCore.QProcess.Running
         can_camera=not host.inference_busy and not (getattr(host,'live',None) and host.live.active)
@@ -378,6 +383,8 @@ class RgbdValidation(QtWidgets.QWidget):
         if self.mode=='preview':self.cancel();return
         if self.preview_btn.isEnabled():self.request_camera('preview')
     def request_camera(self,action):
+        if hasattr(self.host,'image_seg') and self.host.image_seg.active:
+            self.status.setText('请先停止第一页采集 / 分割');return
         self.preview_frames=0
         self.pending_camera_action=action;self.handoff_started=time.monotonic()
         if self.host.camera.active:self.host.close_camera()

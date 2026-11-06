@@ -51,6 +51,8 @@ python3 scripts/install_desktop.py --desktop
 
 应用不会上传图片。运行产物默认保留在本地 `outputs/`；手动导出到仓库外的数据需自行管理。不要用 `git add -f` 添加模型或真人数据。
 
+第四个标签页“数据管理”支持分类统计、搜索、目录 / 图片 / 文本预览，以及将完整样本或运行移入系统回收站；当前任务及正在使用的数据受保护。各目录内容、删除边界与恢复方法见 [数据管理说明](docs/DATA_MANAGEMENT.md)。
+
 ## 验证与范围
 
 ```bash
@@ -80,3 +82,7 @@ python rgbd_geometry_test.py
 本仓库原创的 Studio 集成代码默认采用 **GPL-3.0-only**，见 [LICENSE](LICENSE)，文件头另有声明的除外。`calibrated_visualization.py` 改写自官方渲染代码，按 **SAM License** 标注；ComfyUI 加载器及 Fast 转换流程的改写来源也已单独声明。第三方权重、数据和人体资产不随本仓库发布，本许可证不重新授权这些内容。
 
 **许可审查尚有未决项：** GPL、SAM／DINOv3 自定义许可及可选 AGPL 组件的组合分发尚未确认兼容；分进程、单独下载和补齐署名不能自动解决这些问题。不要将整个运行栈理解为已确认可统一 GPL 发布或商业交付。逐项依据、已完成的修正和后续需要确认的授权，见 [许可证与来源审查](docs/LICENSE_AUDIT.md)、[逐文件清单](docs/provenance.json) 和 [第三方说明](THIRD_PARTY_NOTICES.md)。
+
+单图 SAM3 前景 / 背景点分割、掩膜膨胀 / 腐蚀和人体网络掩膜提示对照，见 [掩膜提示实验](docs/MASK_PROMPTS.md)。分割须在人体模型加载前完成，GUI 与独立进程均有显存互斥检查。
+
+离线视频多人重建、分段提示和结果恢复见 [视频重建说明](docs/VIDEO.md)。

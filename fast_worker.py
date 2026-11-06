@@ -2,7 +2,8 @@
 # Copyright (c) 2026 hanzibo and contributors.
 """Persistent configurable Fast worker using the verified loader and Studio protocol."""
 from gpu_lease import acquire_gpu_lease
-_GPU_LEASE = acquire_gpu_lease('body')
+import os
+_GPU_LEASE = acquire_gpu_lease(os.environ.get('BODYSTUDIO_GPU_KIND','body'))
 import gc
 import hashlib
 import json
@@ -165,11 +166,19 @@ try:
                 raise ValueError('模型顶点形状不符合预期')
 
     @torch.inference_mode()
-    def forward(rgb, mode, roi=None, cam_int=None):
+    def forward(rgb, mode, roi=None, cam_int=None, mask=None):
         detector.roi = roi
         torch.cuda.synchronize()
         began = time.perf_counter()
-        outputs = estimator.process_one_image(rgb.copy(), inference_type=mode, hand_box_source='yolo_pose', cam_int=cam_int)
+        from mask_prompt import FixedMaskSegmentor
+        segmentor = FixedMaskSegmentor(mask) if mask is not None else None
+        estimator.sam = segmentor
+        try:
+            outputs = estimator.process_one_image(rgb.copy(), inference_type=mode, hand_box_source='yolo_pose', cam_int=cam_int, use_mask=mask is not None)
+            if segmentor is not None and outputs and not segmentor.used:
+                raise ValueError('Fast 未消费掩膜提示，已拒绝结果')
+        finally:
+            estimator.sam = None
         torch.cuda.synchronize()
         elapsed = time.perf_counter() - began
         check(outputs)
@@ -214,6 +223,13 @@ try:
         if image is None:
             raise ValueError('无法读取输入图片')
         h,w = image.shape[:2]
+        detector.video_key=command.get('video_frame_key')
+        detector.reserved_boxes=command.get('video_reserved_boxes',[])
+        selection=command.get('selection_mask')
+        detector.selection_mask=None
+        if selection:
+            from mask_prompt import read_prompt
+            detector.selection_mask,_=read_prompt(dict(command,mask_prompt=selection),(h,w))
         roi = command.get('bbox')
         if roi is not None:
             if len(roi) != 4 or not np.isfinite(roi).all():
@@ -227,13 +243,18 @@ try:
         rgb_input=cv2.cvtColor(image,cv2.COLOR_BGR2RGB)
         matrix, camera_info = resolve_intrinsics(command.get('camera_intrinsics'), w, h)
         cam_int = torch.from_numpy(matrix).unsqueeze(0).cuda() if matrix is not None else None
+        from mask_prompt import read_prompt
+        mask, mask_info = read_prompt(command, (h,w))
         benchmark=None
         if command['type']=='benchmark':
-            outputs,seconds,benchmark=measure(command,lambda:forward(rgb_input,mode,roi,cam_int),emit)
+            outputs,seconds,benchmark=measure(command,lambda:forward(rgb_input,mode,roi,cam_int,mask),emit)
         else:
-            outputs,seconds=forward(rgb_input,mode,roi,cam_int)
+            outputs,seconds=forward(rgb_input,mode,roi,cam_int,mask)
         smpl_info=smpl_stage.process(outputs[0],command) if smpl_stage else None
         mhr_info=mhr_stage.process(outputs[0],command,camera_info) if mhr_stage else None
+        if command['type'] == 'video':
+            from video_protocol import emit_video
+            emit_video(command,outputs[0],faces,seconds,camera_info,emit,detector.selected_bbox);return
         if command['type'] == 'stream':
             emit_mesh(command, outputs[0], faces, seconds, camera_info, began, emit,smpl_info,mhr_info)
             return
@@ -254,6 +275,7 @@ try:
             compile_actual=actual_compile,
             checkpoint_dtype='float16 backbone / float32 decoder',
             detector='YOLO11m-Pose '+('TensorRT' if CONFIG.trt_detector else 'PyTorch'), hand_box_source='yolo_pose',
+            mask_prompt=mask_info,
             selection_roi=roi, bbox_xyxy=detector.selected_bbox, detector_keypoints=detector.selected_keypoints,
             hand_warning='手腕关键点置信度较低，建议检查手部结果' if detector.hand_warning else None,
             image=command['image'], input_hw=[h,w], inference_type=mode, person_count=1,
@@ -280,7 +302,7 @@ try:
                 break
             if command.get('config_id') != CONFIG.config_id:
                 raise ValueError('启动配置已失效')
-            if command['type'] not in ('run','benchmark','stream'):
+            if command['type'] not in ('run','benchmark','stream','video'):
                 raise ValueError('Unknown command')
             run(command)
         except Exception as exc:

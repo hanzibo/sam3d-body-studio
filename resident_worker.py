@@ -7,7 +7,8 @@
 # warmup, timing, camera calibration and asynchronous result export.
 """Persistent SAM model. JSON commands on stdin; prefixed events on stdout."""
 from gpu_lease import acquire_gpu_lease
-_GPU_LEASE = acquire_gpu_lease('body')
+import os
+_GPU_LEASE = acquire_gpu_lease(os.environ.get('BODYSTUDIO_GPU_KIND','body'))
 import gc
 import os
 import hashlib
@@ -94,14 +95,15 @@ class Engine:
         emit('ready', actual_config=CONFIG.to_dict(), warmup=self.warm_times, load_seconds=self.load_seconds, allocated_gib=torch.cuda.memory_allocated()/1024**3,smpl_assets=self.smpl_stage.asset_hashes if self.smpl_stage else None)
 
     @torch.inference_mode()
-    def forward(self, image, bbox, mode, cam_int=None):
+    def forward(self, image, bbox, mode, cam_int=None, mask=None):
         mm.load_models_gpu([self.patcher], memory_required=self.model.memory_used_forward(1, mode == 'full'))
         torch.cuda.reset_peak_memory_stats()
         torch.cuda.synchronize()
         began = time.perf_counter()
         frames = run_batched_frames(self.model,
             [torch.from_numpy(cv2.cvtColor(image, cv2.COLOR_BGR2RGB)).contiguous()],
-            [torch.tensor([bbox], dtype=torch.float32)], None, self.model.image_size,
+            [torch.tensor([bbox], dtype=torch.float32)],
+            [torch.from_numpy(mask[None, :, :, None])] if mask is not None else None, self.model.image_size,
             mode, crops_per_chunk=1, cam_int=cam_int)
         torch.cuda.synchronize()
         return frames[0], time.perf_counter()-began
@@ -121,16 +123,21 @@ class Engine:
             raise ValueError('Unknown inference type')
         matrix, camera_info = resolve_intrinsics(command.get('camera_intrinsics'), w, h)
         cam_int = torch.from_numpy(matrix).unsqueeze(0) if matrix is not None else None
+        from mask_prompt import read_prompt
+        mask, mask_info = read_prompt(command, (h,w))
         benchmark=None
         if command['type']=='benchmark':
-            outputs,seconds,benchmark=measure(command,lambda:self.forward(image,bbox,mode,cam_int),emit)
+            outputs,seconds,benchmark=measure(command,lambda:self.forward(image,bbox,mode,cam_int,mask),emit)
         else:
-            outputs,seconds=self.forward(image,bbox,mode,cam_int)
+            outputs,seconds=self.forward(image,bbox,mode,cam_int,mask)
         if not outputs:
             raise ValueError('未生成人体')
         smpl_info=self.smpl_stage.process(outputs[0],command) if self.smpl_stage else None
         mhr_info=self.mhr_stage.process(outputs[0],command,camera_info) if self.mhr_stage else None
         faces = self.model.head_pose.faces_np().copy()
+        if command['type'] == 'video':
+            from video_protocol import emit_video
+            emit_video(command,outputs[0],faces,seconds,camera_info,emit,bbox);return
         if command['type'] == 'stream':
             emit_mesh(command, outputs[0], faces, seconds, camera_info, began, emit,smpl_info,mhr_info)
             return
@@ -149,6 +156,7 @@ class Engine:
             backend_id='standard', session_id=os.environ.get('BODYSTUDIO_SESSION', ''),
             comfy_commit=self.commit, checkpoint=str(CHECKPOINT), checkpoint_sha256=self.sha,
             checkpoint_dtype=str(self.dtype), runtime_dtype=str(self.dtype), image=command['image'],
+            mask_prompt=mask_info,
             input_hw=[h,w], bbox_xyxy=bbox, inference_type=mode, person_count=len(outputs),
             load_seconds=self.load_seconds, inference_seconds_single_cold_run=seconds,
             inference_seconds=seconds, worker_seconds_to_mesh=time.perf_counter()-began,
@@ -176,7 +184,7 @@ try:
         command = json.loads(line)
         if command['type'] == 'stop':
             break
-        if command['type'] in ('run','benchmark','stream'):
+        if command['type'] in ('run','benchmark','stream','video'):
             try:
                 if command.get('backend_id', 'standard') != 'standard' or command.get('session_id', os.environ.get('BODYSTUDIO_SESSION', '')) != os.environ.get('BODYSTUDIO_SESSION', ''):
                     raise ValueError('后端会话已失效')

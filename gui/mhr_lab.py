@@ -2,6 +2,7 @@
 # Copyright (c) 2026 hanzibo and contributors.
 """Independent MHR parameter laboratory tab; GUI never imports torch."""
 import copy
+from datetime import datetime
 import json
 from pathlib import Path
 import tempfile
@@ -429,10 +430,17 @@ class MhrLab(QtWidgets.QWidget):
         self.marker.setData(pos=cross);self.viewer.update()
 
     def export_dialog(self):
-        path,_=QtWidgets.QFileDialog.getSaveFileName(self,'导出实验参数及人体网格',str(ROOT/'outputs/mhr-lab-experiment.npz'),'实验快照 (*.npz)')
-        if path:
-            try:self.export_to(path)
-            except Exception as exc:self.failed('导出失败：'+str(exc))
+        directory=ROOT/'outputs/mhr-lab'/datetime.now().strftime('%Y%m%d-%H%M%S-%f')
+        try:
+            # QFileDialog needs an existing initial directory to preserve grouping.
+            directory.mkdir(parents=True,exist_ok=False)
+            path,_=QtWidgets.QFileDialog.getSaveFileName(self,'导出实验参数及人体网格',str(directory/'experiment.npz'),'实验快照 (*.npz)')
+            if path:self.export_to(path)
+        except Exception as exc:self.failed('导出失败：'+str(exc))
+        finally:
+            # Only remove an empty placeholder after cancellation / choosing elsewhere.
+            try:directory.rmdir()
+            except OSError:pass
 
     def export_to(self,path):
         if self.frame is None or self.frame_state is None:raise ValueError('没有可导出的结果')

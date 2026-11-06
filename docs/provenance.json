@@ -179,10 +179,22 @@
       "basis": "Studio-authored documentation, configuration, workflow or original SVG asset; named external sources retain their terms.",
       "sources": []
     },
+    "data_catalog.py": {
+      "kind": "Studio original source",
+      "license": "GPL-3.0-only",
+      "basis": "Original Studio data-management implementation, regression fixture or documentation; uses public Python and Qt APIs.",
+      "sources": []
+    },
     "dependencies.json": {
       "kind": "Studio documentation/configuration",
       "license": "GPL-3.0-only",
       "basis": "Studio-authored documentation, configuration, workflow or original SVG asset; named external sources retain their terms.",
+      "sources": []
+    },
+    "docs/DATA_MANAGEMENT.md": {
+      "kind": "Studio documentation/configuration",
+      "license": "GPL-3.0-only",
+      "basis": "Original Studio data-management implementation, regression fixture or documentation; uses public Python and Qt APIs.",
       "sources": []
     },
     "docs/INSTALL.md": {
@@ -197,10 +209,22 @@
       "basis": "Studio-authored documentation, configuration, workflow or original SVG asset; named external sources retain their terms.",
       "sources": []
     },
+    "docs/MASK_PROMPTS.md": {
+      "kind": "Studio documentation/configuration",
+      "license": "GPL-3.0-only",
+      "basis": "Studio-authored mask snapshot validation, morphology, GUI/process orchestration or interface checks; separately installed upstream APIs are referenced without copying their implementation.",
+      "sources": []
+    },
     "docs/VALIDATION.md": {
       "kind": "Studio documentation/configuration",
       "license": "GPL-3.0-only",
       "basis": "Studio-authored documentation, configuration, workflow or original SVG asset; named external sources retain their terms.",
+      "sources": []
+    },
+    "docs/VIDEO.md": {
+      "kind": "Studio documentation",
+      "license": "GPL-3.0-only",
+      "basis": "Studio-authored offline video manifests, point-prompt orchestration, process isolation, numerical frame exports, timestamp-aware rendering or regression checks. Separately installed upstream APIs are called without copying their implementation.",
       "sources": []
     },
     "docs/provenance.json": {
@@ -259,10 +283,22 @@
       "basis": "Qt process/socket adapter; the GUI never imports the camera SDK. Studio integration implementation; no substantial upstream source copy identified in this review; preliminary engineering classification.",
       "sources": []
     },
+    "gui/data_manager.py": {
+      "kind": "Studio original source",
+      "license": "GPL-3.0-only",
+      "basis": "Original Studio data-management implementation, regression fixture or documentation; uses public Python and Qt APIs.",
+      "sources": []
+    },
     "gui/icon.svg": {
       "kind": "Studio documentation/configuration",
       "license": "GPL-3.0-only",
       "basis": "Studio-authored documentation, configuration, workflow or original SVG asset; named external sources retain their terms.",
+      "sources": []
+    },
+    "gui/image_segmentation.py": {
+      "kind": "Original Studio implementation",
+      "license": "GPL-3.0-only",
+      "basis": "Studio-authored mask snapshot validation, morphology, GUI/process orchestration or interface checks; separately installed upstream APIs are referenced without copying their implementation.",
       "sources": []
     },
     "gui/live_stream.py": {
@@ -327,6 +363,12 @@
       "basis": "Local run history with CSV export and immutable report links. Studio integration implementation; no substantial upstream source copy identified in this review; preliminary engineering classification.",
       "sources": []
     },
+    "gui/video_reconstruction.py": {
+      "kind": "Studio original source",
+      "license": "GPL-3.0-only",
+      "basis": "Studio-authored offline video manifests, point-prompt orchestration, process isolation, numerical frame exports, timestamp-aware rendering or regression checks. Separately installed upstream APIs are called without copying their implementation.",
+      "sources": []
+    },
     "gui/使用说明.md": {
       "kind": "Studio documentation/configuration",
       "license": "GPL-3.0-only",
@@ -373,6 +415,12 @@
       "kind": "Studio source",
       "license": "GPL-3.0-only",
       "basis": "Studio launcher: interpreter/path/environment selection and process invocation; no model implementation bundled.",
+      "sources": []
+    },
+    "mask_prompt.py": {
+      "kind": "Original Studio implementation",
+      "license": "GPL-3.0-only",
+      "basis": "Studio-authored mask snapshot validation, morphology, GUI/process orchestration or interface checks; separately installed upstream APIs are referenced without copying their implementation.",
       "sources": []
     },
     "mhr_filter.py": {
@@ -531,6 +579,12 @@
         "https://github.com/facebookresearch/sam3/tree/0570b3a5be9c4e694f23d85232fb55f4a6f1f7fc"
       ]
     },
+    "sam3_video_worker.py": {
+      "kind": "Studio original source",
+      "license": "GPL-3.0-only",
+      "basis": "Studio-authored offline video manifests, point-prompt orchestration, process isolation, numerical frame exports, timestamp-aware rendering or regression checks. Separately installed upstream APIs are called without copying their implementation.",
+      "sources": []
+    },
     "scripts/audit_provenance.py": {
       "kind": "Studio source",
       "license": "GPL-3.0-only",
@@ -547,6 +601,12 @@
       "kind": "Studio source",
       "license": "GPL-3.0-only",
       "basis": "Real one-image GPU acceptance; writes private artifacts only under outputs/. Studio integration implementation; no substantial upstream source copy identified in this review; preliminary engineering classification.",
+      "sources": []
+    },
+    "scripts/check_mask_prompt.py": {
+      "kind": "Original Studio implementation",
+      "license": "GPL-3.0-only",
+      "basis": "Studio-authored mask snapshot validation, morphology, GUI/process orchestration or interface checks; separately installed upstream APIs are referenced without copying their implementation.",
       "sources": []
     },
     "scripts/fetch_dependencies.py": {
@@ -588,16 +648,76 @@
       "basis": "ROI selection must keep each person's wrist keypoints and reject ambiguity. Studio integration implementation; no substantial upstream source copy identified in this review; preliminary engineering classification.",
       "sources": []
     },
+    "tests/data_manager_gui.py": {
+      "kind": "Studio original source",
+      "license": "GPL-3.0-only",
+      "basis": "Original Studio data-management implementation, regression fixture or documentation; uses public Python and Qt APIs.",
+      "sources": []
+    },
     "tests/gui_startup.py": {
       "kind": "Studio source",
       "license": "GPL-3.0-only",
       "basis": "Construct all Studio tabs without GPU/model loading; isolate user settings. Studio integration implementation; no substantial upstream source copy identified in this review; preliminary engineering classification.",
       "sources": []
     },
+    "tests/image_segmentation_gui.py": {
+      "kind": "Original Studio implementation",
+      "license": "GPL-3.0-only",
+      "basis": "Studio-authored mask snapshot validation, morphology, GUI/process orchestration or interface checks; separately installed upstream APIs are referenced without copying their implementation.",
+      "sources": []
+    },
+    "tests/test_data_catalog.py": {
+      "kind": "Studio original source",
+      "license": "GPL-3.0-only",
+      "basis": "Original Studio data-management implementation, regression fixture or documentation; uses public Python and Qt APIs.",
+      "sources": []
+    },
+    "tests/test_mask_prompt.py": {
+      "kind": "Original Studio implementation",
+      "license": "GPL-3.0-only",
+      "basis": "Studio-authored mask snapshot validation, morphology, GUI/process orchestration or interface checks; separately installed upstream APIs are referenced without copying their implementation.",
+      "sources": []
+    },
     "tests/test_portability.py": {
       "kind": "Studio source",
       "license": "GPL-3.0-only",
       "basis": "No model packages required. Validate machine config and engine trust boundaries. Studio integration implementation; no substantial upstream source copy identified in this review; preliminary engineering classification.",
+      "sources": []
+    },
+    "tests/test_video_project.py": {
+      "kind": "Studio original source",
+      "license": "GPL-3.0-only",
+      "basis": "Studio-authored offline video manifests, point-prompt orchestration, process isolation, numerical frame exports, timestamp-aware rendering or regression checks. Separately installed upstream APIs are called without copying their implementation.",
+      "sources": []
+    },
+    "tests/video_reconstruction_gui.py": {
+      "kind": "Studio original source",
+      "license": "GPL-3.0-only",
+      "basis": "Studio-authored offline video manifests, point-prompt orchestration, process isolation, numerical frame exports, timestamp-aware rendering or regression checks. Separately installed upstream APIs are called without copying their implementation.",
+      "sources": []
+    },
+    "video_pipeline.py": {
+      "kind": "Studio original source",
+      "license": "GPL-3.0-only",
+      "basis": "Studio-authored offline video manifests, point-prompt orchestration, process isolation, numerical frame exports, timestamp-aware rendering or regression checks. Separately installed upstream APIs are called without copying their implementation.",
+      "sources": []
+    },
+    "video_project.py": {
+      "kind": "Studio original source",
+      "license": "GPL-3.0-only",
+      "basis": "Studio-authored offline video manifests, point-prompt orchestration, process isolation, numerical frame exports, timestamp-aware rendering or regression checks. Separately installed upstream APIs are called without copying their implementation.",
+      "sources": []
+    },
+    "video_protocol.py": {
+      "kind": "Studio original source",
+      "license": "GPL-3.0-only",
+      "basis": "Studio-authored offline video manifests, point-prompt orchestration, process isolation, numerical frame exports, timestamp-aware rendering or regression checks. Separately installed upstream APIs are called without copying their implementation.",
+      "sources": []
+    },
+    "video_render.py": {
+      "kind": "Studio original source",
+      "license": "GPL-3.0-only",
+      "basis": "Studio-authored offline video manifests, point-prompt orchestration, process isolation, numerical frame exports, timestamp-aware rendering or regression checks. Separately installed upstream APIs are called without copying their implementation.",
       "sources": []
     },
     "worker_benchmark.py": {
