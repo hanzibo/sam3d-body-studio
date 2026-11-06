@@ -809,6 +809,48 @@
       "license": "GPL-3.0-only",
       "basis": "Synchronized inference timing; caller owns CUDA boundaries and output validation. Studio integration implementation; no substantial upstream source copy identified in this review; preliminary engineering classification.",
       "sources": []
+    },
+    "depth_camera_audit.py": {
+      "kind": "Original Studio implementation",
+      "license": "GPL-3.0-only",
+      "basis": "Studio-authored staged RGB-D surface-fit experiment, evidence reporting, or regression validation; external MHR assets and upstream code remain separately acquired.",
+      "sources": []
+    },
+    "depth_pose_experiment.py": {
+      "kind": "Original Studio implementation",
+      "license": "GPL-3.0-only",
+      "basis": "Studio-authored staged RGB-D surface-fit experiment, evidence reporting, or regression validation; external MHR assets and upstream code remain separately acquired.",
+      "sources": []
+    },
+    "depth_pose_refinement.py": {
+      "kind": "Original Studio implementation",
+      "license": "GPL-3.0-only",
+      "basis": "Studio-authored staged RGB-D surface-fit experiment, evidence reporting, or regression validation; external MHR assets and upstream code remain separately acquired.",
+      "sources": []
+    },
+    "depth_pose_report.py": {
+      "kind": "Original Studio implementation",
+      "license": "GPL-3.0-only",
+      "basis": "Studio-authored staged RGB-D surface-fit experiment, evidence reporting, or regression validation; external MHR assets and upstream code remain separately acquired.",
+      "sources": []
+    },
+    "tests/mhr_depth_roundtrip.py": {
+      "kind": "Original Studio implementation",
+      "license": "GPL-3.0-only",
+      "basis": "Studio-authored staged RGB-D surface-fit experiment, evidence reporting, or regression validation; external MHR assets and upstream code remain separately acquired.",
+      "sources": []
+    },
+    "tests/test_depth_pose_refinement.py": {
+      "kind": "Original Studio implementation",
+      "license": "GPL-3.0-only",
+      "basis": "Studio-authored staged RGB-D surface-fit experiment, evidence reporting, or regression validation; external MHR assets and upstream code remain separately acquired.",
+      "sources": []
+    },
+    "tests/rgbd_pose_gui.py": {
+      "kind": "Original Studio implementation",
+      "license": "GPL-3.0-only",
+      "basis": "Studio-authored staged RGB-D surface-fit experiment, evidence reporting, or regression validation; external MHR assets and upstream code remain separately acquired.",
+      "sources": []
     }
   }
 }

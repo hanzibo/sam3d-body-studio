@@ -27,3 +27,5 @@ jobs:
       - run: QT_QPA_PLATFORM=offscreen python tests/rgbd_depth_gui.py
       - run: python -m unittest discover -s tests -p test_display_cache.py -v
       - run: QT_QPA_PLATFORM=offscreen python tests/rgbd_preview_gui.py
+      - run: python -m unittest discover -s tests -p test_depth_pose_refinement.py -v
+      - run: QT_QPA_PLATFORM=offscreen python tests/rgbd_pose_gui.py

@@ -304,8 +304,13 @@ class RgbdValidation(QtWidgets.QWidget):
         self.depth_view=QtWidgets.QComboBox();self.depth_view.addItems(['原始位置（蓝）','深度校正位置','叠加对照（蓝：原始 / 绿：校正）'])
         self.depth_view.setMinimumWidth(300);self.depth_view.setToolTip('原始位置：蓝色；叠加对照：原始蓝色、校正绿色。回退时两者重合。')
         self.depth_view.currentIndexChanged.connect(self.select_result)
+        self.stage_compare=QtWidgets.QCheckBox('叠加原始网络预测')
+        self.stage_compare.setToolTip('深度实验记录：蓝色为原始网络预测，绿色为选中的阶段结果；不对齐、不缩放视图。')
+        self.stage_compare.toggled.connect(self.select_result);self.stage_compare.hide()
+        self.stage_report=QtWidgets.QPushButton('打开深度实验报告')
+        self.stage_report.clicked.connect(self.open_depth_report);self.stage_report.hide()
         self.depth_info=QtWidgets.QLabel('尚未深度校正 · 不修改骨架姿态与关节角');self.depth_info.setWordWrap(True)
-        depthrow.addWidget(self.refine_btn);depthrow.addWidget(self.depth_view);depthrow.addWidget(self.depth_info,1);root.addLayout(depthrow)
+        depthrow.addWidget(self.refine_btn);depthrow.addWidget(self.depth_view);depthrow.addWidget(self.stage_compare);depthrow.addWidget(self.stage_report);depthrow.addWidget(self.depth_info,1);root.addLayout(depthrow)
         self.table=QtWidgets.QTableWidget(0,7);self.table.setHorizontalHeaderLabels(['配置 / 时间','推理 ms','深度 MAE mm','深度 P90 mm','轮廓 IoU','覆盖率','点面 MAE mm'])
         self.table.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectRows);self.table.setSelectionMode(QtWidgets.QAbstractItemView.SingleSelection)
         self.table.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers);self.table.horizontalHeader().setSectionResizeMode(QtWidgets.QHeaderView.ResizeToContents)
@@ -433,7 +438,12 @@ class RgbdValidation(QtWidgets.QWidget):
         self.cancel_btn.setEnabled(busy);self.run_btn.setEnabled(self.sample is not None and not busy and free and host.model_state!='stopping')
         self.evaluate_btn.setEnabled(self.active_result is not None and self.canvas.mask is not None and not busy)
         self.refine_btn.setEnabled(self.active_result is not None and self.canvas.mask is not None and not busy and not host.inference_busy)
-        self.depth_view.setEnabled(self.active_result is not None and not busy)
+        stage=bool(self.active_result and self.active_result.get('depth_fit'))
+        if stage:self.refine_btn.setEnabled(False)
+        self.depth_view.setEnabled(self.active_result is not None and not busy and not stage)
+        self.depth_view.setVisible(not stage);self.stage_compare.setVisible(stage)
+        self.stage_report.setVisible(stage);self.stage_report.setEnabled(stage and not busy)
+        self.stage_compare.setEnabled(stage and not busy)
         config=host.draft_config()
         self.profile_label.setText('当前方案：'+(config.summary() if config else '参数组合无效，请到第一页调整'))
         self.profile_label.setToolTip(json.dumps(config.to_dict(),ensure_ascii=False,indent=2) if config else '')
@@ -761,7 +771,31 @@ class RgbdValidation(QtWidgets.QWidget):
             if 'pred_keypoints_3d' in d:
                 points=to_view(d['pred_keypoints_3d']+d['pred_cam_t'].reshape(1,3)+applied)
                 self.scene.bones.setData(pos=points[EDGES].reshape(-1,3))
-            if valid:
+            stage=result.get('depth_fit')
+            if stage:
+                stage_current=all(self.display_cache.digest(self.sample/name)==expected for name,expected in stage.get('fit_inputs',{}).items())
+                if self.stage_compare.isChecked():
+                    source=self.sample/'predictions'/Path(stage['source_prediction']).parent.name/'person_00.npz'
+                    if self.display_cache.digest(source)!=stage['source_prediction_sha256']:
+                        raise ValueError('深度实验的原始预测已改变，无法叠加')
+                    source_key,source_data=self.display_cache.prediction(source)
+                    self.scene.set_mesh(source_data['pred_vertices']+source_data['pred_cam_t'],source_data['faces'],key=source_key)
+                    self.scene.set_comparison(raw,d['faces'],key=key)
+                else:
+                    self.scene.set_mesh(raw,d['faces'],key=key);self.scene.set_comparison()
+                # This row already contains a separately saved fitted mesh, not a
+                # translation delta that should be applied a second time.
+                if 'pred_keypoints_3d' in d:
+                    points=to_view(d['pred_keypoints_3d']+d['pred_cam_t'])
+                    self.scene.bones.setData(pos=points[EDGES].reshape(-1,3))
+                state='阶段基线' if stage['stage']=='translation' else ('已应用' if stage['accepted'] else '保留上阶段')
+                if not stage_current:state='实验输入已改变，仅查看历史网格'
+                reason={'accepted':'检查通过','v1_translation_baseline':'复用第一阶段平移结果',
+                        'no_guard_improvement':'检查点未改善','silhouette_degraded':'轮廓退化',
+                        'coverage_degraded':'覆盖率下降','insufficient_correspondences':'可靠对应不足',
+                        'insufficient_consistent_scale_evidence':'尺度证据不足，保持原尺度'}.get(stage['reason'],stage['reason'])
+                self.depth_info.setText(f"深度实验 · {stage['stage_label']} · {state} · {reason}\n尺度 {stage['scale']:.4f} · 本阶段检查/后处理 {stage['total_seconds']*1000:.0f} ms · 表中推理时间沿用原始网络，不含后处理")
+            elif valid:
                 after=ref['metrics'];offset=' / '.join(f'{v*1000:+.1f}' for v in delta)
                 reason={'accepted':'检查通过','silhouette_degraded':'轮廓变差','no_guard_improvement':'检查点未改善','coverage_degraded':'覆盖率下降','translation_bound_reached':'位移过大','insufficient_depth':'有效深度不足','insufficient_initial_overlap':'初始重合不足','insufficient_reliable_normals':'可靠法线不足'}.get(ref['reason'],ref['reason'])
                 self.depth_info.setText(f"{'已接受' if ref['accepted'] else '已回退原始位置'} · {reason} · ΔXYZ {offset} mm\n深度 MAE {m['mae_mm']:.1f} → {after['mae_mm']:.1f} mm · 校正 {ref['total_seconds']*1000:.1f} ms（含候选渲染）")
@@ -781,13 +815,17 @@ class RgbdValidation(QtWidgets.QWidget):
         m=result.get('metrics')
         if not m or m.get('mask_sha256')!=self.mask_hash():
             self.details.setText('当前掩膜尚未评估。原始结果不做平移、缩放或 ICP；仅验证可见表面。');self.preview.clear();return
-        label='原始位置'
+        label=('深度实验 / '+result['depth_fit']['stage_label']) if result.get('depth_fit') else '原始位置'
         if self.depth_view.currentIndex()==1 and getattr(self,'refinement_current',False):m=m['depth_refinement']['metrics'];label='已应用深度校正'
         self.details.setText(f"{label} · 深度有符号均值 {m['signed_mean_mm']:.1f} mm（正值偏后） · 有效深度 {m['valid_depth_fraction']:.1%} · <1/2/5 cm：{m['within_10mm']:.1%} / {m['within_20mm']:.1%} / {m['within_50mm']:.1%}\n热图蓝色偏前 / 红色偏后（±50 mm），灰暗区域不参与深度误差；点面距离采样 {m['point_surface_count']} 点。")
         heat='depth_error_refined.png' if self.depth_view.currentIndex()==1 and getattr(self,'refinement_current',False) else 'depth_error.png'
         pix=QtGui.QPixmap(str(Path(result['evaluation'])/heat));self.preview.setPixmap(pix.scaled(420,160,QtCore.Qt.KeepAspectRatio,QtCore.Qt.SmoothTransformation))
     def open_folder(self):
         if self.sample:QtGui.QDesktopServices.openUrl(QtCore.QUrl.fromLocalFile(str(self.sample)))
+    def open_depth_report(self):
+        file=Path((self.active_result or {}).get('depth_fit',{}).get('experiment_report',''))
+        if file.is_file():QtGui.QDesktopServices.openUrl(QtCore.QUrl.fromLocalFile(str(file.resolve())))
+        else:self.status.setText('实验报告不在原路径，可在数据目录中查看该阶段的 fit.json。')
     def export_bundle(self):
         if not self.sample or self.process.state()!=QtCore.QProcess.NotRunning or self.expected or self.segmenting:return
         parent=QtWidgets.QFileDialog.getExistingDirectory(self,'选择实验包导出位置')

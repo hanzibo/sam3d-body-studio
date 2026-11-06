@@ -112,6 +112,19 @@ def information(s):
     info['深度位置校正总 ms']=ref['total_seconds']*1000 if 'total_seconds' in ref else MISSING
     info['深度位置校正求解 ms']=ref['solver_seconds']*1000 if 'solver_seconds' in ref else MISSING
     info.update({'校正后 / '+label:ref.get('metrics',{}).get(key,MISSING) for key,label in METRICS.items()})
+    fit=r.get('depth_fit') or {}
+    if fit:
+        info.update({'深度实验阶段':fit.get('stage_label'),
+                     '阶段修改已接受':fit.get('accepted'), '阶段接受 / 回退原因':fit.get('reason'),
+                     '共用米制尺度乘数':fit.get('scale'),
+                     '尺度校准姿态':fit.get('calibration',{}).get('calibration_poses'),
+                     '尺度校准状态':fit.get('calibration',{}).get('reason'),
+                     '本阶段 CPU 后处理 ms':fit.get('total_seconds',0)*1000,
+                     '拟合参数与边界':fit.get('config'),
+                     '候选参数变化（未通过时不会应用）':fit.get('fit',{}).get('changes'),
+                     '已应用比例':fit.get('applied_fraction',0),
+                     '实验报告':fit.get('experiment_report'),
+                     '对照说明':'表中推理 ms 沿用原始网络测速，不含深度后处理；表面误差不等于真实关节误差。'})
     info['预测文件']=str(Path(s['folder'])/'person_00.npz')
     info['推理报告']=str(Path(s['folder'])/'inference.json')
     return info

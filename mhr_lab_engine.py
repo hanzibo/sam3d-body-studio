@@ -87,6 +87,7 @@ class LabEngine:
             model = vector(data['mhr_model_params'], 204, 'mhr_model_params') if 'mhr_model_params' in data else self.recover_fast_parameters(data)
             state = dict(model=model.tolist(), shape=vector(data['shape'], 45, 'shape').tolist(),
                          expression=vector(data.get('face', np.zeros(72)), 72, 'face').tolist(), overrides={}, correctives=True)
+            state['metric_scale'] = float(np.asarray(data.get('depth_metric_scale', 1.)))
         # Commit only after the candidate successfully generates a finite mesh.
         result = self.render(state)
         if data is not None and 'pred_vertices' in data and 'lab_state_json' not in data:
@@ -110,6 +111,9 @@ class LabEngine:
     @torch.inference_mode()
     def render(self, state):
         began = time.perf_counter()
+        metric_scale = float(state.get('metric_scale', 1.))
+        if not np.isfinite(metric_scale) or not .5 <= metric_scale <= 2.:
+            raise ValueError('metric_scale 必须在 0.5–2 之间')
         mp = torch.as_tensor(vector(state['model'], 204, 'model'), device=self.device)[None]
         identity = torch.as_tensor(vector(state['shape'], 45, 'shape'), device=self.device)[None]
         expr = torch.as_tensor(vector(state['expression'], 72, 'expression'), device=self.device)[None]
@@ -131,8 +135,8 @@ class LabEngine:
         vertices = ct.skin_points(skel, rest)
         # Native +Y up, cm -> existing Studio camera-space metres. Do not mix raw SAM rotations with camera positions.
         cv = torch.tensor([1, -1, -1], device=self.device, dtype=vertices.dtype)
-        result = dict(vertices=(vertices[0]*.01*cv).cpu().numpy(),
-                      joints=(skel[0, :, :3]*.01*cv).cpu().numpy(),
+        result = dict(vertices=(vertices[0]*.01*cv*metric_scale).cpu().numpy(),
+                      joints=(skel[0, :, :3]*.01*cv*metric_scale).cpu().numpy(),
                       joint_parameters=jp[0].cpu().numpy(),
                       local_positions=local[0, :, :3].cpu().numpy(),
                       global_positions=skel[0, :, :3].cpu().numpy(),
