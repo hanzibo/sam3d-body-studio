@@ -37,7 +37,7 @@ with tempfile.TemporaryDirectory() as folder:
     panel = DataManager(host, root); panel.resize(1250, 800); panel.show()
     try:
         wait(app, lambda: panel.scanned and panel.task is None)
-        assert host.workspace_tabs.count() == 5 and len(panel.entries) == 3
+        assert host.workspace_tabs.count() == 7 and len(panel.entries) == 3
         row = next(i for i,e in enumerate(panel.entries) if e.path == sample)
         panel.table.selectRow(row); app.processEvents()
         assert panel.files.topLevelItemCount() == 3 and panel.delete_btn.isEnabled()

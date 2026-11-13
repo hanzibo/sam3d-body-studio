@@ -26,6 +26,7 @@ from gui_camera import select_camera_intrinsics
 from live_stream import LiveStream
 from mesh_geometry import FastMeshData
 from mhr_lab import MhrLab
+from hand_lab import HandLab
 from rgbd_validation import RgbdValidation
 from overlay_view import OverlayView
 from motion_panel import MotionPanel
@@ -603,9 +604,12 @@ class MainWindow(QtWidgets.QMainWindow):
         self.workspace_tabs.addTab(video_scroll, "视频重建")
         self.tracking_comparison = RgbdComparison(self)
         self.workspace_tabs.addTab(self.tracking_comparison, "RGB-D 跟踪对照")
+        self.hand = HandLab(self, ImageCanvas, BodyViewer)
+        self.workspace_tabs.addTab(self.hand, "手部实验")
 
     def update_camera_controls(self):
-        busy = self.inference_busy
+        hand_live=getattr(getattr(getattr(self,'hand',None),'live',None),'running',False)
+        busy = self.inference_busy or hand_live
         active = self.camera_state not in ('off', 'photo')
         waiting = self.camera_state in ('countdown', 'stopping', 'starting')
         rgbd_camera=hasattr(self,'rgbd') and (self.rgbd.mode in ('capture','preview') or self.rgbd.pending_camera_action is not None)
@@ -662,6 +666,8 @@ class MainWindow(QtWidgets.QMainWindow):
             self.rgbd.setEnabled(not self.video.active)
             if self.video.active:
                 for widget in (self.camera_btn,self.capture_btn,self.open_btn,self.demo_btn,self.run_btn,self.preload_btn,self.benchmark_btn,self.stream_btn,self.profile_panel):widget.setEnabled(False)
+
+        if hasattr(self,'hand') and hasattr(self.hand,'live'):self.hand.live.refresh()
 
     def selected_camera_intrinsics(self):
         width, height = (self.canvas.image.width(), self.canvas.image.height()) if self.source_path else (1280, 800)
@@ -729,6 +735,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.camera.start()
 
     def close_camera(self):
+        self.hand.live.end('相机关闭，实时手部重建已停止')
         self.live.stop('相机关闭，连续推理已停止')
         self.camera_job = None
         self.pending_photo = None
@@ -746,7 +753,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.live.poll()
 
     def capture_camera(self):
-        if self.camera_state != 'preview':
+        if self.camera_state != 'preview' or self.hand.live.running:
             return
         self.camera_job = uuid.uuid4().hex
         self.photo_bbox = list(self.canvas.bbox) if self.canvas.bbox else None
@@ -976,6 +983,8 @@ class MainWindow(QtWidgets.QMainWindow):
                 (hasattr(self,'video') and self.video.active))
 
     def preload_model(self):
+        if hasattr(self,"hand") and self.hand.active:
+            self.status.setText("请先在手部实验页释放手部模型，再预加载身体模型。");return
         if self.sam3_blocks_models():
             self.status.setText('SAM3 分割尚未退出，已阻止人体模型加载；请等待分割结束或取消。');return
         if self.model_state=='ready':
@@ -1281,6 +1290,10 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def closeEvent(self, event):
         self.closing = True
+        self.hand.shutdown()
+        self.hand.overlay.release()
+        self.hand.sequence.overlay.release()
+        self.hand.live.overlay.release()
         self.video.shutdown()
         self.image_seg.shutdown()
         self.data_manager.shutdown()

@@ -1,4 +1,5 @@
 {
+  "hand_warmup_image": "assets/hand-warmup.jpg",
   "official_repo": "third_party/sam-3d-body",
   "fast_repo": "third_party/Fast-SAM-3D-Body",
   "comfy_repo": "third_party/ComfyUI",
@@ -17,5 +18,8 @@
   "inductor_cache": "models/torch-cache/fast",
   "yolo_config": "outputs/yolo-config",
   "smpl_assets": "assets/smpl",
-  "engine_registry": "config/local.engines.json"
+  "engine_registry": "config/local.engines.json",
+  "hand_detector_checkpoint": "models/hands/detector.pt",
+  "hand_sequence_outputs": "outputs/hand-sequences",
+  "hand_detector_engine": "models/hands/detector_fp16.engine"
 }

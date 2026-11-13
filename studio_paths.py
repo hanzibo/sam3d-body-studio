@@ -13,6 +13,10 @@ import sys
 ROOT = Path(__file__).resolve().parent
 CONFIG_FILE = Path(os.environ.get('SAM3D_STUDIO_PATHS', ROOT/'config/local.json')).expanduser().resolve()
 DEFAULTS = {
+    'hand_warmup_image': 'assets/hand-warmup.jpg',
+    'hand_detector_engine': 'models/hands/detector_fp16.engine',
+    'hand_detector_checkpoint': 'models/hands/detector.pt',
+    'hand_sequence_outputs': 'outputs/hand-sequences',
     'official_repo': 'third_party/sam-3d-body',
     'fast_repo': 'third_party/Fast-SAM-3D-Body',
     'comfy_repo': 'third_party/ComfyUI',

@@ -317,6 +317,24 @@
       "basis": "Studio-authored integration, workflow, validation or documentation; separately acquired upstream code, datasets, weights and accelerators are not bundled.",
       "sources": []
     },
+    "docs/HAND_ACCELERATION.md": {
+      "kind": "Studio engineering documentation",
+      "license": "GPL-3.0-only",
+      "basis": "Studio-authored integration, workflow, validation or documentation; separately acquired upstream code, datasets, weights and accelerators are not bundled.",
+      "sources": []
+    },
+    "docs/HAND_LAB.md": {
+      "kind": "Studio engineering documentation",
+      "license": "GPL-3.0-only",
+      "basis": "Studio-authored integration, workflow, validation or documentation; separately acquired upstream code, datasets, weights and accelerators are not bundled.",
+      "sources": []
+    },
+    "docs/HAND_LIVE.md": {
+      "kind": "Studio engineering documentation",
+      "license": "GPL-3.0-only",
+      "basis": "Studio-authored integration, workflow, validation or documentation; separately acquired upstream code, datasets, weights and accelerators are not bundled.",
+      "sources": []
+    },
     "docs/INSTALL.md": {
       "kind": "Studio documentation/configuration",
       "license": "GPL-3.0-only",
@@ -483,6 +501,24 @@
       "basis": "Studio-authored bounded preview caches, thumbnail and rendering regression validation. No third-party renderer implementation copied.",
       "sources": []
     },
+    "gui/hand_lab.py": {
+      "kind": "Studio application or experiment implementation",
+      "license": "GPL-3.0-only",
+      "basis": "Studio-authored integration, workflow, validation or documentation; separately acquired upstream code, datasets, weights and accelerators are not bundled.",
+      "sources": []
+    },
+    "gui/hand_live.py": {
+      "kind": "Studio application or experiment implementation",
+      "license": "GPL-3.0-only",
+      "basis": "Studio-authored integration, workflow, validation or documentation; separately acquired upstream code, datasets, weights and accelerators are not bundled.",
+      "sources": []
+    },
+    "gui/hand_sequence_panel.py": {
+      "kind": "Studio application or experiment implementation",
+      "license": "GPL-3.0-only",
+      "basis": "Studio-authored integration, workflow, validation or documentation; separately acquired upstream code, datasets, weights and accelerators are not bundled.",
+      "sources": []
+    },
     "gui/icon.svg": {
       "kind": "Studio documentation/configuration",
       "license": "GPL-3.0-only",
@@ -591,6 +627,99 @@
       "basis": "Per-image camera selection; independent of the resident model launch profile. Studio integration implementation; no substantial upstream source copy identified in this review; preliminary engineering classification.",
       "sources": []
     },
+    "hand_acceleration.py": {
+      "kind": "Studio application or experiment implementation",
+      "license": "GPL-3.0-only",
+      "basis": "Studio-authored integration, workflow, validation or documentation; separately acquired upstream code, datasets, weights and accelerators are not bundled.",
+      "sources": []
+    },
+    "hand_automatic.py": {
+      "kind": "Studio application or experiment implementation",
+      "license": "GPL-3.0-only",
+      "basis": "Studio-authored integration, workflow, validation or documentation; separately acquired upstream code, datasets, weights and accelerators are not bundled.",
+      "sources": []
+    },
+    "hand_config.py": {
+      "kind": "Studio application or experiment implementation",
+      "license": "GPL-3.0-only",
+      "basis": "Studio-authored integration, workflow, validation or documentation; separately acquired upstream code, datasets, weights and accelerators are not bundled.",
+      "sources": []
+    },
+    "hand_decoder.py": {
+      "kind": "SAM hand decoder scheduling and parameter/camera callback adaptation",
+      "license": "LicenseRef-SAM-3D-Body",
+      "basis": "Inference schedule adapted from PromptableDecoder.forward; hand parameter operations extracted verbatim from installed MHRHead.forward before its geometry call; camera and crop projection preserve upstream operations. Independent integration provides explicit compilation boundaries and count selection. No third-party checkout is edited.",
+      "sources": [
+        "https://github.com/facebookresearch/sam-3d-body/blob/b5c765a0d89d789985e186d396315e7590887b94/sam_3d_body/models/decoders/promptable_decoder.py",
+        "https://github.com/facebookresearch/sam-3d-body/blob/b5c765a0d89d789985e186d396315e7590887b94/sam_3d_body/models/heads/mhr_head.py",
+        "https://github.com/facebookresearch/sam-3d-body/blob/b5c765a0d89d789985e186d396315e7590887b94/sam_3d_body/models/meta_arch/sam3d_body.py"
+      ],
+      "reviewed_at": "2026-11-13"
+    },
+    "hand_detector_preprocess.py": {
+      "kind": "Studio application or experiment implementation",
+      "license": "GPL-3.0-only",
+      "basis": "Studio-authored integration, workflow, validation or documentation; separately acquired upstream code, datasets, weights and accelerators are not bundled.",
+      "sources": []
+    },
+    "hand_engine.py": {
+      "kind": "Studio application or experiment implementation",
+      "license": "GPL-3.0-only",
+      "basis": "Studio-authored integration, workflow, validation or documentation; separately acquired upstream code, datasets, weights and accelerators are not bundled.",
+      "sources": []
+    },
+    "hand_feedback.py": {
+      "kind": "SAM hand MHR parameter assembly and feedback adaptation; exact-support intermediate geometry",
+      "license": "LicenseRef-SAM-3D-Body",
+      "basis": "Hand parameter assembly adapted from MHRHead.mhr_forward; uses separately acquired MHR joint mapping and TorchScript modules. Original support selection, graph replay, callback lifetime and copying controls. Final upstream MHR retained.",
+      "sources": [
+        "https://github.com/facebookresearch/sam-3d-body/blob/b5c765a0d89d789985e186d396315e7590887b94/sam_3d_body/models/heads/mhr_head.py",
+        "https://github.com/facebookresearch/sam-3d-body/blob/b5c765a0d89d789985e186d396315e7590887b94/sam_3d_body/models/meta_arch/sam3d_body.py"
+      ],
+      "reviewed_at": "2026-11-12"
+    },
+    "hand_geometry.py": {
+      "kind": "Studio application or experiment implementation",
+      "license": "GPL-3.0-only",
+      "basis": "Studio-authored integration, workflow, validation or documentation; separately acquired upstream code, datasets, weights and accelerators are not bundled.",
+      "sources": []
+    },
+    "hand_sequence.py": {
+      "kind": "Studio application or experiment implementation",
+      "license": "GPL-3.0-only",
+      "basis": "Studio-authored integration, workflow, validation or documentation; separately acquired upstream code, datasets, weights and accelerators are not bundled.",
+      "sources": []
+    },
+    "hand_sequence_metrics.py": {
+      "kind": "Studio application or experiment implementation",
+      "license": "GPL-3.0-only",
+      "basis": "Studio-authored integration, workflow, validation or documentation; separately acquired upstream code, datasets, weights and accelerators are not bundled.",
+      "sources": []
+    },
+    "hand_stream.py": {
+      "kind": "Studio application or experiment implementation",
+      "license": "GPL-3.0-only",
+      "basis": "Studio-authored integration, workflow, validation or documentation; separately acquired upstream code, datasets, weights and accelerators are not bundled.",
+      "sources": []
+    },
+    "hand_temporal.py": {
+      "kind": "Studio application or experiment implementation",
+      "license": "GPL-3.0-only",
+      "basis": "Studio-authored integration, workflow, validation or documentation; separately acquired upstream code, datasets, weights and accelerators are not bundled.",
+      "sources": []
+    },
+    "hand_warmup.py": {
+      "kind": "Studio application or experiment implementation",
+      "license": "GPL-3.0-only",
+      "basis": "Studio-authored integration, workflow, validation or documentation; separately acquired upstream code, datasets, weights and accelerators are not bundled.",
+      "sources": []
+    },
+    "hand_worker.py": {
+      "kind": "Studio application or experiment implementation",
+      "license": "GPL-3.0-only",
+      "basis": "Studio-authored integration, workflow, validation or documentation; separately acquired upstream code, datasets, weights and accelerators are not bundled.",
+      "sources": []
+    },
     "launch_camera.sh": {
       "kind": "Studio source",
       "license": "GPL-3.0-only",
@@ -613,6 +742,12 @@
       "kind": "Studio source",
       "license": "GPL-3.0-only",
       "basis": "Studio launcher: interpreter/path/environment selection and process invocation; no model implementation bundled.",
+      "sources": []
+    },
+    "launch_hand.py": {
+      "kind": "Studio application or experiment implementation",
+      "license": "GPL-3.0-only",
+      "basis": "Studio-authored integration, workflow, validation or documentation; separately acquired upstream code, datasets, weights and accelerators are not bundled.",
       "sources": []
     },
     "launch_model.sh": {
@@ -935,7 +1070,55 @@
       "basis": "Studio-authored integration, workflow, validation or documentation; separately acquired upstream code, datasets, weights and accelerators are not bundled.",
       "sources": []
     },
+    "scripts/benchmark_hand_callbacks.py": {
+      "kind": "Studio profiling, build or comparison utility",
+      "license": "GPL-3.0-only",
+      "basis": "Studio-authored integration, workflow, validation or documentation; separately acquired upstream code, datasets, weights and accelerators are not bundled.",
+      "sources": []
+    },
+    "scripts/benchmark_hand_detector.py": {
+      "kind": "Studio profiling, build or comparison utility",
+      "license": "GPL-3.0-only",
+      "basis": "Studio-authored integration, workflow, validation or documentation; separately acquired upstream code, datasets, weights and accelerators are not bundled.",
+      "sources": []
+    },
+    "scripts/benchmark_hand_execution.py": {
+      "kind": "Studio profiling, build or comparison utility",
+      "license": "GPL-3.0-only",
+      "basis": "Studio-authored integration, workflow, validation or documentation; separately acquired upstream code, datasets, weights and accelerators are not bundled.",
+      "sources": []
+    },
+    "scripts/benchmark_hand_feedback.py": {
+      "kind": "Studio profiling, build or comparison utility",
+      "license": "GPL-3.0-only",
+      "basis": "Studio-authored integration, workflow, validation or documentation; separately acquired upstream code, datasets, weights and accelerators are not bundled.",
+      "sources": []
+    },
+    "scripts/benchmark_hand_int8.py": {
+      "kind": "Studio profiling, build or comparison utility",
+      "license": "GPL-3.0-only",
+      "basis": "Studio-authored integration, workflow, validation or documentation; separately acquired upstream code, datasets, weights and accelerators are not bundled.",
+      "sources": []
+    },
+    "scripts/benchmark_hand_preprocess.py": {
+      "kind": "Studio profiling, build or comparison utility",
+      "license": "GPL-3.0-only",
+      "basis": "Studio-authored integration, workflow, validation or documentation; separately acquired upstream code, datasets, weights and accelerators are not bundled.",
+      "sources": []
+    },
+    "scripts/benchmark_hand_surface.py": {
+      "kind": "Studio profiling, build or comparison utility",
+      "license": "GPL-3.0-only",
+      "basis": "Studio-authored integration, workflow, validation or documentation; separately acquired upstream code, datasets, weights and accelerators are not bundled.",
+      "sources": []
+    },
     "scripts/benchmark_mhr_precision.py": {
+      "kind": "Studio profiling, build or comparison utility",
+      "license": "GPL-3.0-only",
+      "basis": "Studio-authored integration, workflow, validation or documentation; separately acquired upstream code, datasets, weights and accelerators are not bundled.",
+      "sources": []
+    },
+    "scripts/build_hand_detector.py": {
       "kind": "Studio profiling, build or comparison utility",
       "license": "GPL-3.0-only",
       "basis": "Studio-authored integration, workflow, validation or documentation; separately acquired upstream code, datasets, weights and accelerators are not bundled.",
@@ -971,6 +1154,18 @@
       "basis": "Studio-authored integration, workflow, validation or documentation; separately acquired upstream code, datasets, weights and accelerators are not bundled.",
       "sources": []
     },
+    "scripts/compare_hand_int8.py": {
+      "kind": "Studio profiling, build or comparison utility",
+      "license": "GPL-3.0-only",
+      "basis": "Studio-authored integration, workflow, validation or documentation; separately acquired upstream code, datasets, weights and accelerators are not bundled.",
+      "sources": []
+    },
+    "scripts/compare_hand_sequences.py": {
+      "kind": "Studio profiling, build or comparison utility",
+      "license": "GPL-3.0-only",
+      "basis": "Studio-authored integration, workflow, validation or documentation; separately acquired upstream code, datasets, weights and accelerators are not bundled.",
+      "sources": []
+    },
     "scripts/fetch_dependencies.py": {
       "kind": "Studio source",
       "license": "GPL-3.0-only",
@@ -981,6 +1176,12 @@
       "kind": "Studio source",
       "license": "GPL-3.0-only",
       "basis": "Install a desktop menu entry for this checkout, optionally on the desktop. Studio integration implementation; no substantial upstream source copy identified in this review; preliminary engineering classification.",
+      "sources": []
+    },
+    "scripts/make_hand_int8_video.py": {
+      "kind": "Studio profiling, build or comparison utility",
+      "license": "GPL-3.0-only",
+      "basis": "Studio-authored integration, workflow, validation or documentation; separately acquired upstream code, datasets, weights and accelerators are not bundled.",
       "sources": []
     },
     "scripts/prepare_embedl_384.py": {
@@ -1001,6 +1202,12 @@
       "basis": "Studio-authored integration, workflow, validation or documentation; separately acquired upstream code, datasets, weights and accelerators are not bundled.",
       "sources": []
     },
+    "scripts/profile_hand_decoder.py": {
+      "kind": "Studio profiling, build or comparison utility",
+      "license": "GPL-3.0-only",
+      "basis": "Studio-authored integration, workflow, validation or documentation; separately acquired upstream code, datasets, weights and accelerators are not bundled.",
+      "sources": []
+    },
     "scripts/report_embedl_384.py": {
       "kind": "Studio profiling, build or comparison utility",
       "license": "GPL-3.0-only",
@@ -1008,6 +1215,30 @@
       "sources": []
     },
     "scripts/report_embedl_encoder.py": {
+      "kind": "Studio profiling, build or comparison utility",
+      "license": "GPL-3.0-only",
+      "basis": "Studio-authored integration, workflow, validation or documentation; separately acquired upstream code, datasets, weights and accelerators are not bundled.",
+      "sources": []
+    },
+    "scripts/report_hand_acceleration.py": {
+      "kind": "Studio profiling, build or comparison utility",
+      "license": "GPL-3.0-only",
+      "basis": "Studio-authored integration, workflow, validation or documentation; separately acquired upstream code, datasets, weights and accelerators are not bundled.",
+      "sources": []
+    },
+    "scripts/report_hand_feedback.py": {
+      "kind": "Studio profiling, build or comparison utility",
+      "license": "GPL-3.0-only",
+      "basis": "Studio-authored integration, workflow, validation or documentation; separately acquired upstream code, datasets, weights and accelerators are not bundled.",
+      "sources": []
+    },
+    "scripts/report_hand_int8.py": {
+      "kind": "Studio profiling, build or comparison utility",
+      "license": "GPL-3.0-only",
+      "basis": "Studio-authored integration, workflow, validation or documentation; separately acquired upstream code, datasets, weights and accelerators are not bundled.",
+      "sources": []
+    },
+    "scripts/report_hand_surface.py": {
       "kind": "Studio profiling, build or comparison utility",
       "license": "GPL-3.0-only",
       "basis": "Studio-authored integration, workflow, validation or documentation; separately acquired upstream code, datasets, weights and accelerators are not bundled.",
@@ -1074,6 +1305,48 @@
       "kind": "Studio source",
       "license": "GPL-3.0-only",
       "basis": "Construct all Studio tabs without GPU/model loading; isolate user settings. Studio integration implementation; no substantial upstream source copy identified in this review; preliminary engineering classification.",
+      "sources": []
+    },
+    "tests/hand_automatic_gui.py": {
+      "kind": "Studio regression or integration validation",
+      "license": "GPL-3.0-only",
+      "basis": "Studio-authored integration, workflow, validation or documentation; separately acquired upstream code, datasets, weights and accelerators are not bundled.",
+      "sources": []
+    },
+    "tests/hand_callback_controls_gui.py": {
+      "kind": "Studio regression or integration validation",
+      "license": "GPL-3.0-only",
+      "basis": "Studio-authored integration, workflow, validation or documentation; separately acquired upstream code, datasets, weights and accelerators are not bundled.",
+      "sources": []
+    },
+    "tests/hand_lab_gui.py": {
+      "kind": "Studio regression or integration validation",
+      "license": "GPL-3.0-only",
+      "basis": "Studio-authored integration, workflow, validation or documentation; separately acquired upstream code, datasets, weights and accelerators are not bundled.",
+      "sources": []
+    },
+    "tests/hand_live_gui.py": {
+      "kind": "Studio regression or integration validation",
+      "license": "GPL-3.0-only",
+      "basis": "Studio-authored integration, workflow, validation or documentation; separately acquired upstream code, datasets, weights and accelerators are not bundled.",
+      "sources": []
+    },
+    "tests/hand_scheduling_benchmark.py": {
+      "kind": "Studio regression or integration validation",
+      "license": "GPL-3.0-only",
+      "basis": "Studio-authored integration, workflow, validation or documentation; separately acquired upstream code, datasets, weights and accelerators are not bundled.",
+      "sources": []
+    },
+    "tests/hand_startup_warmup_gui.py": {
+      "kind": "Studio regression or integration validation",
+      "license": "GPL-3.0-only",
+      "basis": "Studio-authored integration, workflow, validation or documentation; separately acquired upstream code, datasets, weights and accelerators are not bundled.",
+      "sources": []
+    },
+    "tests/hand_temporal_integration.py": {
+      "kind": "Studio regression or integration validation",
+      "license": "GPL-3.0-only",
+      "basis": "Studio-authored integration, workflow, validation or documentation; separately acquired upstream code, datasets, weights and accelerators are not bundled.",
       "sources": []
     },
     "tests/image_segmentation_gui.py": {
@@ -1183,6 +1456,60 @@
       "sources": []
     },
     "tests/test_fast_keypoints.py": {
+      "kind": "Studio regression or integration validation",
+      "license": "GPL-3.0-only",
+      "basis": "Studio-authored integration, workflow, validation or documentation; separately acquired upstream code, datasets, weights and accelerators are not bundled.",
+      "sources": []
+    },
+    "tests/test_hand_automatic.py": {
+      "kind": "Studio regression or integration validation",
+      "license": "GPL-3.0-only",
+      "basis": "Studio-authored integration, workflow, validation or documentation; separately acquired upstream code, datasets, weights and accelerators are not bundled.",
+      "sources": []
+    },
+    "tests/test_hand_config.py": {
+      "kind": "Studio regression or integration validation",
+      "license": "GPL-3.0-only",
+      "basis": "Studio-authored integration, workflow, validation or documentation; separately acquired upstream code, datasets, weights and accelerators are not bundled.",
+      "sources": []
+    },
+    "tests/test_hand_decoder.py": {
+      "kind": "Studio regression or integration validation",
+      "license": "GPL-3.0-only",
+      "basis": "Studio-authored integration, workflow, validation or documentation; separately acquired upstream code, datasets, weights and accelerators are not bundled.",
+      "sources": []
+    },
+    "tests/test_hand_feedback.py": {
+      "kind": "Studio regression or integration validation",
+      "license": "GPL-3.0-only",
+      "basis": "Studio-authored integration, workflow, validation or documentation; separately acquired upstream code, datasets, weights and accelerators are not bundled.",
+      "sources": []
+    },
+    "tests/test_hand_geometry.py": {
+      "kind": "Studio regression or integration validation",
+      "license": "GPL-3.0-only",
+      "basis": "Studio-authored integration, workflow, validation or documentation; separately acquired upstream code, datasets, weights and accelerators are not bundled.",
+      "sources": []
+    },
+    "tests/test_hand_live_scheduling.py": {
+      "kind": "Studio regression or integration validation",
+      "license": "GPL-3.0-only",
+      "basis": "Studio-authored integration, workflow, validation or documentation; separately acquired upstream code, datasets, weights and accelerators are not bundled.",
+      "sources": []
+    },
+    "tests/test_hand_stream.py": {
+      "kind": "Studio regression or integration validation",
+      "license": "GPL-3.0-only",
+      "basis": "Studio-authored integration, workflow, validation or documentation; separately acquired upstream code, datasets, weights and accelerators are not bundled.",
+      "sources": []
+    },
+    "tests/test_hand_temporal.py": {
+      "kind": "Studio regression or integration validation",
+      "license": "GPL-3.0-only",
+      "basis": "Studio-authored integration, workflow, validation or documentation; separately acquired upstream code, datasets, weights and accelerators are not bundled.",
+      "sources": []
+    },
+    "tests/test_hand_warmup.py": {
       "kind": "Studio regression or integration validation",
       "license": "GPL-3.0-only",
       "basis": "Studio-authored integration, workflow, validation or documentation; separately acquired upstream code, datasets, weights and accelerators are not bundled.",

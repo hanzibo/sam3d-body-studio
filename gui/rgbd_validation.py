@@ -431,7 +431,7 @@ class RgbdValidation(QtWidgets.QWidget):
         busy=busy or (hasattr(host,'image_seg') and host.image_seg.active)
         free=not host.inference_busy and host.camera_state in ('off','photo') and not host.camera.active
         previewing=self.mode=='preview' and self.process.state()==QtCore.QProcess.Running
-        can_camera=not host.inference_busy and not (getattr(host,'live',None) and host.live.active)
+        can_camera=not host.inference_busy and not (getattr(host,'live',None) and host.live.active) and not getattr(getattr(getattr(host,'hand',None),'live',None),'running',False)
         self.preview_btn.setText('关闭相机预览' if self.mode=='preview' else '开启相机预览')
         self.preview_btn.setEnabled(previewing or (not busy and can_camera))
         self.capture_btn.setEnabled(previewing or (not busy and can_camera));self.open_btn.setEnabled(not busy and not host.inference_busy)
@@ -472,6 +472,8 @@ class RgbdValidation(QtWidgets.QWidget):
         if self.mode=='preview':self.cancel();return
         if self.preview_btn.isEnabled():self.request_camera('preview')
     def request_camera(self,action):
+        if getattr(getattr(getattr(self.host,'hand',None),'live',None),'running',False):
+            self.status.setText('请先停止手部实时重建，再切换 RGB-D 相机');return
         if hasattr(self.host,'image_seg') and self.host.image_seg.active:
             self.status.setText('请先停止第一页采集 / 分割');return
         self.preview_frames=0

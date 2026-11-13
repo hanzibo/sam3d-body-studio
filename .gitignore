@@ -22,6 +22,7 @@ dist/
 
 # Model assets and machine-specific accelerators.
 /assets/smpl/*
+/assets/hand-warmup.jpg
 !/assets/smpl/README.md
 /checkpoints/
 /models/
@@ -85,3 +86,6 @@ envs/
 # Historical acceptance scripts requiring private local fixtures
 /mhr_lab_test.py
 /euro_test.py
+
+# One-off machine-specific cleanup procedure; not part of the application.
+/maintenance/cleanup_depth_fusion_20261110.py

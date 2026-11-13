@@ -112,6 +112,7 @@ class DataManager(QtWidgets.QWidget):
 
     def busy_reason(self):
         h = self.host; v = h.rgbd; lab = h.lab.client
+        if hasattr(h,"hand") and h.hand.state in ("loading","switching","busy","stopping"):return "手部模型正在加载、计算或释放"
         if hasattr(h,'video') and h.video.active:return '视频任务正在运行'
         if hasattr(h,'image_seg') and h.image_seg.active: return '第一页采集 / SAM3 分割正在运行'
         if h.inference_busy or h.model_state in ('loading', 'stopping') or h.pending_launch:
@@ -130,8 +131,11 @@ class DataManager(QtWidgets.QWidget):
 
     def protected_paths(self):
         h = self.host; v = h.rgbd
-        paths = [h.source_path, h.result_dir, v.sample,
+        paths = [getattr(getattr(h,"hand",None),"result_dir",None),h.source_path, h.result_dir, v.sample,
                  h.settings.value('lab_latest_prediction_path', '')]
+        if hasattr(h,'hand'):
+            paths.append(h.hand.source)
+            if h.hand.active:paths.append(h.hand.log_file)
         if hasattr(h,'image_seg') and h.image_seg.directory: paths.append(h.image_seg.directory)
         if hasattr(h,'video') and h.video.directory: paths.append(h.video.directory)
         if h.model_state != 'off' and h.model_log_path:
