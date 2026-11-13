@@ -218,6 +218,18 @@ try:
          allocated_gib=torch.cuda.memory_allocated()/1024**3,smpl_assets=smpl_stage.asset_hashes if smpl_stage else None)
 
     def run(command):
+        if command['type'] == 'rgbd_compare':
+            if os.environ.get('BODYSTUDIO_GPU_KIND') != 'exclusive':
+                raise ValueError('RGB-D comparison requires exclusive worker')
+            from rgbd_comparison_worker import run_comparison
+            run_comparison(command, forward, faces, emit)
+            return
+        if command['type'] == 'rgbd_track':
+            if os.environ.get('BODYSTUDIO_GPU_KIND') != 'exclusive':
+                raise ValueError('RGB-D tracking requires its isolated exclusive worker')
+            from rgbd_tracking_worker import track_session
+            track_session(command, forward, faces, emit)
+            return
         began = time.perf_counter()
         image = read_image(command)
         if image is None:
@@ -302,7 +314,7 @@ try:
                 break
             if command.get('config_id') != CONFIG.config_id:
                 raise ValueError('启动配置已失效')
-            if command['type'] not in ('run','benchmark','stream','video'):
+            if command['type'] not in ('run','benchmark','stream','video','rgbd_track','rgbd_compare'):
                 raise ValueError('Unknown command')
             run(command)
         except Exception as exc:

@@ -32,6 +32,7 @@ from motion_panel import MotionPanel
 from data_manager import DataManager
 from image_segmentation import ImageSegmentation
 from video_reconstruction import VideoReconstruction
+from tracking_comparison import RgbdComparison
 from pose_data import EDGES, COLORS
 from smpl_stage import SMPL_EDGES
 from studio_paths import path
@@ -600,6 +601,8 @@ class MainWindow(QtWidgets.QMainWindow):
         video_scroll = QtWidgets.QScrollArea()
         video_scroll.setWidgetResizable(True);video_scroll.setWidget(self.video)
         self.workspace_tabs.addTab(video_scroll, "视频重建")
+        self.tracking_comparison = RgbdComparison(self)
+        self.workspace_tabs.addTab(self.tracking_comparison, "RGB-D 跟踪对照")
 
     def update_camera_controls(self):
         busy = self.inference_busy
@@ -1299,6 +1302,7 @@ class MainWindow(QtWidgets.QMainWindow):
             if not self.process.waitForFinished(2500):
                 self.process.kill()
                 self.process.waitForFinished(3000)
+        self.tracking_comparison.shutdown()
         self.overlay.release()
         event.accept()
 

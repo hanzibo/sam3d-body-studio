@@ -84,7 +84,7 @@ def save_stage(dest, arrays, surface, depth, xyz, k, sample, mask_hash, report, 
     np.savez_compressed(dest/'person_00.npz', **arrays)
     save(dest/'metrics.json', metrics); save(dest/'fit.json', report)
     save(dest/'inference.json', dict(original_report, depth_fit=report,
-         note='Network time belongs to the original inference; fitting is separate CPU postprocessing.'))
+         note='Network time belongs to the original inference; fitting is separate postprocessing.'))
     np.savez_compressed(dest/'depth_comparison.npz', rendered_m=rendered)
     rgb = cv2.imread(str(sample/'rgb.png'))
     heat = cv2.applyColorMap(np.uint8(np.clip((residual+.05)/.1, 0, 1)*255), cv2.COLORMAP_JET)
@@ -126,13 +126,15 @@ def calibrate(rows, source, profile, config):
                 evidence=evidence)
 
 
-def process(row, source, out, profile, model, calibration, config, refresh_derived=False):
+def process(row, source, out, profile, model, calibration, config, refresh_derived=False, fit_backend='cpu'):
     sample, folder, original, depth, xyz, k, mask = inputs(row, source, profile)
     dest = out/profile/f"pose-{row['pose']:03d}"
     manifest = dict(schema='studio_depth_pose_experiment_v2', profile=profile, pose=row['pose'],
                     config=asdict(config), calibration=calibration,
                     source_sha256={str(f.resolve()): digest(f) for f in [sample/'rgb.png', sample/'rgbd.npz', sample/'camera.json',
                         Path(row['mask']), folder/'prediction/person_00.npz', folder/'evaluation/refined_prediction.npz']})
+    if fit_backend != 'cpu':
+        manifest['fit_backend'] = fit_backend
     if (dest/'complete.json').exists():
         if json.loads((dest/'complete.json').read_text()) != manifest:
             raise ValueError('resume input/config mismatch: '+str(dest))
@@ -155,7 +157,11 @@ def process(row, source, out, profile, model, calibration, config, refresh_deriv
     dest.mkdir(parents=True)
     renderer = DepthRenderer(original['faces'], k)
     try:
-        surface = SurfaceFit(depth, xyz, mask, k, renderer.render, config)
+        fitting_renderer = renderer
+        if fit_backend == 'cuda-graph':
+            from depth_pose_render import FittingDepthRenderer
+            fitting_renderer = FittingDepthRenderer(original['faces'], k, renderer.renderer)
+        surface = SurfaceFit(depth, xyz, mask, k, fitting_renderer.render, config)
         original_report = json.loads((folder/'prediction/inference.json').read_text())
         parity = model.seed(original); params = model.base.numpy().copy()
         scale = 1.; translation = original['pred_cam_t'].copy(); arrays = original
@@ -201,7 +207,13 @@ def process(row, source, out, profile, model, calibration, config, refresh_deriv
             # The network prediction remains unmodified in the source directory.
             if stage == 'translation':
                 arrays = derived_arrays(model, params, scale, translation, original, k)
-            metrics = save_stage(dest/stage, arrays, surface, depth, xyz, k, sample, row['mask_sha256'], report, original_report)
+            # Evaluate exports with the original renderer independently of the
+            # fitting buffer optimization; share its context to avoid EGL teardown.
+            surface.render = renderer.render
+            try:
+                metrics = save_stage(dest/stage, arrays, surface, depth, xyz, k, sample, row['mask_sha256'], report, original_report)
+            finally:
+                surface.render = fitting_renderer.render
             print(f"{profile} pose {row['pose']:02d} {stage}: {metrics['mae_mm']:.1f}mm / {report['reason']}", flush=True)
         save(dest/'complete.json', manifest)
     finally:
@@ -214,13 +226,20 @@ def main():
     p.add_argument('--profiles', nargs='+', choices=['standard512', 'fast512', 'fast384'], default=['standard512', 'fast512', 'fast384'])
     p.add_argument('--calibration-poses', nargs='+', type=int, default=[1, 2, 3])
     p.add_argument('--poses', nargs='+', type=int)
+    p.add_argument('--fit-backend', choices=['cpu', 'cuda-graph'], default='cpu',
+                   help='Opt-in cached CUDA fitting; CPU v2 remains the reference default')
+    p.add_argument('--pose-steps', type=int, default=60, help='Steps per rigid/pose stage; reduced budgets need quality comparison')
     p.add_argument('--refresh-derived', action='store_true', help='Regenerate derived arrays from saved fitted parameters; abort if evaluated vertices change')
     args = p.parse_args()
     from gpu_lease import acquire_gpu_lease
     lease = acquire_gpu_lease('exclusive')
     source = Path(args.source).resolve(); out = Path(args.output).resolve(); out.mkdir(parents=True, exist_ok=True)
-    rows = json.loads(Path(args.masks).read_text()); config = PoseDepthConfig().validate()
-    model = MhrSurfaceModel()
+    rows = json.loads(Path(args.masks).read_text()); config = PoseDepthConfig(steps=args.pose_steps).validate()
+    if args.fit_backend == 'cuda-graph':
+        from depth_pose_accelerated import AcceleratedMhrSurfaceModel
+        model = AcceleratedMhrSurfaceModel()
+    else:
+        model = MhrSurfaceModel()
     for profile in args.profiles:
         folder = out/profile; folder.mkdir(exist_ok=True)
         calibration_file = folder/'calibration.json'
@@ -236,7 +255,7 @@ def main():
         for row in rows:
             if args.poses and row['pose'] not in args.poses:
                 continue
-            process(row, source, out, profile, model, calibration, config,args.refresh_derived)
+            process(row, source, out, profile, model, calibration, config, args.refresh_derived, args.fit_backend)
     print('COMPLETE: raw predictions preserved; report generation is a separate step', flush=True)
     lease.close()
 

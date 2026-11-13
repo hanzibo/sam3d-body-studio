@@ -126,7 +126,7 @@ def reconstruct(directory,config_file,radius):
 
 
 def main():
-    parser=argparse.ArgumentParser();parser.add_argument('--mode',choices=['prepare','segment','reconstruct','render'],required=True)
+    parser=argparse.ArgumentParser();parser.add_argument('--mode',choices=['prepare','segment','reconstruct','render','point_audit'],required=True)
     parser.add_argument('--directory',required=True);parser.add_argument('--source');parser.add_argument('--config')
     parser.add_argument('--radius',type=int,default=0);parser.add_argument('--run');parser.add_argument('--layers',choices=['mesh','skeleton','both'],default='mesh')
     args=parser.parse_args()
@@ -138,6 +138,9 @@ def main():
         elif args.mode=='segment':
             from sam3_video_worker import segment_video
             segment_video(args.directory,emit)
+        elif args.mode=='point_audit':
+            from rgbd_tracking_report import evaluate
+            evaluate(Path(args.directory),15)
         elif args.mode=='reconstruct':reconstruct(args.directory,args.config,args.radius)
         elif args.mode=='render':
             from video_render import render_video

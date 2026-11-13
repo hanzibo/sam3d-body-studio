@@ -29,6 +29,7 @@ class VideoReconstruction(QtWidgets.QWidget):
         note.setWordWrap(True);layout.addWidget(note)
         row=QtWidgets.QHBoxLayout();layout.addLayout(row)
         self.import_btn=self.button(row,'导入视频…',self.import_video);self.open_btn=self.button(row,'打开已有任务…',self.open_project)
+        self.rgbd_open_btn=self.button(row,'RGB-D 跟踪分割…',self.open_rgbd_tracking)
         self.folder_btn=self.button(row,'打开任务目录',lambda:self.open_path(self.directory));self.cancel_btn=self.button(row,'取消任务',self.cancel)
         self.info=QtWidgets.QLabel('请选择视频；原文件保留，解码帧与各次结果统一保存在 outputs/video。');self.info.setWordWrap(True);layout.addWidget(self.info)
         split=QtWidgets.QSplitter();layout.addWidget(split,1)
@@ -54,7 +55,10 @@ class VideoReconstruction(QtWidgets.QWidget):
         help_label=QtWidgets.QLabel('左键添加前景，右键添加背景。中途入场：到出现帧新增人物；遮挡后失跟：到失跟帧重新点选并保存分段。每人至少一个前景点；保存前请勿切换帧。分段之外不预测该人物。')
         help_label.setWordWrap(True);pl.addWidget(help_label)
         self.segment_btn=QtWidgets.QPushButton('① SAM3 分割全部人物 / 未完成分段');self.segment_btn.clicked.connect(lambda:self.start_stage('segment'));pl.addWidget(self.segment_btn)
-        row=QtWidgets.QHBoxLayout();pl.addLayout(row);row.addWidget(QtWidgets.QLabel('掩膜膨胀＋ / 腐蚀−（像素）'))
+        self.reference_btn=QtWidgets.QPushButton('确认已核查 · 导出 RGB-D 参考掩膜');self.reference_btn.clicked.connect(self.export_reference);pl.addWidget(self.reference_btn);self.reference_btn.hide()
+        self.audit_btn=QtWidgets.QPushButton('用当前参考重新评估实际选点');self.audit_btn.clicked.connect(lambda:self.start_stage('point_audit'));pl.addWidget(self.audit_btn)
+        self.audit_open_btn=QtWidgets.QPushButton('打开点集对照报告');self.audit_open_btn.clicked.connect(lambda:self.open_path(self.audit_report_file()));pl.addWidget(self.audit_open_btn)
+        row=QtWidgets.QHBoxLayout();pl.addLayout(row);self.radius_label=QtWidgets.QLabel('掩膜膨胀＋ / 腐蚀−（像素）');row.addWidget(self.radius_label)
         self.radius=QtWidgets.QSpinBox();self.radius.setRange(-40,40);row.addWidget(self.radius)
         self.reconstruct_btn=QtWidgets.QPushButton('② 应用本页方案、预热并逐帧重建');self.reconstruct_btn.clicked.connect(lambda:self.start_stage('reconstruct'));pl.addWidget(self.reconstruct_btn)
         self.runs=QtWidgets.QComboBox();self.runs.currentIndexChanged.connect(self.select_run);pl.addWidget(self.runs)
@@ -65,6 +69,7 @@ class VideoReconstruction(QtWidgets.QWidget):
         self.video_btn=QtWidgets.QPushButton('打开导出视频');self.video_btn.clicked.connect(self.open_video);pl.addWidget(self.video_btn);pl.addStretch()
         self.profile=ProfilePanel(replace(LaunchConfig(),warmup_runs=3,warmup_layout='sample'))
         settings=QtWidgets.QGroupBox('本视频独立启动方案（点击展开；不修改第一页配置）');settings.setCheckable(True);settings.setChecked(False)
+        self.settings_group=settings
         sl=QtWidgets.QVBoxLayout(settings);sl.addWidget(self.profile);self.profile.hide();settings.toggled.connect(self.profile.setVisible);layout.addWidget(settings)
         self.progress=QtWidgets.QProgressBar();layout.addWidget(self.progress)
         self.status=QtWidgets.QLabel('准备就绪。首次分割前请释放第一页与 MHR 实验室中的模型。');self.status.setWordWrap(True);layout.addWidget(self.status)
@@ -97,15 +102,23 @@ class VideoReconstruction(QtWidgets.QWidget):
 
     def refresh(self):
         idle=not self.active;loaded=self.project is not None
-        for control in (self.import_btn,self.open_btn):control.setEnabled(idle)
+        for control in (self.import_btn,self.open_btn,self.rgbd_open_btn):control.setEnabled(idle)
         for control in (self.people,self.add_btn,self.remove_btn,self.segments,self.end,self.fg,self.bg,self.undo,self.clear,self.save_btn,self.remove_segment_btn,self.radius,self.profile):control.setEnabled(idle and loaded)
         self.canvas.setEnabled(idle and loaded and not self.result_preview.isChecked())
         self.slider.setEnabled(idle and loaded);self.frame.setEnabled(idle and loaded);self.play_btn.setEnabled(idle and loaded)
         self.result_preview.setEnabled(idle and self.run is not None);self.runs.setEnabled(idle);self.layers.setEnabled(idle)
         reason=self.other_busy() if idle else '本页任务正在运行'
         self.segment_btn.setEnabled(idle and loaded and any(t['segments'] for t in self.project['tracks']) and not reason)
-        self.reconstruct_btn.setEnabled(idle and loaded and not reason)
-        self.render_btn.setEnabled(idle and self.run is not None and not reason)
+        reference_only=bool(self.project and self.project.get('source_kind')=='rgbd_tracking')
+        self.reference_btn.setVisible(reference_only)
+        for control in (self.radius,self.radius_label,self.reconstruct_btn,self.runs,self.layers,self.render_btn,self.video_btn,self.settings_group,self.result_preview):control.setVisible(not reference_only)
+        self.reference_btn.setEnabled(idle and reference_only)
+        self.audit_btn.setVisible(reference_only);self.audit_open_btn.setVisible(reference_only)
+        ready_audit=reference_only and (self.directory/'candidate-15/complete.json').exists() and (self.directory/'oracle-15/complete.json').exists()
+        self.audit_btn.setEnabled(idle and ready_audit)
+        self.audit_open_btn.setEnabled(reference_only and self.audit_report_file() is not None)
+        self.reconstruct_btn.setEnabled(idle and loaded and not reason and not reference_only)
+        self.render_btn.setEnabled(idle and self.run is not None and not reason and not reference_only)
         for button in (self.segment_btn,self.reconstruct_btn,self.render_btn):button.setToolTip(reason)
         self.folder_btn.setEnabled(loaded);self.cancel_btn.setEnabled(self.active and not self.cancelled)
         self.video_btn.setEnabled(self.video_file() is not None)
@@ -125,11 +138,50 @@ class VideoReconstruction(QtWidgets.QWidget):
             try:self.load(folder)
             except Exception as exc:self.status.setText(str(exc))
 
+    def open_rgbd_tracking(self):
+        if self.active:return
+        root=ROOT/'outputs/depth-fusion'
+        candidates=[]
+        for file in sorted(root.glob('tracking-*/*/inputs.json')):
+            try:
+                data=json.loads(file.read_text());candidates.append((f'{data["name"]} · {len(data["frames"])} 帧 / {data["hz"]:g} Hz · {file.parent.name}',file.parent))
+            except (OSError,ValueError,KeyError):continue
+        if not candidates:
+            self.status.setText('尚无已准备的 RGB-D 跟踪实验，请先使用 rgbd_tracking.py prepare 准备录制序列。');return
+        choice,ok=QtWidgets.QInputDialog.getItem(self,'选择 RGB-D 序列（去畸变 RGB）','只修改点提示及分段；原始 RGB-D 保留。',[c[0] for c in candidates],0,False)
+        if ok:
+            try:self.load(next(path for title,path in candidates if title==choice))
+            except Exception as exc:self.status.setText(str(exc))
+
+    def audit_report_file(self):
+        if not self.directory or not self.project or self.project.get('source_kind')!='rgbd_tracking':return None
+        try:
+            from rgbd_tracking_reference import reference_directory
+            from video_project import file_hash
+            ref=reference_directory(self.directory);suffix='' if ref.name=='reference_masks' else '-'+file_hash(ref/'manifest.json')[:10]
+            report=self.directory/f'comparison-15{suffix}'/'report.html'
+            return report if report.is_file() else None
+        except (OSError,ValueError):return None
+
+    def export_reference(self):
+        if self.active or not self.project:return
+        try:
+            from rgbd_tracking_reference import export_reviewed_reference
+            if QtWidgets.QMessageBox.question(self,'保存已核查参考','确认已检查全身掩膜（包括头、裤子和四肢），并修正失跟分段？\n会保存不可覆盖的新参考版本；已有对照结果保留。SAM3 掩膜仍不是人工逐像素真值。')!=QtWidgets.QMessageBox.Yes:return
+            directory=export_reviewed_reference(self.directory)
+            self.status.setText('参考掩膜已保存：'+str(directory)+'。可据此重新评估候选版实际选点；旧报告不会被覆盖。')
+        except Exception as exc:self.status.setText(str(exc))
+
     def load(self,directory):
+        self.play_timer.stop()
         self.directory,self.project=load_project(directory);p=self.project
+        self.result_preview.setChecked(False)
         self.info.setText(f'{self.directory.name} · {p["width"]}×{p["height"]} · {p["frame_count"]} 帧 · {p["duration"]:.3f} 秒 · '+('有音轨' if p['has_audio'] else '无音轨'))
         self.slider.setRange(0,p['frame_count']-1);self.frame.setRange(0,p['frame_count']-1);self.end.setRange(0,p['frame_count']-1);self.end.setValue(p['frame_count']-1)
         self.reload_people();self.reload_runs();self.seek(0);self.refresh()
+        if p.get('source_kind')=='rgbd_tracking':
+            self.info.setText(self.info.text()+' · RGB-D 参考分割：去畸变 RGB；仅制作掩膜，不在此页重建。')
+            self.status.setText('可修改现有提示；建议头部、躯干、裤腿各加前景点。完成 SAM3 分割后，抽查全程并导出已核查参考。')
 
     def track(self):
         return next((t for t in self.project['tracks'] if t['id']==self.people.currentData()),None) if self.project else None
@@ -175,7 +227,7 @@ class VideoReconstruction(QtWidgets.QWidget):
             rendered=self.run/('render-'+self.layers.currentData())/f'{index:06d}.png'
             if rendered.exists() and self.current_render():image=rendered;mask=None;points=[]
         self.canvas.load(image,mask);self.canvas.prompts=points;self.canvas.prompt_mode=True;self.canvas.update()
-        self.time.setText(f'{index}/{self.project["frame_count"]-1} · {self.project["pts"][index]:.3f}s')
+        self.time.setText(f'{index}/{self.project["frame_count"]-1} · {self.project["pts"][index]:.3f}s'+(f' · 源帧 {self.project["rgbd_source_indices"][index]}' if self.project.get('source_kind')=='rgbd_tracking' else ''))
 
     def prompt_mode(self,label):self.canvas.prompt_label=label;self.canvas.prompt_mode=True
     def undo_point(self):
@@ -235,11 +287,14 @@ class VideoReconstruction(QtWidgets.QWidget):
     def start_stage(self,mode):
         if self.active:return
         try:
-            reason=self.other_busy()
+            reason=self.other_busy() if mode!='point_audit' else ''
             if reason:raise ValueError(reason)
             if self.project is None:raise ValueError('请先导入视频')
             args=[]
-            if mode=='reconstruct':
+            if mode=='point_audit':
+                if self.project.get('source_kind')!='rgbd_tracking':raise ValueError('请打开 RGB-D 跟踪分割项目')
+                if self.audit_report_file():raise ValueError('当前参考的报告已存在，请点击打开；修改分割并导出新参考后可生成新报告。')
+            elif mode=='reconstruct':
                 require_masks(self.directory,self.project);config=self.profile.config()
                 if config.one_euro_enabled or config.smpl_smoothing:raise ValueError('视频首版请关闭 One Euro / MLP；人物时序状态暂不混用')
                 file=self.directory/'requested-config.json';config.save(file);args=['--config',str(file),'--radius',str(self.radius.value())]
@@ -281,7 +336,7 @@ class VideoReconstruction(QtWidgets.QWidget):
     def finished(self,code,*_):
         self.read();self.kill_timer.stop();previous=self.mode;self.mode=None;self.pid=0
         if not self.cancelled and code==0 and self.done:
-            self.status.setText('阶段完成；分割进程已退出，可以加载人体模型。' if previous=='segment' else '阶段完成。')
+            self.status.setText('阶段完成；分割进程已退出，可以加载人体模型。' if previous=='segment' else '选点复评完成，请点击打开点集对照报告。' if previous=='point_audit' else '阶段完成。')
             if previous=='prepare':self.load(self.directory)
             else:
                 self.reload_runs()

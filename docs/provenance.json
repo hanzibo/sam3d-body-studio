@@ -203,6 +203,18 @@
       "basis": "Studio-authored translation-only RGB-D geometry, experiment orchestration, diagnostics or validation. No third-party fitting implementation copied.",
       "sources": []
     },
+    "depth_pose_accelerated.py": {
+      "kind": "Studio application or experiment implementation",
+      "license": "GPL-3.0-only",
+      "basis": "Studio-authored integration, workflow, validation or documentation; separately acquired upstream code, datasets, weights and accelerators are not bundled.",
+      "sources": []
+    },
+    "depth_pose_benchmark.py": {
+      "kind": "Studio application or experiment implementation",
+      "license": "GPL-3.0-only",
+      "basis": "Studio-authored integration, workflow, validation or documentation; separately acquired upstream code, datasets, weights and accelerators are not bundled.",
+      "sources": []
+    },
     "depth_pose_experiment.py": {
       "kind": "Original Studio implementation",
       "license": "GPL-3.0-only",
@@ -213,6 +225,12 @@
       "kind": "Original Studio implementation",
       "license": "GPL-3.0-only",
       "basis": "Studio-authored staged RGB-D surface-fit experiment, evidence reporting, or regression validation; external MHR assets and upstream code remain separately acquired.",
+      "sources": []
+    },
+    "depth_pose_render.py": {
+      "kind": "Studio application or experiment implementation",
+      "license": "GPL-3.0-only",
+      "basis": "Studio-authored integration, workflow, validation or documentation; separately acquired upstream code, datasets, weights and accelerators are not bundled.",
       "sources": []
     },
     "depth_pose_report.py": {
@@ -233,6 +251,12 @@
       "basis": "Studio-authored translation-only RGB-D geometry, experiment orchestration, diagnostics or validation. No third-party fitting implementation copied.",
       "sources": []
     },
+    "depth_speed_report.py": {
+      "kind": "Studio application or experiment implementation",
+      "license": "GPL-3.0-only",
+      "basis": "Studio-authored integration, workflow, validation or documentation; separately acquired upstream code, datasets, weights and accelerators are not bundled.",
+      "sources": []
+    },
     "docs/DATA_MANAGEMENT.md": {
       "kind": "Studio documentation/configuration",
       "license": "GPL-3.0-only",
@@ -243,6 +267,12 @@
       "kind": "Studio documentation/configuration",
       "license": "GPL-3.0-only",
       "basis": "Studio-authored translation-only RGB-D geometry, experiment orchestration, diagnostics or validation. No third-party fitting implementation copied.",
+      "sources": []
+    },
+    "docs/DEPTH_SPEED_BASELINE.md": {
+      "kind": "Studio engineering documentation",
+      "license": "GPL-3.0-only",
+      "basis": "Studio-authored integration, workflow, validation or documentation; separately acquired upstream code, datasets, weights and accelerators are not bundled.",
       "sources": []
     },
     "docs/INSTALL.md": {
@@ -266,6 +296,24 @@
     "docs/RGBD_RECORDER.md": {
       "license": "GPL-3.0-only",
       "basis": "Original recorder usage, data format and staged depth refinement scope documentation."
+    },
+    "docs/RGBD_THREE_METHOD_COMPARISON.md": {
+      "kind": "Studio engineering documentation",
+      "license": "GPL-3.0-only",
+      "basis": "Studio-authored integration, workflow, validation or documentation; separately acquired upstream code, datasets, weights and accelerators are not bundled.",
+      "sources": []
+    },
+    "docs/RGBD_TRACKING_EXPERIMENT.md": {
+      "kind": "Studio engineering documentation",
+      "license": "GPL-3.0-only",
+      "basis": "Studio-authored integration, workflow, validation or documentation; separately acquired upstream code, datasets, weights and accelerators are not bundled.",
+      "sources": []
+    },
+    "docs/RGBD_TRACKING_PLAN.md": {
+      "kind": "Studio engineering documentation",
+      "license": "GPL-3.0-only",
+      "basis": "Studio-authored integration, workflow, validation or documentation; separately acquired upstream code, datasets, weights and accelerators are not bundled.",
+      "sources": []
     },
     "docs/VALIDATION.md": {
       "kind": "Studio documentation/configuration",
@@ -429,6 +477,12 @@
       "kind": "Studio source",
       "license": "GPL-3.0-only",
       "basis": "Local run history with CSV export and immutable report links. Studio integration implementation; no substantial upstream source copy identified in this review; preliminary engineering classification.",
+      "sources": []
+    },
+    "gui/tracking_comparison.py": {
+      "kind": "Studio application or experiment implementation",
+      "license": "GPL-3.0-only",
+      "basis": "Studio-authored integration, workflow, validation or documentation; separately acquired upstream code, datasets, weights and accelerators are not bundled.",
       "sources": []
     },
     "gui/video_reconstruction.py": {
@@ -615,10 +669,46 @@
         "https://github.com/orbbec/pyorbbecsdk"
       ]
     },
+    "rgbd_comparison.py": {
+      "kind": "Studio application or experiment implementation",
+      "license": "GPL-3.0-only",
+      "basis": "Studio-authored integration, workflow, validation or documentation; separately acquired upstream code, datasets, weights and accelerators are not bundled.",
+      "sources": []
+    },
+    "rgbd_comparison_data.py": {
+      "kind": "Studio application or experiment implementation",
+      "license": "GPL-3.0-only",
+      "basis": "Studio-authored integration, workflow, validation or documentation; separately acquired upstream code, datasets, weights and accelerators are not bundled.",
+      "sources": []
+    },
+    "rgbd_comparison_playlist.py": {
+      "kind": "Studio application or experiment implementation",
+      "license": "GPL-3.0-only",
+      "basis": "Studio-authored integration, workflow, validation or documentation; separately acquired upstream code, datasets, weights and accelerators are not bundled.",
+      "sources": []
+    },
+    "rgbd_comparison_report.py": {
+      "kind": "Studio application or experiment implementation",
+      "license": "GPL-3.0-only",
+      "basis": "Studio-authored integration, workflow, validation or documentation; separately acquired upstream code, datasets, weights and accelerators are not bundled.",
+      "sources": []
+    },
+    "rgbd_comparison_worker.py": {
+      "kind": "Studio application or experiment implementation",
+      "license": "GPL-3.0-only",
+      "basis": "Studio-authored integration, workflow, validation or documentation; separately acquired upstream code, datasets, weights and accelerators are not bundled.",
+      "sources": []
+    },
     "rgbd_evaluate.py": {
       "kind": "Studio source",
       "license": "GPL-3.0-only",
       "basis": "Offline visible-surface evaluation, isolated EGL process, no model loading. Studio integration implementation; no substantial upstream source copy identified in this review; preliminary engineering classification.",
+      "sources": []
+    },
+    "rgbd_first_init.py": {
+      "kind": "Studio application or experiment implementation",
+      "license": "GPL-3.0-only",
+      "basis": "Studio-authored integration, workflow, validation or documentation; separately acquired upstream code, datasets, weights and accelerators are not bundled.",
       "sources": []
     },
     "rgbd_geometry.py": {
@@ -640,6 +730,36 @@
       "sources": []
     },
     "rgbd_stream_capture.py": {
+      "kind": "Studio application or experiment implementation",
+      "license": "GPL-3.0-only",
+      "basis": "Studio-authored integration, workflow, validation or documentation; separately acquired upstream code, datasets, weights and accelerators are not bundled.",
+      "sources": []
+    },
+    "rgbd_tracking.py": {
+      "kind": "Studio application or experiment implementation",
+      "license": "GPL-3.0-only",
+      "basis": "Studio-authored integration, workflow, validation or documentation; separately acquired upstream code, datasets, weights and accelerators are not bundled.",
+      "sources": []
+    },
+    "rgbd_tracking_points.py": {
+      "kind": "Studio application or experiment implementation",
+      "license": "GPL-3.0-only",
+      "basis": "Studio-authored integration, workflow, validation or documentation; separately acquired upstream code, datasets, weights and accelerators are not bundled.",
+      "sources": []
+    },
+    "rgbd_tracking_reference.py": {
+      "kind": "Studio application or experiment implementation",
+      "license": "GPL-3.0-only",
+      "basis": "Studio-authored integration, workflow, validation or documentation; separately acquired upstream code, datasets, weights and accelerators are not bundled.",
+      "sources": []
+    },
+    "rgbd_tracking_report.py": {
+      "kind": "Studio application or experiment implementation",
+      "license": "GPL-3.0-only",
+      "basis": "Studio-authored integration, workflow, validation or documentation; separately acquired upstream code, datasets, weights and accelerators are not bundled.",
+      "sources": []
+    },
+    "rgbd_tracking_worker.py": {
       "kind": "Studio application or experiment implementation",
       "license": "GPL-3.0-only",
       "basis": "Studio-authored integration, workflow, validation or documentation; separately acquired upstream code, datasets, weights and accelerators are not bundled.",
@@ -748,6 +868,12 @@
       "basis": "Original Studio data-management implementation, regression fixture or documentation; uses public Python and Qt APIs.",
       "sources": []
     },
+    "tests/depth_speed_integration.py": {
+      "kind": "Studio regression or integration validation",
+      "license": "GPL-3.0-only",
+      "basis": "Studio-authored integration, workflow, validation or documentation; separately acquired upstream code, datasets, weights and accelerators are not bundled.",
+      "sources": []
+    },
     "tests/gui_startup.py": {
       "kind": "Studio source",
       "license": "GPL-3.0-only",
@@ -764,6 +890,24 @@
       "kind": "Original Studio implementation",
       "license": "GPL-3.0-only",
       "basis": "Studio-authored staged RGB-D surface-fit experiment, evidence reporting, or regression validation; external MHR assets and upstream code remain separately acquired.",
+      "sources": []
+    },
+    "tests/rgbd_comparison_artifacts.py": {
+      "kind": "Studio regression or integration validation",
+      "license": "GPL-3.0-only",
+      "basis": "Studio-authored integration, workflow, validation or documentation; separately acquired upstream code, datasets, weights and accelerators are not bundled.",
+      "sources": []
+    },
+    "tests/rgbd_comparison_gui.py": {
+      "kind": "Studio regression or integration validation",
+      "license": "GPL-3.0-only",
+      "basis": "Studio-authored integration, workflow, validation or documentation; separately acquired upstream code, datasets, weights and accelerators are not bundled.",
+      "sources": []
+    },
+    "tests/rgbd_comparison_render.py": {
+      "kind": "Studio regression or integration validation",
+      "license": "GPL-3.0-only",
+      "basis": "Studio-authored integration, workflow, validation or documentation; separately acquired upstream code, datasets, weights and accelerators are not bundled.",
       "sources": []
     },
     "tests/rgbd_depth_gui.py": {
@@ -794,10 +938,22 @@
       "basis": "Studio-authored integration, workflow, validation or documentation; separately acquired upstream code, datasets, weights and accelerators are not bundled.",
       "sources": []
     },
+    "tests/rgbd_tracking_outputs.py": {
+      "kind": "Studio regression or integration validation",
+      "license": "GPL-3.0-only",
+      "basis": "Studio-authored integration, workflow, validation or documentation; separately acquired upstream code, datasets, weights and accelerators are not bundled.",
+      "sources": []
+    },
     "tests/test_data_catalog.py": {
       "kind": "Studio original source",
       "license": "GPL-3.0-only",
       "basis": "Original Studio data-management implementation, regression fixture or documentation; uses public Python and Qt APIs.",
+      "sources": []
+    },
+    "tests/test_depth_pose_accelerated.py": {
+      "kind": "Studio regression or integration validation",
+      "license": "GPL-3.0-only",
+      "basis": "Studio-authored integration, workflow, validation or documentation; separately acquired upstream code, datasets, weights and accelerators are not bundled.",
       "sources": []
     },
     "tests/test_depth_pose_refinement.py": {
@@ -834,7 +990,37 @@
       "license": "GPL-3.0-only",
       "basis": "Original model-free tests of recording integrity, resumption and active data deletion protection."
     },
+    "tests/test_rgbd_comparison_data.py": {
+      "kind": "Studio regression or integration validation",
+      "license": "GPL-3.0-only",
+      "basis": "Studio-authored integration, workflow, validation or documentation; separately acquired upstream code, datasets, weights and accelerators are not bundled.",
+      "sources": []
+    },
+    "tests/test_rgbd_comparison_playlist.py": {
+      "kind": "Studio regression or integration validation",
+      "license": "GPL-3.0-only",
+      "basis": "Studio-authored integration, workflow, validation or documentation; separately acquired upstream code, datasets, weights and accelerators are not bundled.",
+      "sources": []
+    },
+    "tests/test_rgbd_comparison_report.py": {
+      "kind": "Studio regression or integration validation",
+      "license": "GPL-3.0-only",
+      "basis": "Studio-authored integration, workflow, validation or documentation; separately acquired upstream code, datasets, weights and accelerators are not bundled.",
+      "sources": []
+    },
     "tests/test_rgbd_sequence.py": {
+      "kind": "Studio regression or integration validation",
+      "license": "GPL-3.0-only",
+      "basis": "Studio-authored integration, workflow, validation or documentation; separately acquired upstream code, datasets, weights and accelerators are not bundled.",
+      "sources": []
+    },
+    "tests/test_rgbd_tracking_points.py": {
+      "kind": "Studio regression or integration validation",
+      "license": "GPL-3.0-only",
+      "basis": "Studio-authored integration, workflow, validation or documentation; separately acquired upstream code, datasets, weights and accelerators are not bundled.",
+      "sources": []
+    },
+    "tests/test_rgbd_tracking_reference.py": {
       "kind": "Studio regression or integration validation",
       "license": "GPL-3.0-only",
       "basis": "Studio-authored integration, workflow, validation or documentation; separately acquired upstream code, datasets, weights and accelerators are not bundled.",
