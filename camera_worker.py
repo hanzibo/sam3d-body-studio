@@ -56,6 +56,7 @@ def main():
         pipeline.start(config)
         last_frame = time.monotonic()
         preview_at = 0
+        preview_fps = 15
         count = 0
         ready = False
         restarted = False
@@ -79,6 +80,8 @@ def main():
                     if command['type'] == 'stop':
                         running = False
                         pending = None
+                    elif command['type'] == 'preview_rate':
+                        preview_fps=max(1,min(30,int(command.get('fps',15))));preview_at=0
                     elif command['type'] == 'cancel':
                         pending = None
                         send('cancelled')
@@ -90,15 +93,20 @@ def main():
                 break
             frames = pipeline.wait_for_frames(100)
             frame = frames.get_color_frame() if frames else None
-            image = color_frame_to_bgr(frame) if frame else None
+            # MJPG live preview already has an encoded image. Decode only for
+            # PNG capture or fallback formats, never on every preview frame.
+            encoded = bytes(frame.get_data()) if frame else b''
+            jpeg = encoded.startswith(b'\xff\xd8')
+            image = color_frame_to_bgr(frame) if frame and not jpeg else None
             now = time.monotonic()
-            if image is not None:
+            valid = frame is not None and (jpeg or image is not None)
+            if valid:
                 index, timestamp = frame.get_index(), frame.get_timestamp_us()
                 if previous_index is not None and (index <= previous_index or timestamp <= previous_timestamp):
-                    image = None
+                    valid = False
                 else:
                     previous_index, previous_timestamp = index, timestamp
-            if image is None:
+            if not valid:
                 if now-last_frame > 3:
                     if not ready and not restarted:
                         send('status', message='首次取帧超时，正在重新启动采集…')
@@ -117,6 +125,10 @@ def main():
                 ready = True
                 send('ready', metadata=metadata)
             if pending and now >= pending['deadline']:
+                if image is None:
+                    image = color_frame_to_bgr(frame)
+                    if image is None:
+                        continue
                 target = Path(pending['directory'])
                 target.mkdir(parents=True, exist_ok=False)
                 photo = target/'photo.png'
@@ -129,12 +141,17 @@ def main():
                 (target/'camera.json').write_text(json.dumps(record, ensure_ascii=False, indent=2))
                 send('photo', job=pending['job'], path=str(photo), metadata=record)
                 pending = None
-            if now-preview_at >= 1/15:
-                ok, encoded = cv2.imencode('.jpg', image, [cv2.IMWRITE_JPEG_QUALITY, 85])
-                if ok:
-                    send('frame', jpeg=base64.b64encode(encoded).decode(), index=frame.get_index(),
-                         received_monotonic=now, device_timestamp_us=frame.get_timestamp_us())
-                preview_at = now
+            if now+.001 >= preview_at:
+                # The selected camera profile already emits JPEG; preserve its pixels
+                # rather than decode/encode a second lossy JPEG for the socket.
+                if not jpeg:
+                    ok, encoded=cv2.imencode('.jpg',image,[cv2.IMWRITE_JPEG_QUALITY,85])
+                    if not ok:continue
+                send('frame',jpeg=base64.b64encode(encoded).decode(),index=frame.get_index(),
+                     received_monotonic=now,device_timestamp_us=frame.get_timestamp_us(),preview_fps=preview_fps,
+                     receipt_stage='sdk_color_frame_available')
+                preview_at+=1/preview_fps
+                if preview_at<now-1/preview_fps:preview_at=now+1/preview_fps
     except Exception as exc:
         try:
             send('error', message=str(exc))

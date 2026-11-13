@@ -1,13 +1,13 @@
 # SPDX-License-Identifier: GPL-3.0-only
 # Copyright (c) 2026 hanzibo and contributors.
 """Qt process/socket adapter; the GUI never imports the camera SDK."""
-import base64
 import json
 from pathlib import Path
 import struct
 import tempfile
 import time
 from PyQt5 import QtCore, QtGui, QtNetwork
+from camera_receiver import CameraReceiver
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -28,6 +28,7 @@ class CameraClient(QtCore.QObject):
         self.server = QtNetwork.QLocalServer(self)
         self.server.newConnection.connect(self.connected)
         self.socket = None
+        self.receiver = self.io_thread = None
         self.temp = None
         self.buffer = b''
         self.stopping = False
@@ -47,6 +48,7 @@ class CameraClient(QtCore.QObject):
     def start(self):
         if self.active:
             return
+        self.close_receiver()
         self.stopping = False
         self.latest_frame = None
         self.buffer = b''
@@ -63,38 +65,39 @@ class CameraClient(QtCore.QObject):
 
     def connected(self):
         self.socket = self.server.nextPendingConnection()
-        self.socket.readyRead.connect(self.read_messages)
+        self.socket.setParent(None)
+        self.io_thread = QtCore.QThread(self)
+        self.receiver = CameraReceiver(self.socket)
+        self.socket.moveToThread(self.io_thread)
+        self.receiver.moveToThread(self.io_thread)
+        self.io_thread.started.connect(self.receiver.start)
+        self.receiver.available.connect(self.read_messages)
+        self.receiver.message.connect(self.receive_message)
+        self.receiver.closed.connect(self.io_thread.quit, QtCore.Qt.DirectConnection)
+        self.io_thread.finished.connect(self.receiver.deleteLater)
+        self.io_thread.start()
         self.server.close()
 
     def send(self, kind, **values):
-        if self.socket is not None and self.socket.state() == QtNetwork.QLocalSocket.ConnectedState:
+        if self.receiver is not None and self.io_thread.isRunning():
             data = json.dumps(dict(type=kind, **values)).encode()
-            self.socket.write(struct.pack('!I',len(data))+data)
-            self.socket.flush()
+            self.receiver.command.emit(struct.pack('!I',len(data))+data)
+
+    def receive_message(self, message):
+        if self.sender() is not self.receiver or self.stopping:
+            return
+        self.last_event = time.monotonic()
+        self.messageReceived.emit(message)
 
     def read_messages(self):
-        self.buffer += bytes(self.socket.readAll())
-        latest = None
-        while len(self.buffer) >= 4:
-            size = struct.unpack('!I', self.buffer[:4])[0]
-            if size > 8*1024*1024:
-                self.messageReceived.emit(dict(type='error', message='相机消息格式无效'))
-                self.stop()
-                return
-            if len(self.buffer) < size+4:
-                break
-            message = json.loads(self.buffer[4:4+size])
-            self.buffer = self.buffer[4+size:]
-            self.last_event = time.monotonic()
-            if message['type'] == 'frame':
-                latest = message
-            else:
-                self.messageReceived.emit(message)
+        if self.sender() is not self.receiver or self.receiver is None:
+            return
+        latest = self.receiver.take()
         if latest and not self.stopping:
-            image = QtGui.QImage.fromData(base64.b64decode(latest['jpeg']), 'JPG')
-            if not image.isNull():
-                self.latest_frame = latest
-                self.frame.emit(image)
+            self.last_event = time.monotonic()
+            latest['gui_receive_monotonic'] = self.last_event
+            self.latest_frame = latest
+            self.frame.emit(latest['_image'])
 
     def check_timeout(self):
         if not self.stopping and time.monotonic()-self.last_event > 10:
@@ -122,10 +125,7 @@ class CameraClient(QtCore.QObject):
         self.kill_timer.stop()
         self.read_log()
         self.server.close()
-        if self.socket:
-            self.socket.close()
-            self.socket.deleteLater()
-            self.socket = None
+        self.close_receiver()
         if self.temp:
             self.temp.cleanup()
             self.temp = None
@@ -138,3 +138,14 @@ class CameraClient(QtCore.QObject):
         if self.active and not self.process.waitForFinished(1500):
             self.process.kill()
             self.process.waitForFinished(2000)
+        self.close_receiver()
+
+    def close_receiver(self):
+        if self.io_thread is not None:
+            thread = self.io_thread
+            if thread.isRunning():
+                self.receiver.closeRequested.emit()
+                # No GUI callback is required to finish the receiver thread.
+                thread.wait()
+            self.receiver = self.io_thread = self.socket = None
+            thread.deleteLater()

@@ -3,6 +3,7 @@
 """Persistent GPU camera-image + calibrated body mesh display (no readback)."""
 import ctypes
 import traceback
+import time
 import numpy as np
 from PyQt5 import QtCore, QtGui, QtWidgets
 from OpenGL import GL
@@ -35,6 +36,8 @@ class OverlayView(QtWidgets.QOpenGLWidget):
         self.texture_shape = None
         self.topology = None
         self.frame_index = None
+        self.painted_frame_index = None
+        self.paint_cpu_ms = 0.
         self.renderer_name = ''
         self.failed = False
         self.show_mesh = self.show_skeleton = self.show_angles = True
@@ -136,8 +139,11 @@ class OverlayView(QtWidgets.QOpenGLWidget):
         if self.failed or self.image is None or not self.texture:
             return
         try:
+            began=time.perf_counter()
             self.draw_frame()
             self.draw_pose()
+            self.paint_cpu_ms=(time.perf_counter()-began)*1000
+            self.painted_frame_index=self.frame_index
         except Exception as exc:
             traceback.print_exc()
             self.failed = True

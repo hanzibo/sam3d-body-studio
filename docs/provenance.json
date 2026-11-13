@@ -465,6 +465,12 @@
       "basis": "Qt process/socket adapter; the GUI never imports the camera SDK. Studio integration implementation; no substantial upstream source copy identified in this review; preliminary engineering classification.",
       "sources": []
     },
+    "gui/camera_receiver.py": {
+      "kind": "Studio application or experiment implementation",
+      "license": "GPL-3.0-only",
+      "basis": "Studio-authored integration, workflow, validation or documentation; separately acquired upstream code, datasets, weights and accelerators are not bundled.",
+      "sources": []
+    },
     "gui/data_manager.py": {
       "kind": "Studio original source",
       "license": "GPL-3.0-only",
@@ -1044,6 +1050,12 @@
       "kind": "Studio source",
       "license": "GPL-3.0-only",
       "basis": "ROI selection must keep each person's wrist keypoints and reject ambiguity. Studio integration implementation; no substantial upstream source copy identified in this review; preliminary engineering classification.",
+      "sources": []
+    },
+    "tests/camera_receiver_smoke.py": {
+      "kind": "Studio regression or integration validation",
+      "license": "GPL-3.0-only",
+      "basis": "Studio-authored integration, workflow, validation or documentation; separately acquired upstream code, datasets, weights and accelerators are not bundled.",
       "sources": []
     },
     "tests/data_manager_gui.py": {
