@@ -37,7 +37,7 @@ python3 scripts/install_desktop.py --desktop
 
 默认“演示最快”需要先构建并登记 384 TensorRT 引擎。没有引擎时，在预热前选择 Fast 512、骨干／检测器 PyTorch，并关闭三个编译开关进行初次验证，或者使用标准版；不静默下载或切换执行路径。
 
-独立采集后续深度实验数据可运行 `./launch_rgbd_recorder.sh`。支持彩色／深度预览、倒计时、多姿态自动拍摄、重拍与续采，不加载模型；见 [RGB-D 记录工具](docs/RGBD_RECORDER.md)。
+独立采集后续深度实验数据可运行 `./launch_rgbd_recorder.sh`。支持彩色／深度预览、倒计时、多姿态自动拍摄、重拍与续采；新增命名的连续 RGB-D 录制、动作提示和逐帧时间戳，不加载模型；见 [RGB-D 记录工具](docs/RGBD_RECORDER.md)。
 
 ## 目录与数据
 

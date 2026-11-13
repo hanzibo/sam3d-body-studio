@@ -23,7 +23,7 @@ def main():
     parser.add_argument('--desktop', action='store_true')
     parser.add_argument('--recorder', action='store_true', help='Install the independent RGB-D recorder instead')
     args=parser.parse_args()
-    name='RGB-D 姿态采集' if args.recorder else 'SAM 3D Body Studio'
+    name='RGB-D 数据采集' if args.recorder else 'SAM 3D Body Studio'
     launcher='launch_rgbd_recorder.sh' if args.recorder else 'launch_gui.sh'
     identifier='sam3d-rgbd-recorder' if args.recorder else 'sam3d-body-studio'
     content=('''[Desktop Entry]

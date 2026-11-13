@@ -44,8 +44,8 @@ class Preview(QtWidgets.QWidget):
 
 
 class Recorder(QtWidgets.QMainWindow):
-    def __init__(self, camera_python=None, capture_script=None):
-        super().__init__();self.setWindowTitle('RGB-D 姿态采集 · SAM 3D Body Studio');self.resize(1280,900)
+    def __init__(self, camera_python=None, capture_script=None, stream_script=None, sequence_root=None):
+        super().__init__();self.setWindowTitle('RGB-D 数据采集 · SAM 3D Body Studio');self.resize(1360,960)
         self.camera_python=str(camera_python or path('camera_python'));self.capture_script=str(capture_script or ROOT/'rgbd_capture.py')
         self.session=None;self.state='idle';self.pending=None;self.pending_index=None
         self.event=None;self.buffer='';self.cancelled=False;self.auto_sequence=False
@@ -100,6 +100,15 @@ class Recorder(QtWidgets.QMainWindow):
         self.shortcut=QtWidgets.QShortcut(QtGui.QKeySequence('Ctrl+Return'),self);self.shortcut.activated.connect(self.begin_capture)
         self.escape=QtWidgets.QShortcut(QtGui.QKeySequence('Escape'),self);self.escape.activated.connect(self.stop)
         self.capture_btn.setToolTip('Ctrl+Enter 拍摄；Esc 取消并断开。重拍保留旧版本，不覆盖文件。')
+        from rgbd_stream_recorder import StreamRecorder
+        self.mode_tabs=QtWidgets.QTabWidget()
+        # Reparent the existing static recorder intact; the two camera workers
+        # cannot be started simultaneously from this window.
+        self.takeCentralWidget();self.mode_tabs.addTab(central,'单张 / 多姿态照片')
+        self.stream=StreamRecorder(Preview,self.camera_python,stream_script,sequence_root)
+        self.mode_tabs.addTab(self.stream,'连续 RGB-D 录制')
+        self.setCentralWidget(self.mode_tabs)
+        self.stream.busyChanged.connect(lambda busy:self.mode_tabs.setTabEnabled(0,not busy))
         self.setStyleSheet(STYLE);self.refresh();self.tick()
 
     @property
@@ -175,6 +184,7 @@ class Recorder(QtWidgets.QMainWindow):
         self.refresh()
 
     def begin_capture(self):
+        if self.mode_tabs.currentIndex()==1:self.stream.begin_record();return
         if not self.capture_btn.isEnabled():return
         self.auto_sequence=self.auto.isChecked();self.capture()
 
@@ -264,6 +274,8 @@ class Recorder(QtWidgets.QMainWindow):
         elif not self.cancelled:self.add_log('相机进程：'+self.process.errorString())
 
     def stop(self):
+        if hasattr(self,'mode_tabs') and self.mode_tabs.currentIndex()==1:
+            self.stream.stop();return
         self.next_timer.stop();self.auto_sequence=False;self.cancelled=True
         if self.process.state()!=QtCore.QProcess.NotRunning:
             self.state='stopping';self.status.setText('正在取消并释放相机…')
@@ -286,6 +298,7 @@ class Recorder(QtWidgets.QMainWindow):
 
     def refresh(self):
         idle=not self.busy;available=self.session is not None
+        if hasattr(self,'mode_tabs'):self.mode_tabs.setTabEnabled(1,idle)
         for widget in (self.create_btn,self.open_btn,self.count):widget.setEnabled(idle)
         self.poses.setEnabled(self.state in ('idle','preview') and not self.auto_sequence)
         self.notes.setEnabled(available and self.state in ('idle','preview') and not self.auto_sequence)
@@ -303,6 +316,7 @@ class Recorder(QtWidgets.QMainWindow):
         if self.session:QtGui.QDesktopServices.openUrl(QtCore.QUrl.fromLocalFile(str(self.session.directory)))
 
     def closeEvent(self,event):
+        self.stream.shutdown()
         self.timer.stop();self.stop()
         if self.process.state()!=QtCore.QProcess.NotRunning:
             if not self.process.waitForFinished(3000):self.process.kill();self.process.waitForFinished(1500)
@@ -320,7 +334,10 @@ QPushButton { background:#20324b; border:1px solid #3a5271; border-radius:6px; p
 QPushButton:hover { background:#2c476a; }
 QPushButton#primary { background:#216ddd; font-weight:bold; }
 QPushButton:disabled { background:#182336; color:#67758d; border-color:#28364b; }
-QSpinBox,QPlainTextEdit,QListWidget { background:#0b1220; border:1px solid #34465f; border-radius:5px; padding:5px; }
+QSpinBox,QPlainTextEdit,QListWidget,QLineEdit,QComboBox { background:#0b1220; border:1px solid #34465f; border-radius:5px; padding:5px; }
+QTabBar::tab { padding:12px 28px; background:#19263b; }
+QTabBar::tab:selected { background:#244f80; color:white; }
+QTabBar::tab:disabled { color:#67758d; }
 QListWidget::item { padding:10px; }
 QListWidget::item:selected { background:#244f80; }
 QCheckBox { spacing:8px; }
@@ -337,6 +354,10 @@ QToolTip { background:#20324b; color:white; border:1px solid #3a5271; }
 def main():
     parser=argparse.ArgumentParser(description=__doc__);parser.add_argument('--session',type=Path)
     args=parser.parse_args()
+    # Qt 5 otherwise reports DPR=1 on this HiDPI XWayland desktop, so CSS
+    # pixel fonts and the entire window are much too small. Set before QApplication.
+    QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling,True)
+    QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_UseHighDpiPixmaps,True)
     app=QtWidgets.QApplication(sys.argv[:1]);app.setStyle('Fusion')
     w=Recorder()
     if args.session:

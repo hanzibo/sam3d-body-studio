@@ -9,6 +9,7 @@ from recorder_session import recording_active
 
 
 OUTPUT_TYPES = {
+    'rgbd-sequences': ('连续 RGB-D 序列', '命名的原始彩色/无损深度帧、标定、时间戳与动作提示；录制中禁止删除。'),
     'video': ('视频重建任务', '原视频引用、解码帧、人物分段、掩膜、各配置预测与合成视频；整套管理。'),
     'rgbd': ('RGB-D 单张样本', '照片、深度/点云、内参、掩膜、预测与评估作为一个整体。'),
     'rgbd-sets': ('多姿态样本集', '整套姿态照片、分割、批次记录与对比表；整套管理。'),
