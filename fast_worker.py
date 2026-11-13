@@ -122,14 +122,26 @@ try:
     if a.trt_backbone:
         # Replace only after strict checkpoint validation and derived-cache setup.
         # Avoid constructing the model without encoder parameters before loading.
-        from sam_3d_body.models.backbones.dinov3_tensorrt import create_tensorrt_backbone
-        trt_backbone=create_tensorrt_backbone(engine_path=str(a.trt_backbone.resolve()),image_size=(CONFIG.image_size,CONFIG.image_size))
-        trt_backbone._init_engine()
-        if tuple(trt_backbone._engine.get_tensor_shape('input'))[-2:] != (CONFIG.image_size,CONFIG.image_size):
-            raise ValueError('TensorRT 输入尺寸与方案不一致')
+        if CONFIG.backbone_precision == 'int8':
+            from embedl_backbone import EmbedlTensorRTBackbone
+            trt_backbone=EmbedlTensorRTBackbone(a.trt_backbone.resolve(), image_size=CONFIG.image_size)
+        else:
+            from sam_3d_body.models.backbones.dinov3_tensorrt import create_tensorrt_backbone
+            trt_backbone=create_tensorrt_backbone(engine_path=str(a.trt_backbone.resolve()),image_size=(CONFIG.image_size,CONFIG.image_size))
+            trt_backbone._init_engine()
+            if tuple(trt_backbone._engine.get_tensor_shape('input'))[-2:] != (CONFIG.image_size,CONFIG.image_size):
+                raise ValueError('TensorRT 输入尺寸与方案不一致')
         model.backbone=trt_backbone.eval()
         gc.collect()
         torch.cuda.empty_cache()
+    from fast_keypoints import install_fast_keypoint_path
+    keypoint_path = install_fast_keypoint_path(model)
+    keypoint_path['enabled'] = os.environ.get('BODYSTUDIO_KEYPOINT_PATH', '1') != '0'
+    from mhr_precision import install_mhr_precision
+    mhr_precision_mode = os.environ.get('BODYSTUDIO_MHR_PRECISION', 'fp32')
+    if mhr_precision_mode != 'fp32' and CONFIG.mode != 'body':
+        raise ValueError('MHR 精度实验仅支持身体模式')
+    mhr_precision_status = install_mhr_precision(model, mhr_precision_mode)
     # Native backbone is explicitly eager; no hidden backbone compile.
     if a.compile:
         # Upstream combines three compilers. Suppress only MHR calls when unchecked.
@@ -148,9 +160,38 @@ try:
                           interm=bool(getattr(model,'_interm_compiled',False)))
     if actual_compile != dict(decoder=CONFIG.decoder_compile,mhr=CONFIG.mhr_compile,interm=CONFIG.interm_compile):
         raise ValueError(f'实际编译状态与方案不一致：{actual_compile}')
+    keypoint_path['eligible_config'] = bool(actual_compile['interm'] and
+        getattr(model, '_use_slim_interm', False) and CONFIG.body_interm_layers and
+        not getattr(model.head_pose, 'apply_correctives', True))
+    if mhr_precision_mode != 'fp32' and not (keypoint_path['enabled'] and keypoint_path['eligible_config']):
+        raise ValueError('MHR 精度实验需要启用已编译的身体中间关键点路径')
+    from fast_feedback import install_fast_feedback_cache
+    feedback_cache = install_fast_feedback_cache(model)
+    # Diagnostic rollback keeps the original upstream callback for paired checks.
+    feedback_cache['enabled'] = os.environ.get('BODYSTUDIO_FEEDBACK_CACHE', '1') != '0'
+    def keypoint_status():
+        return dict(keypoint_path, graph_captured=
+            getattr(model.head_pose._studio_selected_mhr70, '_replay', None) is not None)
+
     detector_path=a.trt_yolo.resolve() if a.trt_yolo else yolo_path
     detector=SinglePersonDetector(HumanDetector(name='yolo_pose',device='cuda',model=str(detector_path)))
     estimator=SAM3DBodyEstimator(model,cfg,human_detector=detector,fov_estimator=None)
+    from fast_execution import install_final_body_replay, install_body_io
+    final_replay = install_final_body_replay(model)
+    if final_replay is not None:
+        final_replay.enabled = CONFIG.mode == 'body' and os.environ.get('BODYSTUDIO_FINAL_REPLAY', '1') != '0'
+    body_io = install_body_io(estimator)
+    body_io['enabled'] = os.environ.get('BODYSTUDIO_BODY_IO', '1') != '0'
+
+    def execution_status():
+        return dict(mhr_precision=dict(mhr_precision_status), final_replay=final_replay.status() if final_replay else None,
+                    body_io=dict(body_io))
+    def runtime_status():
+        return dict(compile_actual=dict(actual_compile), feedback_cache=dict(feedback_cache),
+                    detector=dict(network='YOLO11m-Pose',runs=detector.detection_runs),
+                    keypoint_path=keypoint_status(), execution=execution_status(),
+                    backbone=model.backbone.status() if CONFIG.backbone_precision=='int8' else
+                        dict(precision='FP16',implementation='TensorRT' if CONFIG.trt_backbone else 'PyTorch'))
     torch.cuda.synchronize()
     load_seconds=time.perf_counter()-start
 
@@ -215,7 +256,9 @@ try:
     load_seconds=time.perf_counter()-startup
     commit=subprocess.check_output(['git','-C',str(REPO),'rev-parse','HEAD'],text=True).strip()
     emit('ready',load_seconds=load_seconds,warmup=warm_times,actual_config=CONFIG.to_dict(),
-         allocated_gib=torch.cuda.memory_allocated()/1024**3,smpl_assets=smpl_stage.asset_hashes if smpl_stage else None)
+         runtime_status=runtime_status(),
+         allocated_gib=torch.cuda.memory_allocated()/1024**3,smpl_assets=smpl_stage.asset_hashes if smpl_stage else None,
+         feedback_cache=dict(feedback_cache), keypoint_path=keypoint_status(), execution=execution_status())
 
     def run(command):
         if command['type'] == 'rgbd_compare':
@@ -268,7 +311,12 @@ try:
             from video_protocol import emit_video
             emit_video(command,outputs[0],faces,seconds,camera_info,emit,detector.selected_bbox);return
         if command['type'] == 'stream':
-            emit_mesh(command, outputs[0], faces, seconds, camera_info, began, emit,smpl_info,mhr_info)
+            stream_emit = emit
+            if command.get('runtime_status'):
+                state = runtime_status()
+                def stream_emit(kind, **values):
+                    emit(kind, runtime_status=state, **values)
+            emit_mesh(command, outputs[0], faces, seconds, camera_info, began, stream_emit,smpl_info,mhr_info)
             return
         out = Path(command['output'])
         out.mkdir(parents=True, exist_ok=True)
@@ -282,11 +330,18 @@ try:
             launch_config=CONFIG.to_dict(), actual_config=CONFIG.to_dict(), config_id=CONFIG.config_id,
             observed_backbone_shapes=observed_shapes, benchmark=benchmark,
             image_sha256=hashlib.sha256(Path(command['image']).read_bytes()).hexdigest(),
-            backbone_execution='TensorRT' if CONFIG.trt_backbone else 'PyTorch eager',
+            backbone_execution=('TensorRT INT8/FP16 mixed (Embedl)' if CONFIG.backbone_precision=='int8' else
+                                'TensorRT FP16' if CONFIG.trt_backbone else 'PyTorch eager'),
+            backbone_runtime=runtime_status()['backbone'],
             compile_requested=dict(decoder=CONFIG.decoder_compile,mhr=CONFIG.mhr_compile,interm=CONFIG.interm_compile),
             compile_actual=actual_compile,
-            checkpoint_dtype='float16 backbone / float32 decoder',
+            feedback_cache=dict(feedback_cache),
+            keypoint_path=keypoint_status(),
+            execution=execution_status(),
+            checkpoint_dtype=('INT8/FP16 mixed backbone / float32 decoder' if CONFIG.backbone_precision=='int8' else
+                              'float16 backbone / float32 decoder'),
             detector='YOLO11m-Pose '+('TensorRT' if CONFIG.trt_detector else 'PyTorch'), hand_box_source='yolo_pose',
+            detector_runs=detector.detection_runs,
             mask_prompt=mask_info,
             selection_roi=roi, bbox_xyxy=detector.selected_bbox, detector_keypoints=detector.selected_keypoints,
             hand_warning='手腕关键点置信度较低，建议检查手部结果' if detector.hand_warning else None,

@@ -25,6 +25,8 @@ DEFAULTS = {
     'sam3_checkpoint': 'models/sam3/sam3.pt',
     'backbone_engine_512': 'models/engines/512/backbone_dinov3_fp16.engine',
     'backbone_engine_384': 'models/engines/384/backbone_dinov3_fp16.engine',
+    'backbone_engine_int8_512': 'models/engines/embedl512/embedl_sam3dbody_int8_trt10_fp16.engine',
+    'backbone_engine_int8_384': 'models/engines/embedl384/embedl_sam3dbody_int8_384_trt10_fp16.engine',
     'torch_home': 'models/torch-hub',
     'inductor_cache': 'models/torch-cache/fast',
     'yolo_config': 'outputs/yolo-config',

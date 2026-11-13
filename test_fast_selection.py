@@ -28,6 +28,18 @@ class SelectionTests(unittest.TestCase):
         np.testing.assert_equal(result['boxes'],[[210,10,290,190]])
         np.testing.assert_equal(result['keypoints'][0,:,:2],111)
 
+    def test_roi_filters_people_without_skipping_yolo_or_replacing_crop(self):
+        d=SinglePersonDetector(Detector([[40,20,90,150]]));d.roi=[0,0,100,200]
+        for _ in range(3):
+            result=d.run_human_detection(None)
+            np.testing.assert_equal(result['boxes'],[[40,20,90,150]])
+        self.assertEqual(d.detection_runs,3)
+        # Reuse is limited to an explicit offline video frame key, not image/live calls.
+        d.video_key='frame-1';d.run_human_detection(None);d.run_human_detection(None)
+        self.assertEqual(d.detection_runs,4)
+        d.video_key='frame-2';d.run_human_detection(None)
+        self.assertEqual(d.detection_runs,5)
+
     def test_ambiguous_and_empty_do_not_fall_back_to_first(self):
         for boxes, roi in [([],None),([[0,0,100,200],[200,0,300,200]],None),
                            ([[0,0,100,200],[200,0,300,200]],[0,0,300,200]),

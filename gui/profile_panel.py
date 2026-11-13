@@ -35,6 +35,11 @@ class ProfilePanel(QtWidgets.QGroupBox):
             grid.addWidget(QtWidgets.QLabel(label),0,column*2);grid.addWidget(widget,0,column*2+1)
         for column,(label,widget) in enumerate([('骨干执行',self.backbone),('检测器执行',self.detector),('',self.decoder)]):
             grid.addWidget(QtWidgets.QLabel(label),1,column*2);grid.addWidget(widget,1,column*2+1)
+        self.precision=QtWidgets.QComboBox()
+        self.precision.addItem('FP16（原方案）','fp16')
+        self.precision.addItem('INT8 混合精度（Embedl，身体）','int8')
+        self.precision.setToolTip('仅量化 DINO 编码器；解码器和 MHR 保持 FP32。384/512 使用独立静态引擎，batch=1，不支持手部精修。384 为本地改图实验，未重新标定量化尺度。切换后需重新应用并预热。')
+        grid.addWidget(QtWidgets.QLabel('骨干精度'),2,0);grid.addWidget(self.precision,2,1,1,5)
         feedback_row=QtWidgets.QHBoxLayout()
         feedback_row.addWidget(QtWidgets.QLabel('身体中间预测'))
         self.feedback=QtWidgets.QComboBox()
@@ -77,11 +82,12 @@ class ProfilePanel(QtWidgets.QGroupBox):
         for widget in [self.mhr,self.interm,QtWidgets.QLabel('预热次数/布局'),self.warmup,self.layout_combo]:advanced.addWidget(widget)
         advanced.addStretch();layout.addWidget(self.advanced);self.advanced.hide()
         advanced_button.toggled.connect(self.advanced.setVisible)
-        self.note=QtWidgets.QLabel('身体模式不做独立手部精修；384 可能损失精度。Fast 固定 FP16 骨干、FP32 解码器，PyTorch 骨干不编译。')
+        self.note=QtWidgets.QLabel()
         self.note.setWordWrap(True);self.note.setObjectName('muted');layout.addWidget(self.note)
         self.summary=QtWidgets.QLabel();self.summary.setWordWrap(True);layout.addWidget(self.summary)
         self.presets.currentIndexChanged.connect(self.pick_preset)
         self.backend.currentIndexChanged.connect(self.backend_changed)
+        self.precision.currentIndexChanged.connect(self.precision_changed)
         for widget in [self.hand,self.decoder,self.mhr,self.interm,self.smpl,self.smoothing,self.euro]:widget.toggled.connect(self.edited)
         for widget in [self.size,self.backbone,self.detector,self.layout_combo,self.feedback]:widget.currentIndexChanged.connect(self.edited)
         self.warmup.valueChanged.connect(self.edited)
@@ -109,6 +115,7 @@ class ProfilePanel(QtWidgets.QGroupBox):
 
     def config(self):
         return LaunchConfig(backend=self.backend.currentData(),mode='full' if self.hand.isChecked() else 'body',
+            backbone_precision=self.precision.currentData(),
             image_size=self.size.currentData(),trt_backbone=self.backbone.currentData(),trt_detector=self.detector.currentData(),
             decoder_compile=self.decoder.isChecked(),mhr_compile=self.mhr.isChecked(),interm_compile=self.interm.isChecked(),
             warmup_runs=self.warmup.value(),warmup_layout=self.layout_combo.currentData(),
@@ -117,6 +124,7 @@ class ProfilePanel(QtWidgets.QGroupBox):
     def set_config(self,config):
         self.block=True
         for widget,value in [(self.backend,config.backend),(self.size,config.image_size),
+                             (self.precision,config.backbone_precision),
                              (self.backbone,config.trt_backbone),(self.detector,config.trt_detector),(self.layout_combo,config.warmup_layout),(self.feedback,config.body_interm_predictions)]:
             widget.setCurrentIndex(widget.findData(value))
         for widget,value in [(self.hand,config.mode=='full'),(self.decoder,config.decoder_compile),
@@ -134,6 +142,15 @@ class ProfilePanel(QtWidgets.QGroupBox):
         if self.block:return
         config=PRESETS['标准版身体'] if self.backend.currentData()=='standard' else PRESETS['演示最快']
         self.set_config(config)
+
+    def precision_changed(self):
+        if self.block:return
+        if self.precision.currentData()=='int8':
+            self.block=True
+            self.backbone.setCurrentIndex(self.backbone.findData(True))
+            self.hand.setChecked(False)
+            self.block=False
+        self.edited()
 
     def pick_preset(self):
         if not self.block and self.presets.currentData() is not None:
@@ -160,6 +177,13 @@ class ProfilePanel(QtWidgets.QGroupBox):
         for widget in (self.euro_min,self.euro_beta,self.euro_deriv):widget.setEnabled(self.euro.isChecked())
         self.smpl_path.setEnabled(self.smpl.isChecked());self.smpl_browse.setEnabled(self.smpl.isChecked())
         for widget in [self.size,self.backbone,self.detector,self.decoder,self.mhr,self.interm]:widget.setEnabled(fast)
+        self.precision.setEnabled(fast)
+        quantized=fast and self.precision.currentData()=='int8'
+        self.hand.setEnabled(not quantized)
+        if quantized:
+            self.backbone.setEnabled(False)
+        self.note.setText(('INT8 384 为本地改图实验，沿用 512 量化尺度，未重新标定；' if self.size.currentData()==384 else 'INT8 512：发布者原始分辨率；')+'单人身体模式，解码器/MHR 保持 FP32，沿用全部现有推理优化。量化或降分辨率可能改变姿态及相机位置。'
+            if quantized else '身体模式不做独立手部精修；384 可能损失精度。Fast 默认 FP16 骨干、FP32 解码器，PyTorch 骨干不编译。')
         try:
             self.summary.setText(self.config().summary())
             self.summary.setStyleSheet('')

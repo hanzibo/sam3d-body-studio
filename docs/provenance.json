@@ -275,6 +275,48 @@
       "basis": "Studio-authored integration, workflow, validation or documentation; separately acquired upstream code, datasets, weights and accelerators are not bundled.",
       "sources": []
     },
+    "docs/EMBEDL_INT8_384.md": {
+      "kind": "Studio engineering documentation",
+      "license": "GPL-3.0-only",
+      "basis": "Studio-authored integration, workflow, validation or documentation; separately acquired upstream code, datasets, weights and accelerators are not bundled.",
+      "sources": []
+    },
+    "docs/EMBEDL_INT8_EXPERIMENT.md": {
+      "kind": "Studio engineering documentation",
+      "license": "GPL-3.0-only",
+      "basis": "Studio-authored integration, workflow, validation or documentation; separately acquired upstream code, datasets, weights and accelerators are not bundled.",
+      "sources": []
+    },
+    "docs/FAST384_VS_INT8_512.md": {
+      "kind": "Studio engineering documentation",
+      "license": "GPL-3.0-only",
+      "basis": "Studio-authored integration, workflow, validation or documentation; separately acquired upstream code, datasets, weights and accelerators are not bundled.",
+      "sources": []
+    },
+    "docs/FAST_EXECUTION.md": {
+      "kind": "Studio engineering documentation",
+      "license": "GPL-3.0-only",
+      "basis": "Studio-authored integration, workflow, validation or documentation; separately acquired upstream code, datasets, weights and accelerators are not bundled.",
+      "sources": []
+    },
+    "docs/FAST_FEEDBACK_CACHE.md": {
+      "kind": "Studio engineering documentation",
+      "license": "GPL-3.0-only",
+      "basis": "Studio-authored integration, workflow, validation or documentation; separately acquired upstream code, datasets, weights and accelerators are not bundled.",
+      "sources": []
+    },
+    "docs/FAST_KEYPOINT_PATH.md": {
+      "kind": "Studio engineering documentation",
+      "license": "GPL-3.0-only",
+      "basis": "Studio-authored integration, workflow, validation or documentation; separately acquired upstream code, datasets, weights and accelerators are not bundled.",
+      "sources": []
+    },
+    "docs/HANDOFF_FAST_INFERENCE_20261108.md": {
+      "kind": "Studio engineering documentation",
+      "license": "GPL-3.0-only",
+      "basis": "Studio-authored integration, workflow, validation or documentation; separately acquired upstream code, datasets, weights and accelerators are not bundled.",
+      "sources": []
+    },
     "docs/INSTALL.md": {
       "kind": "Studio documentation/configuration",
       "license": "GPL-3.0-only",
@@ -291,6 +333,12 @@
       "kind": "Studio documentation/configuration",
       "license": "GPL-3.0-only",
       "basis": "Studio-authored mask snapshot validation, morphology, GUI/process orchestration or interface checks; separately installed upstream APIs are referenced without copying their implementation.",
+      "sources": []
+    },
+    "docs/MHR_PRECISION_EXPERIMENT.md": {
+      "kind": "Studio engineering documentation",
+      "license": "GPL-3.0-only",
+      "basis": "Studio-authored integration, workflow, validation or documentation; separately acquired upstream code, datasets, weights and accelerators are not bundled.",
       "sources": []
     },
     "docs/RGBD_RECORDER.md": {
@@ -333,11 +381,45 @@
       "basis": "Studio-authored documentation, configuration, workflow or original SVG asset; named external sources retain their terms.",
       "sources": []
     },
+    "embedl_backbone.py": {
+      "kind": "Studio application or experiment implementation",
+      "license": "GPL-3.0-only",
+      "basis": "Studio-authored integration, workflow, validation or documentation; separately acquired upstream code, datasets, weights and accelerators are not bundled.",
+      "sources": []
+    },
     "engine_registry.py": {
       "kind": "Studio source",
       "license": "GPL-3.0-only",
       "basis": "Hash pinning for locally built TensorRT engines, which are GPU/version specific. Studio integration implementation; no substantial upstream source copy identified in this review; preliminary engineering classification.",
       "sources": []
+    },
+    "fast_execution.py": {
+      "kind": "Fast full body core replay and body-only diagnostic/transfer adaptation",
+      "license": "LicenseRef-SAM-3D-Body",
+      "basis": "Original Studio graph replay and transfer packing; runtime AST removes only standalone diagnostics/cache eviction from inherited Meta methods in separately installed Fast. Original upstream arithmetic and full/hand fallbacks retained.",
+      "sources": [
+        "https://github.com/yangtiming/Fast-SAM-3D-Body/blob/d72aa36913a1673ace029d345f437561a85ec9e2/sam_3d_body/sam_3d_body_estimator.py",
+        "https://github.com/yangtiming/Fast-SAM-3D-Body/blob/d72aa36913a1673ace029d345f437561a85ec9e2/sam_3d_body/models/meta_arch/sam3d_body.py"
+      ],
+      "reviewed_at": "2026-11-08"
+    },
+    "fast_feedback.py": {
+      "kind": "SAM 3D Body feedback arithmetic adaptation and per-call cache",
+      "license": "LicenseRef-SAM-3D-Body",
+      "basis": "2D/3D keypoint feedback arithmetic adapted from inherited Meta methods in Fast; modified immutable intermediates, copy ownership, per-call cache and runtime integration.",
+      "sources": [
+        "https://github.com/yangtiming/Fast-SAM-3D-Body/blob/d72aa36913a1673ace029d345f437561a85ec9e2/sam_3d_body/models/meta_arch/sam3d_body.py"
+      ],
+      "reviewed_at": "2026-11-08"
+    },
+    "fast_keypoints.py": {
+      "kind": "MHR70 exact-support intermediate geometry adaptation with single-person CUDA graph",
+      "license": "LicenseRef-SAM-3D-Body",
+      "basis": "Parameter assembly adapted from Fast MHRHead; original Studio support selection, buffer compaction and graph replay. Calls separately acquired MHR TorchScript asset without copying upstream source.",
+      "sources": [
+        "https://github.com/yangtiming/Fast-SAM-3D-Body/blob/d72aa36913a1673ace029d345f437561a85ec9e2/sam_3d_body/models/heads/mhr_head.py"
+      ],
+      "reviewed_at": "2026-11-08"
     },
     "fast_selection.py": {
       "kind": "Studio source",
@@ -573,6 +655,12 @@
       "kind": "Studio source",
       "license": "GPL-3.0-only",
       "basis": "JSON-lines process boundary for the Studio parameter laboratory. Studio integration implementation; no substantial upstream source copy identified in this review; preliminary engineering classification.",
+      "sources": []
+    },
+    "mhr_precision.py": {
+      "kind": "Studio application or experiment implementation",
+      "license": "GPL-3.0-only",
+      "basis": "Studio-authored integration, workflow, validation or documentation; separately acquired upstream code, datasets, weights and accelerators are not bundled.",
       "sources": []
     },
     "motion_recording.py": {
@@ -811,6 +899,54 @@
       "basis": "Check tracked publication scope. Reports filenames only, never secret contents. Studio integration implementation; no substantial upstream source copy identified in this review; preliminary engineering classification.",
       "sources": []
     },
+    "scripts/benchmark_detector_components.py": {
+      "kind": "Studio profiling, build or comparison utility",
+      "license": "GPL-3.0-only",
+      "basis": "Studio-authored integration, workflow, validation or documentation; separately acquired upstream code, datasets, weights and accelerators are not bundled.",
+      "sources": []
+    },
+    "scripts/benchmark_embedl_encoder.py": {
+      "kind": "Studio profiling, build or comparison utility",
+      "license": "GPL-3.0-only",
+      "basis": "Studio-authored integration, workflow, validation or documentation; separately acquired upstream code, datasets, weights and accelerators are not bundled.",
+      "sources": []
+    },
+    "scripts/benchmark_fast_execution.py": {
+      "kind": "Studio profiling, build or comparison utility",
+      "license": "GPL-3.0-only",
+      "basis": "Studio-authored integration, workflow, validation or documentation; separately acquired upstream code, datasets, weights and accelerators are not bundled.",
+      "sources": []
+    },
+    "scripts/benchmark_fast_feedback.py": {
+      "kind": "Studio profiling, build or comparison utility",
+      "license": "GPL-3.0-only",
+      "basis": "Studio-authored integration, workflow, validation or documentation; separately acquired upstream code, datasets, weights and accelerators are not bundled.",
+      "sources": []
+    },
+    "scripts/benchmark_fast_keypoints.py": {
+      "kind": "Studio profiling, build or comparison utility",
+      "license": "GPL-3.0-only",
+      "basis": "Studio-authored integration, workflow, validation or documentation; separately acquired upstream code, datasets, weights and accelerators are not bundled.",
+      "sources": []
+    },
+    "scripts/benchmark_mhr_precision.py": {
+      "kind": "Studio profiling, build or comparison utility",
+      "license": "GPL-3.0-only",
+      "basis": "Studio-authored integration, workflow, validation or documentation; separately acquired upstream code, datasets, weights and accelerators are not bundled.",
+      "sources": []
+    },
+    "scripts/check_embedl_384.py": {
+      "kind": "Studio profiling, build or comparison utility",
+      "license": "GPL-3.0-only",
+      "basis": "Studio-authored integration, workflow, validation or documentation; separately acquired upstream code, datasets, weights and accelerators are not bundled.",
+      "sources": []
+    },
+    "scripts/check_embedl_profile.py": {
+      "kind": "Studio profiling, build or comparison utility",
+      "license": "GPL-3.0-only",
+      "basis": "Studio-authored integration, workflow, validation or documentation; separately acquired upstream code, datasets, weights and accelerators are not bundled.",
+      "sources": []
+    },
     "scripts/check_inference.py": {
       "kind": "Studio source",
       "license": "GPL-3.0-only",
@@ -823,6 +959,12 @@
       "basis": "Studio-authored mask snapshot validation, morphology, GUI/process orchestration or interface checks; separately installed upstream APIs are referenced without copying their implementation.",
       "sources": []
     },
+    "scripts/compare_backbones_standard.py": {
+      "kind": "Studio profiling, build or comparison utility",
+      "license": "GPL-3.0-only",
+      "basis": "Studio-authored integration, workflow, validation or documentation; separately acquired upstream code, datasets, weights and accelerators are not bundled.",
+      "sources": []
+    },
     "scripts/fetch_dependencies.py": {
       "kind": "Studio source",
       "license": "GPL-3.0-only",
@@ -833,6 +975,48 @@
       "kind": "Studio source",
       "license": "GPL-3.0-only",
       "basis": "Install a desktop menu entry for this checkout, optionally on the desktop. Studio integration implementation; no substantial upstream source copy identified in this review; preliminary engineering classification.",
+      "sources": []
+    },
+    "scripts/prepare_embedl_384.py": {
+      "kind": "Studio profiling, build or comparison utility",
+      "license": "GPL-3.0-only",
+      "basis": "Studio-authored integration, workflow, validation or documentation; separately acquired upstream code, datasets, weights and accelerators are not bundled.",
+      "sources": []
+    },
+    "scripts/prepare_embedl_onnx.py": {
+      "kind": "Studio profiling, build or comparison utility",
+      "license": "GPL-3.0-only",
+      "basis": "Studio-authored integration, workflow, validation or documentation; separately acquired upstream code, datasets, weights and accelerators are not bundled.",
+      "sources": []
+    },
+    "scripts/profile_fast_decoder.py": {
+      "kind": "Studio profiling, build or comparison utility",
+      "license": "GPL-3.0-only",
+      "basis": "Studio-authored integration, workflow, validation or documentation; separately acquired upstream code, datasets, weights and accelerators are not bundled.",
+      "sources": []
+    },
+    "scripts/report_embedl_384.py": {
+      "kind": "Studio profiling, build or comparison utility",
+      "license": "GPL-3.0-only",
+      "basis": "Studio-authored integration, workflow, validation or documentation; separately acquired upstream code, datasets, weights and accelerators are not bundled.",
+      "sources": []
+    },
+    "scripts/report_embedl_encoder.py": {
+      "kind": "Studio profiling, build or comparison utility",
+      "license": "GPL-3.0-only",
+      "basis": "Studio-authored integration, workflow, validation or documentation; separately acquired upstream code, datasets, weights and accelerators are not bundled.",
+      "sources": []
+    },
+    "scripts/report_mhr_precision.py": {
+      "kind": "Studio profiling, build or comparison utility",
+      "license": "GPL-3.0-only",
+      "basis": "Studio-authored integration, workflow, validation or documentation; separately acquired upstream code, datasets, weights and accelerators are not bundled.",
+      "sources": []
+    },
+    "scripts/report_standard_reference.py": {
+      "kind": "Studio profiling, build or comparison utility",
+      "license": "GPL-3.0-only",
+      "basis": "Studio-authored integration, workflow, validation or documentation; separately acquired upstream code, datasets, weights and accelerators are not bundled.",
       "sources": []
     },
     "smpl_stage.py": {
@@ -974,10 +1158,40 @@
       "basis": "Studio-authored bounded preview caches, thumbnail and rendering regression validation. No third-party renderer implementation copied.",
       "sources": []
     },
+    "tests/test_fast_execution.py": {
+      "kind": "Studio regression or integration validation",
+      "license": "GPL-3.0-only",
+      "basis": "Studio-authored integration, workflow, validation or documentation; separately acquired upstream code, datasets, weights and accelerators are not bundled.",
+      "sources": []
+    },
+    "tests/test_fast_feedback.py": {
+      "kind": "Studio regression or integration validation",
+      "license": "GPL-3.0-only",
+      "basis": "Studio-authored integration, workflow, validation or documentation; separately acquired upstream code, datasets, weights and accelerators are not bundled.",
+      "sources": []
+    },
+    "tests/test_fast_keypoints.py": {
+      "kind": "Studio regression or integration validation",
+      "license": "GPL-3.0-only",
+      "basis": "Studio-authored integration, workflow, validation or documentation; separately acquired upstream code, datasets, weights and accelerators are not bundled.",
+      "sources": []
+    },
+    "tests/test_int8_launch.py": {
+      "kind": "Studio regression or integration validation",
+      "license": "GPL-3.0-only",
+      "basis": "Studio-authored integration, workflow, validation or documentation; separately acquired upstream code, datasets, weights and accelerators are not bundled.",
+      "sources": []
+    },
     "tests/test_mask_prompt.py": {
       "kind": "Original Studio implementation",
       "license": "GPL-3.0-only",
       "basis": "Studio-authored mask snapshot validation, morphology, GUI/process orchestration or interface checks; separately installed upstream APIs are referenced without copying their implementation.",
+      "sources": []
+    },
+    "tests/test_mhr_precision.py": {
+      "kind": "Studio regression or integration validation",
+      "license": "GPL-3.0-only",
+      "basis": "Studio-authored integration, workflow, validation or documentation; separately acquired upstream code, datasets, weights and accelerators are not bundled.",
       "sources": []
     },
     "tests/test_portability.py": {
@@ -1021,6 +1235,12 @@
       "sources": []
     },
     "tests/test_rgbd_tracking_reference.py": {
+      "kind": "Studio regression or integration validation",
+      "license": "GPL-3.0-only",
+      "basis": "Studio-authored integration, workflow, validation or documentation; separately acquired upstream code, datasets, weights and accelerators are not bundled.",
+      "sources": []
+    },
+    "tests/test_standard_reference_metrics.py": {
       "kind": "Studio regression or integration validation",
       "license": "GPL-3.0-only",
       "basis": "Studio-authored integration, workflow, validation or documentation; separately acquired upstream code, datasets, weights and accelerators are not bundled.",

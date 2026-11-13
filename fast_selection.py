@@ -10,6 +10,7 @@ class SinglePersonDetector:
         self.selected_bbox = None
         self.selected_keypoints = None
         self.hand_warning = False
+        self.detection_runs = 0
         self.video_key=None;self.selection_mask=None;self._cached_key=None;self._cached_result=None;self._claimed=set()
         self.reserved_boxes=[]
 
@@ -21,6 +22,7 @@ class SinglePersonDetector:
             result=self._cached_result
         else:
             result = self.detector.run_human_detection(image, **kwargs)
+            self.detection_runs += 1
             self._cached_key=self.video_key;self._cached_result=result;self._claimed=set()
         if not isinstance(result, dict) or result.get('keypoints') is None:
             raise ValueError('Fast 需要 YOLO-Pose 人物框及关键点')

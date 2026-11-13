@@ -19,6 +19,7 @@ class LaunchConfig:
     mode: str = 'body'
     image_size: int = 384
     trt_backbone: bool = True
+    backbone_precision: str = 'fp16'
     trt_detector: bool = True
     decoder_compile: bool = True
     mhr_compile: bool = True
@@ -42,6 +43,11 @@ class LaunchConfig:
             raise ValueError('实现或模式无效')
         if type(self.image_size) is not int or self.image_size not in (384, 512):
             raise ValueError('网络分辨率只支持 384 或 512')
+        if self.backbone_precision not in ('fp16', 'int8'):
+            raise ValueError('骨干精度只支持 FP16 或 INT8')
+        if self.backbone_precision == 'int8' and (
+                self.backend != 'fast' or self.mode != 'body' or not self.trt_backbone):
+            raise ValueError('Embedl INT8 仅支持 Fast / 身体 / 384或512 / TensorRT 骨干')
         for key in ('trt_backbone','trt_detector','decoder_compile','mhr_compile','interm_compile','smpl_enabled','smpl_smoothing','one_euro_enabled'):
             if type(getattr(self,key)) is not bool:
                 raise ValueError(f'{key} 必须是布尔值')
@@ -111,7 +117,8 @@ class LaunchConfig:
         if self.backend == 'standard':
             return f'标准版 / {mode} / 512'+extra
         labels = '/'.join('开' if x else '关' for x in (self.decoder_compile,self.mhr_compile,self.interm_compile))
-        return (f'Fast / {mode} / {self.image_size} / 骨干 {"TRT" if self.trt_backbone else "PyTorch"}'
+        precision = 'INT8混合（Embedl）' if self.backbone_precision == 'int8' else 'FP16'
+        return (f'Fast / {mode} / {self.image_size} / 骨干 {"TRT" if self.trt_backbone else "PyTorch"} {precision}'
                 f' / 检测 {"TRT" if self.trt_detector else "PyTorch"} / 编译(解码/MHR/中间) {labels} / 身体反馈 {self.body_interm_predictions}次＋最终'+extra)
 
     def save(self,path):
@@ -126,6 +133,8 @@ PRESETS = {
     '实验：身体反馈1次＋One Euro': replace(LaunchConfig(),smpl_enabled=True,one_euro_enabled=True,body_interm_predictions=1),
     'SMPL 身体＋MLP平滑': replace(LaunchConfig(),smpl_enabled=True,smpl_smoothing=True),
     '身体 512 对照': replace(LaunchConfig(),image_size=512),
+    'Fast INT8 512 身体（Embedl）': replace(LaunchConfig(),image_size=512,backbone_precision='int8'),
+    '实验：Fast INT8 384 身体（Embedl）': replace(LaunchConfig(),image_size=384,backbone_precision='int8'),
     '完整人体 512': replace(LaunchConfig(),image_size=512,mode='full'),
     '关闭编译对照': replace(LaunchConfig(),decoder_compile=False,mhr_compile=False,interm_compile=False),
     '关闭 TensorRT 对照': replace(LaunchConfig(),trt_backbone=False,trt_detector=False),
@@ -143,6 +152,8 @@ def worker_config(backend):
 
 def backbone_engine(config):
     from backends import BACKBONE_ENGINE
+    if config.backbone_precision == 'int8':
+        return path(f'backbone_engine_int8_{config.image_size}')
     return ENGINE_384 if config.image_size == 384 else BACKBONE_ENGINE
 
 def required_resources(config):

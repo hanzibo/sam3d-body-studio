@@ -12,6 +12,7 @@ MISSING = '未记录'
 CONFIG_FIELDS = {
     'schema_version':'方案格式版本', 'backend':'实现', 'mode':'身体 / 完整模式',
     'image_size':'网络分辨率', 'trt_backbone':'骨干 TensorRT', 'trt_detector':'检测器 TensorRT',
+    'backbone_precision':'骨干精度（INT8 为混合精度）',
     'decoder_compile':'解码器编译', 'mhr_compile':'MHR 编译', 'interm_compile':'中间预测编译',
     'body_interm_predictions':'身体中间预测次数', 'warmup_runs':'每种布局预热次数',
     'warmup_layout':'预热布局', 'smpl_enabled':'SMPL 转换', 'smpl_smoothing':'MLP 平滑',
