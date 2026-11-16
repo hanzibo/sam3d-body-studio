@@ -443,8 +443,8 @@ class RgbdValidation(QtWidgets.QWidget):
         previewing=self.mode=='preview' and self.process.state()==QtCore.QProcess.Running
         can_camera=not host.inference_busy and not (getattr(host,'live',None) and host.live.active) and not getattr(getattr(getattr(host,'hand',None),'live',None),'running',False)
         self.preview_btn.setText('关闭相机预览' if self.mode=='preview' else '开启相机预览')
-        self.preview_btn.setEnabled(previewing or (not busy and can_camera))
-        self.capture_btn.setEnabled(previewing or (not busy and can_camera));self.open_btn.setEnabled(not busy and not host.inference_busy)
+        self.preview_btn.setEnabled(host.camera_backend.currentData() != "webcam" and (previewing or (not busy and can_camera)))
+        self.capture_btn.setEnabled(host.camera_backend.currentData() != "webcam" and (previewing or (not busy and can_camera)));self.open_btn.setEnabled(not busy and not host.inference_busy)
         self.cancel_btn.setEnabled(busy);self.run_btn.setEnabled(self.sample is not None and not busy and free and host.model_state!='stopping')
         self.evaluate_btn.setEnabled(self.active_result is not None and self.canvas.mask is not None and not busy)
         self.refine_btn.setEnabled(self.active_result is not None and self.canvas.mask is not None and not busy and not host.inference_busy)
@@ -495,6 +495,8 @@ class RgbdValidation(QtWidgets.QWidget):
             self.pending_camera_action=None;self.camera_handoff.stop();self.status.setText('相机释放超时，请关闭其他占用相机的程序');self.refresh_controls();return
         if self.host.camera.active or self.host.camera_state not in ('off','photo'):return
         action=self.pending_camera_action;self.pending_camera_action=None;self.camera_handoff.stop()
+        if self.host.camera_backend.currentData() == 'webcam':
+            self.status.setText('前置摄像头仅支持 RGB，请选择 Gemini 或 Kinect 采集深度');self.refresh_controls();return
         self.pending_sample=self.batch.capture_directory() or ROOT/'outputs/rgbd'/stamp()
         self.preview_frames=0;self.canvas.live_text='正在连接 RGB-D 相机…'
         args=['--output',str(self.pending_sample),'--delay',str(self.delay.value()),'--max-skew-ms',str(self.max_skew.value())]

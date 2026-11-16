@@ -18,7 +18,7 @@ def select_camera_intrinsics(enabled, width, height, metadata=None, metadata_err
         if value is None:
             raise ValueError('照片 camera.json 缺少 RGB 内参')
         source = 'photo_metadata'
-        label = '照片元数据'
+        label = '相机/照片元数据' + ('（'+str(metadata['device'])+'）' if metadata.get('device') else '')
         serial = metadata.get('serial')
     else:
         if not PRESET.is_file():

@@ -1650,6 +1650,18 @@
       "license": "GPL-3.0-only",
       "basis": "Studio-authored SDK protocol adapter or integration documentation; uses separately installed kinect2 SDK without bundling its code or assets.",
       "sources": []
+    },
+    "webcam_camera_worker.py": {
+      "kind": "Studio calibrated webcam integration",
+      "license": "GPL-3.0-only",
+      "basis": "Studio-authored V4L2 protocol adapter or integration documentation; separately generated local calibration and captures are not bundled.",
+      "sources": []
+    },
+    "docs/WEBCAM_CAMERA.md": {
+      "kind": "Studio calibrated webcam integration",
+      "license": "GPL-3.0-only",
+      "basis": "Studio-authored V4L2 protocol adapter or integration documentation; separately generated local calibration and captures are not bundled.",
+      "sources": []
     }
   }
 }

@@ -22,5 +22,6 @@
   "hand_detector_checkpoint": "models/hands/detector.pt",
   "hand_sequence_outputs": "outputs/hand-sequences",
   "hand_detector_engine": "models/hands/detector_fp16.engine",
-  "kinect_python": "envs/kinect/bin/python"
+  "kinect_python": "envs/kinect/bin/python",
+  "webcam_calibration": "config/local.webcam.json"
 }

@@ -25,6 +25,7 @@ DEFAULTS = {
     'fast_python': 'envs/fast/bin/python',
     'camera_python': 'envs/camera/bin/python',
     'kinect_python': 'envs/kinect/bin/python',
+    'webcam_calibration': 'config/local.webcam.json',
     'sam3_python': 'envs/sam3/bin/python',
     'standard_checkpoint': 'models/sam_3d_body_dinov3_bf16.safetensors',
     'sam3_checkpoint': 'models/sam3/sam3.pt',
@@ -90,7 +91,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--launch', choices=['recorder','gui','standard','fast','camera','render','single','build'])
     parser.add_argument('--doctor', action='store_true')
-    parser.add_argument('--backend', choices=['orbbec','kinect'], default='orbbec')
+    parser.add_argument('--backend', choices=['orbbec','kinect','webcam'], default='orbbec')
     args, extra = parser.parse_known_args()
     if args.doctor:
         if extra: parser.error('Unexpected doctor arguments')
@@ -109,6 +110,7 @@ def main():
               'camera':'camera_worker.py','render':'render_comparison.py','single':'run_comfy.py',
               'build':'build_backbone.py'}[kind]
     if kinect:script='kinect_camera_worker.py'
+    if kind == 'camera' and args.backend == 'webcam':script='webcam_camera_worker.py'
     if kind == 'gui':
         folder = ROOT/'outputs/gui'; folder.mkdir(parents=True, exist_ok=True)
         with (folder/'desktop.log').open('ab') as log:

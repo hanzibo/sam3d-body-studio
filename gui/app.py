@@ -432,6 +432,10 @@ class MainWindow(QtWidgets.QMainWindow):
         self.camera_backend = QtWidgets.QComboBox()
         self.camera_backend.addItem("Orbbec Gemini 336L", "orbbec")
         self.camera_backend.addItem("Kinect v2", "kinect")
+        self.camera_backend.addItem("电脑前置摄像头（已标定）", "webcam")
+        self.camera_backend.currentIndexChanged.connect(self.camera_selection_changed)
+        self.camera_backend.currentIndexChanged.connect(lambda: self.rgbd.refresh_controls() if hasattr(self,"rgbd") else None)
+        self.camera_backend.currentIndexChanged.connect(lambda: self.intrinsics_check.setChecked(True) if self.camera_backend.currentData()=="webcam" and hasattr(self,"intrinsics_check") else None)
         self.camera_backend.setToolTip("全局相机来源：身体、手部实时推理及 RGB-D 验证共用；连接期间不可切换")
         camera_layout.addWidget(self.camera_backend)
         self.camera_btn = QtWidgets.QPushButton('打开相机 / 重拍')
@@ -476,7 +480,7 @@ class MainWindow(QtWidgets.QMainWindow):
         camera_layout.addLayout(mode_row)
         self.intrinsics_check = QtWidgets.QCheckBox('使用相机真实内参')
         self.intrinsics_check.setChecked(self.settings.value('use_gemini_intrinsics', True, type=bool))
-        self.intrinsics_check.setToolTip('照片元数据优先；否则 1280×800 图片使用本机 Gemini 固定内参。Kinect 相机照片自动读取自身元数据。切换无需重新预热。')
+        self.intrinsics_check.setToolTip('照片元数据优先；否则 1280×800 图片使用本机 Gemini 固定内参。Kinect / 前置摄像头照片自动读取自身元数据。切换无需重新预热。')
         self.intrinsics_check.toggled.connect(self.intrinsics_changed)
         camera_layout.addWidget(self.intrinsics_check)
         self.intrinsics_label = QtWidgets.QLabel()
@@ -680,9 +684,21 @@ class MainWindow(QtWidgets.QMainWindow):
         if hasattr(self,'hand') and hasattr(self.hand,'live'):self.hand.live.refresh()
 
     def selected_camera_intrinsics(self):
-        width, height = (self.canvas.image.width(), self.canvas.image.height()) if self.source_path else (1280, 800)
+        if self.source_path:
+            width, height = self.canvas.image.width(), self.canvas.image.height()
+        elif self.capture_metadata is not None and self.camera_state in ('preview','countdown','stopping'):
+            width, height = self.capture_metadata['width'], self.capture_metadata['height']
+        else:
+            return None, dict(source='awaiting_input', label=self.camera_backend.currentText()+' · 尚未获取图像；打开相机后读取对应内参')
         return select_camera_intrinsics(self.intrinsics_check.isChecked(), width, height,
                                         self.capture_metadata, self.capture_metadata_error)
+
+    def camera_selection_changed(self):
+        if not hasattr(self,'camera'):
+            return
+        if self.source_path is None and self.camera_state in ('off','photo'):
+            self.camera_label.setText(self.camera_backend.currentText()+' · 尚未连接')
+        self.update_camera_controls()
 
     def intrinsics_changed(self):
         self.settings.setValue('use_gemini_intrinsics', self.intrinsics_check.isChecked())
