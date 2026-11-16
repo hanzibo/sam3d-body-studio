@@ -107,8 +107,15 @@ class LiveStream(QtCore.QObject):
         if now-packet.get('received_monotonic', 0) > .5:
             w.status.setText('连续推理：等待新鲜相机帧…')
             return
+        # The receiver already decoded this frame; use its actual dimensions for
+        # every camera and reuse the image for overlay rendering.
+        image = packet.get('_image')
+        if image is None:
+            image = QtGui.QImage.fromData(base64.b64decode(packet['jpeg']), 'JPG')
+        if image.isNull():
+            self.stop('相机帧解码失败');return
         try:
-            matrix, origin = select_camera_intrinsics(self.use_intrinsics, 1280, 800, self.metadata)
+            matrix, origin = select_camera_intrinsics(self.use_intrinsics, image.width(), image.height(), self.metadata)
         except (ValueError, OSError, KeyError, TypeError) as exc:
             self.stop('连续推理内参无效：'+str(exc));return
         self.last_index = packet['index']
@@ -117,10 +124,7 @@ class LiveStream(QtCore.QObject):
         self.received_at = packet['received_monotonic']
         self.attempts += 1
         if self.display_mode == 'overlay':
-            self.input_image = QtGui.QImage.fromData(base64.b64decode(packet['jpeg']), 'JPG')
-            if self.input_image.isNull():
-                self.pending = None
-                self.stop('相机帧解码失败');return
+            self.input_image = image
         command = dict(type='stream', job=self.pending,stream_id=self.stream_id,host_received_monotonic=self.received_at, jpeg=packet['jpeg'], frame_index=packet['index'],
             output=self.temp.name, bbox=self.roi, inference_type=self.config.mode,
             camera_intrinsics=matrix, camera_intrinsics_origin=origin,
