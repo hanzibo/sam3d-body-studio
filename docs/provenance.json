@@ -1626,6 +1626,12 @@
       "license": "GPL-3.0-only",
       "basis": "Synchronized inference timing; caller owns CUDA boundaries and output validation. Studio integration implementation; no substantial upstream source copy identified in this review; preliminary engineering classification.",
       "sources": []
+    },
+    "docs/HANDOFF_AMAZINGHAND.md": {
+      "kind": "Studio downstream integration documentation",
+      "license": "GPL-3.0-only",
+      "basis": "Studio-authored hand inference interface handoff and downstream integration guidance; no model assets or robot calibration are distributed.",
+      "sources": []
     }
   }
 }
