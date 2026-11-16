@@ -425,7 +425,14 @@ class HandLab(QtWidgets.QWidget):
                 view_vertices=np.asarray(data['vertices'])[:,[0,2,1]].copy();view_vertices[:,2]*=-1
                 center=(view_vertices.min(0)+view_vertices.max(0))/2-viewer.anchor
                 viewer.opts['center']=QtGui.QVector3D(*map(float,center))
-                viewer.setCameraPosition(distance=max(float(np.ptp(view_vertices,axis=0).max()),.2)*1.7,elevation=8,azimuth=-90)
+                # GLViewWidget's fov is horizontal. Fit a bounding sphere to
+                # both axes, including depth, with room around the fingers.
+                radius=float(np.linalg.norm(np.ptp(view_vertices,axis=0)/2))
+                aspect=max(viewer.width(),1)/max(viewer.height(),1)
+                half_horizontal=np.radians(viewer.opts['fov'])/2
+                half_vertical=np.arctan(np.tan(half_horizontal)/aspect)
+                distance=radius/max(float(np.sin(min(half_horizontal,half_vertical))),1e-3)*1.3
+                viewer.setCameraPosition(distance=max(distance,.5),elevation=8,azimuth=-90)
             viewer._hand_active=True;viewer.set_pose(data['joints'],data['edges']);viewer.set_layers(True,self.skeleton.isChecked())
         elif mode!='overlay':
             viewer.clear_mesh();viewer._hand_active=False;viewer.empty.setText('当前帧未检测到手部');viewer.empty.show()
