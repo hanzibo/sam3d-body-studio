@@ -45,7 +45,7 @@ class CameraClient(QtCore.QObject):
     def active(self):
         return self.process.state() != QtCore.QProcess.NotRunning
 
-    def start(self):
+    def start(self, backend="orbbec"):
         if self.active:
             return
         self.close_receiver()
@@ -60,7 +60,7 @@ class CameraClient(QtCore.QObject):
             return
         self.last_event = time.monotonic()
         self.process.setWorkingDirectory(str(ROOT))
-        self.process.start('/bin/bash', [str(ROOT/'launch_camera.sh'), '--socket', path])
+        self.process.start('/bin/bash', [str(ROOT/'launch_camera.sh'), '--socket', path, '--backend', backend])
         self.watchdog.start()
 
     def connected(self):

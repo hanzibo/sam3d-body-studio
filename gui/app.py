@@ -429,6 +429,11 @@ class MainWindow(QtWidgets.QMainWindow):
         camera_layout.setSizeConstraint(QtWidgets.QLayout.SetMinimumSize)
         camera_layout.setContentsMargins(0, 0, 0, 0)
         camera_row = QtWidgets.QHBoxLayout()
+        self.camera_backend = QtWidgets.QComboBox()
+        self.camera_backend.addItem("Orbbec Gemini 336L", "orbbec")
+        self.camera_backend.addItem("Kinect v2", "kinect")
+        self.camera_backend.setToolTip("全局相机来源：身体、手部实时推理及 RGB-D 验证共用；连接期间不可切换")
+        camera_layout.addWidget(self.camera_backend)
         self.camera_btn = QtWidgets.QPushButton('打开相机 / 重拍')
         self.camera_btn.clicked.connect(self.open_camera)
         self.camera_close_btn = QtWidgets.QPushButton('关闭相机')
@@ -469,9 +474,9 @@ class MainWindow(QtWidgets.QMainWindow):
         self.stream_mode.currentIndexChanged.connect(lambda: self.settings.setValue('stream_display_mode', self.stream_mode.currentData()))
         mode_row.addWidget(self.stream_mode, 1)
         camera_layout.addLayout(mode_row)
-        self.intrinsics_check = QtWidgets.QCheckBox('使用 Gemini 真实内参')
+        self.intrinsics_check = QtWidgets.QCheckBox('使用相机真实内参')
         self.intrinsics_check.setChecked(self.settings.value('use_gemini_intrinsics', True, type=bool))
-        self.intrinsics_check.setToolTip('照片元数据优先；否则 1280×800 图片使用本机 Gemini 固定内参。其他相机图片请关闭。切换无需重新预热。')
+        self.intrinsics_check.setToolTip('照片元数据优先；否则 1280×800 图片使用本机 Gemini 固定内参。Kinect 相机照片自动读取自身元数据。切换无需重新预热。')
         self.intrinsics_check.toggled.connect(self.intrinsics_changed)
         camera_layout.addWidget(self.intrinsics_check)
         self.intrinsics_label = QtWidgets.QLabel()
@@ -613,6 +618,11 @@ class MainWindow(QtWidgets.QMainWindow):
         active = self.camera_state not in ('off', 'photo')
         waiting = self.camera_state in ('countdown', 'stopping', 'starting')
         rgbd_camera=hasattr(self,'rgbd') and (self.rgbd.mode in ('capture','preview') or self.rgbd.pending_camera_action is not None)
+        can_change_camera=not busy and not active and not rgbd_camera
+        self.camera_backend.setEnabled(can_change_camera)
+        if hasattr(self,"rgbd"):
+            self.rgbd.camera_source.setEnabled(can_change_camera)
+            self.rgbd.max_skew.setEnabled(not rgbd_camera)
         self.camera_btn.setEnabled(not busy and not active and not rgbd_camera)
         self.camera_close_btn.setEnabled(active and self.camera_state != 'stopping')
         self.capture_btn.setEnabled(self.camera_state == 'preview' and not busy)
@@ -727,12 +737,12 @@ class MainWindow(QtWidgets.QMainWindow):
         self.clear_result()
         self.canvas.set_image(QtGui.QImage())
         self.bbox_changed()
-        self.source_name.setText('实时相机 · 1280 × 800')
+        self.source_name.setText('实时相机 · '+self.camera_backend.currentText())
         self.camera_state = 'starting'
         self.camera_label.setText('正在连接和预热相机…')
         self.status.setText('相机预热中，请稍候')
         self.update_camera_controls()
-        self.camera.start()
+        self.camera.start(self.camera_backend.currentData())
 
     def close_camera(self):
         self.hand.live.end('相机关闭，实时手部重建已停止')
@@ -778,7 +788,8 @@ class MainWindow(QtWidgets.QMainWindow):
         if kind == 'ready' and self.camera_state == 'starting':
             self.camera_state = 'preview'
             self.capture_metadata = event['metadata']
-            self.camera_label.setText('Gemini 336L · 1280 × 800 / 30 FPS · 请让头脚完整入画')
+            m=event['metadata']
+            self.camera_label.setText(f"{m['device']} · {m['width']} × {m['height']} / {m['fps']} FPS · 请让头脚完整入画")
             self.status.setText('相机已就绪，可框选人物后倒计时拍照')
             self.update_camera_controls()
         elif kind == 'countdown' and event['job'] == self.camera_job and self.camera_state == 'countdown':

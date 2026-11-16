@@ -24,6 +24,7 @@ DEFAULTS = {
     'standard_python': 'envs/standard/bin/python',
     'fast_python': 'envs/fast/bin/python',
     'camera_python': 'envs/camera/bin/python',
+    'kinect_python': 'envs/kinect/bin/python',
     'sam3_python': 'envs/sam3/bin/python',
     'standard_checkpoint': 'models/sam_3d_body_dinov3_bf16.safetensors',
     'sam3_checkpoint': 'models/sam3/sam3.pt',
@@ -89,6 +90,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--launch', choices=['recorder','gui','standard','fast','camera','render','single','build'])
     parser.add_argument('--doctor', action='store_true')
+    parser.add_argument('--backend', choices=['orbbec','kinect'], default='orbbec')
     args, extra = parser.parse_known_args()
     if args.doctor:
         if extra: parser.error('Unexpected doctor arguments')
@@ -99,12 +101,14 @@ def main():
     kind = args.launch
     interpreter = {'recorder':'standard','gui':'standard','standard':'standard','fast':'fast','camera':'camera',
                    'render':'standard','single':'standard','build':'fast'}[kind]
-    executable = path(interpreter+'_python')
+    kinect = kind == 'camera' and args.backend == 'kinect'
+    executable = path('kinect_python' if kinect else interpreter+'_python')
     if not executable.is_file():
         parser.exit(1, f'Python environment missing: {executable}\nConfigure {CONFIG_FILE}; see docs/INSTALL.md\n')
     script = {'recorder':'gui/rgbd_recorder.py','gui':'gui/app.py','standard':'resident_worker.py','fast':'fast_worker.py',
               'camera':'camera_worker.py','render':'render_comparison.py','single':'run_comfy.py',
               'build':'build_backbone.py'}[kind]
+    if kinect:script='kinect_camera_worker.py'
     if kind == 'gui':
         folder = ROOT/'outputs/gui'; folder.mkdir(parents=True, exist_ok=True)
         with (folder/'desktop.log').open('ab') as log:

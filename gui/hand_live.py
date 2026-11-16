@@ -22,6 +22,12 @@ class HandLivePanel(QtWidgets.QWidget):
         self.render_waiting=None;self.render_dropped=0
         self.timer=QtCore.QTimer(self);self.timer.setInterval(5);self.timer.setTimerType(QtCore.Qt.PreciseTimer);self.timer.timeout.connect(self.poll)
         layout=QtWidgets.QVBoxLayout(self)
+        self.camera_source=QtWidgets.QComboBox()
+        self.camera_source.setModel(self.host.camera_backend.model())
+        self.camera_source.setCurrentIndex(self.host.camera_backend.currentIndex())
+        self.camera_source.currentIndexChanged.connect(self.host.camera_backend.setCurrentIndex)
+        self.host.camera_backend.currentIndexChanged.connect(self.camera_source.setCurrentIndex)
+        layout.addWidget(self.camera_source)
         note=QtWidgets.QLabel('① 在上方应用方案，自动用本地照片预热 → ② 打开相机 → ③ 开始实时重建。无需在线摆手预热；下方保留补充预热。仅使用 RGB 与实时内参，不使用深度拟合。')
         note.setWordWrap(True);layout.addWidget(note)
         row=QtWidgets.QHBoxLayout();layout.addLayout(row)
@@ -55,6 +61,7 @@ class HandLivePanel(QtWidgets.QWidget):
     def refresh(self):
         h=self.hand;w=self.host;ready=w.camera_state=='preview';running=self.running
         blocked=getattr(getattr(w,'live',None),'running',False) or w.inference_busy or w.rgbd.mode is not None or w.rgbd.pending_camera_action is not None or w.rgbd.batch.active or w.image_seg.active
+        self.camera_source.setEnabled(not w.camera.active and not blocked and not running)
         self.open.setEnabled(not w.camera.active and w.camera_state in ('off','photo') and not blocked)
         self.close.setEnabled(w.camera.active and w.camera_state not in ('stopping',))
         self.warm.setEnabled(ready and h.state=='ready' and not running and not blocked)
@@ -64,7 +71,7 @@ class HandLivePanel(QtWidgets.QWidget):
 
     def open_camera(self):
         if self.host.camera.active:return
-        self.status.setText('正在连接 Gemini 336L…');self.host.open_camera();self.refresh()
+        self.status.setText('正在连接 '+self.host.camera_backend.currentText()+'…');self.host.open_camera();self.refresh()
 
     def close_camera(self):
         self.end('相机关闭，实时重建已停止')

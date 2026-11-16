@@ -234,6 +234,16 @@ class RgbdValidation(QtWidgets.QWidget):
         self.preview_frames=0;self.pending_camera_action=None
         self.camera_handoff=QtCore.QTimer(self);self.camera_handoff.setInterval(100);self.camera_handoff.timeout.connect(self.poll_camera_handoff)
         root=QtWidgets.QVBoxLayout(self)
+        source_row=QtWidgets.QHBoxLayout()
+        source_row.addWidget(QtWidgets.QLabel("相机来源"))
+        self.camera_source=QtWidgets.QComboBox();self.camera_source.setModel(self.host.camera_backend.model())
+        self.camera_source.currentIndexChanged.connect(self.host.camera_backend.setCurrentIndex)
+        self.host.camera_backend.currentIndexChanged.connect(self.camera_source.setCurrentIndex)
+        source_row.addWidget(self.camera_source)
+        source_row.addWidget(QtWidgets.QLabel("最大 RGB/深度时间差"))
+        self.max_skew=QtWidgets.QSpinBox();self.max_skew.setRange(1,250);self.max_skew.setValue(20);self.max_skew.setSuffix(" ms")
+        self.max_skew.setToolTip("超限拒绝保存。Kinect 当前配对约56ms；放宽后仅适合静止姿态对照，不表示严格同步。")
+        source_row.addWidget(self.max_skew);root.addLayout(source_row)
         intro=QtWidgets.QLabel('同一份 RGB-D 对照不同启动方案 · 相机坐标 / 米制 / 原始预测保留 · 可选深度位置校正 · 仅验证可见表面')
         intro.setWordWrap(True);root.addWidget(intro)
         row=QtWidgets.QHBoxLayout();self.preview_btn=QtWidgets.QPushButton('开启相机预览');self.preview_btn.clicked.connect(self.toggle_preview)
@@ -487,9 +497,14 @@ class RgbdValidation(QtWidgets.QWidget):
         action=self.pending_camera_action;self.pending_camera_action=None;self.camera_handoff.stop()
         self.pending_sample=self.batch.capture_directory() or ROOT/'outputs/rgbd'/stamp()
         self.preview_frames=0;self.canvas.live_text='正在连接 RGB-D 相机…'
-        args=['--output',str(self.pending_sample),'--delay',str(self.delay.value())]
+        args=['--output',str(self.pending_sample),'--delay',str(self.delay.value()),'--max-skew-ms',str(self.max_skew.value())]
         if action=='preview':args.append('--preview')
-        self.launch(CAMERA_PYTHON,'rgbd_capture.py',args,action);self.host.update_camera_controls()
+        if self.host.camera_backend.currentData() == 'kinect':
+            from studio_paths import path
+            self.launch(str(path('kinect_python')),'kinect_rgbd_capture.py',args,action)
+        else:
+            self.launch(CAMERA_PYTHON,'rgbd_capture.py',args,action)
+        self.host.update_camera_controls()
     def read_output(self):
         self.buffer+=bytes(self.process.readAllStandardOutput()).decode('utf8',errors='replace')
         while '\n' in self.buffer:

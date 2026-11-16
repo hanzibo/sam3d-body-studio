@@ -323,6 +323,12 @@
       "basis": "Studio-authored integration, workflow, validation or documentation; separately acquired upstream code, datasets, weights and accelerators are not bundled.",
       "sources": []
     },
+    "docs/HANDOFF_AMAZINGHAND.md": {
+      "kind": "Studio downstream integration documentation",
+      "license": "GPL-3.0-only",
+      "basis": "Studio-authored hand inference interface handoff and downstream integration guidance; no model assets or robot calibration are distributed.",
+      "sources": []
+    },
     "docs/HAND_LAB.md": {
       "kind": "Studio engineering documentation",
       "license": "GPL-3.0-only",
@@ -1627,10 +1633,22 @@
       "basis": "Synchronized inference timing; caller owns CUDA boundaries and output validation. Studio integration implementation; no substantial upstream source copy identified in this review; preliminary engineering classification.",
       "sources": []
     },
-    "docs/HANDOFF_AMAZINGHAND.md": {
-      "kind": "Studio downstream integration documentation",
+    "kinect_camera_worker.py": {
+      "kind": "Studio Kinect camera integration",
       "license": "GPL-3.0-only",
-      "basis": "Studio-authored hand inference interface handoff and downstream integration guidance; no model assets or robot calibration are distributed.",
+      "basis": "Studio-authored SDK protocol adapter or integration documentation; uses separately installed kinect2 SDK without bundling its code or assets.",
+      "sources": []
+    },
+    "kinect_rgbd_capture.py": {
+      "kind": "Studio Kinect camera integration",
+      "license": "GPL-3.0-only",
+      "basis": "Studio-authored SDK protocol adapter or integration documentation; uses separately installed kinect2 SDK without bundling its code or assets.",
+      "sources": []
+    },
+    "docs/KINECT_CAMERA.md": {
+      "kind": "Studio Kinect camera integration",
+      "license": "GPL-3.0-only",
+      "basis": "Studio-authored SDK protocol adapter or integration documentation; uses separately installed kinect2 SDK without bundling its code or assets.",
       "sources": []
     }
   }
