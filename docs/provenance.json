@@ -117,6 +117,12 @@
       "basis": "Studio-authored documentation, configuration, workflow or original SVG asset; named external sources retain their terms.",
       "sources": []
     },
+    "README.zh-CN.md": {
+      "kind": "Studio documentation/configuration",
+      "license": "GPL-3.0-only",
+      "basis": "Original Simplified Chinese repository documentation retained as a companion to the English README.",
+      "sources": []
+    },
     "THIRD_PARTY_NOTICES.md": {
       "kind": "Studio documentation/configuration",
       "license": "GPL-3.0-only",
