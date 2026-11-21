@@ -1,30 +1,61 @@
-# SAM 3D Body Studio
+# SAM 3D Body 加速与评测
 
-基于 **[Meta SAM 3D Body](https://github.com/facebookresearch/sam-3d-body)** 与 **[Fast SAM 3D Body](https://github.com/yangtiming/Fast-SAM-3D-Body)** 的 Ubuntu 桌面人体重建与 RGB-D 实验工具。
+基于 [Meta SAM 3D Body](https://github.com/facebookresearch/sam-3d-body) 和 [Fast SAM 3D Body](https://github.com/yangtiming/Fast-SAM-3D-Body)，本项目优化单人 3D 人体重建的完整推理路径，并在相同输入上对照不同配置的耗时和输出差异。项目提供可复用的 TensorRT 与编译配置、身体解码执行优化，以及本地适配的 **INT8 384** 骨干。桌面界面用于切换方案、预热和查看对照结果。
 
-本项目的工作是桌面界面、相机接入、启动方案管理、可视化与实验对照；人体重建模型和 Fast 加速方法来自上游作者。这是独立社区项目，非 Meta 或 Fast 作者的官方产品。请同时保留并引用原项目，见 [引用](CITATIONS.bib) 和 [第三方说明](THIRD_PARTY_NOTICES.md)。
+在 RTX 4060 Laptop 8 GB 上，**Fast INT8 384 平均完整推理 41.71 ms，P95 43.53 ms**，每次都执行 YOLO。和同批次 **Fast FP16 384** 的 53.99 ms 相比，均值下降约 **23%**。在这组样本上，Fast FP16 512 最接近标准版。Fast INT8 512 的平均耗时为 60.90 ms，网格、骨架和双肘角度与标准版的差异均小于两种 384 方案。
 
-## 功能
+## 方案矩阵
 
-- 图片上传、Gemini 336L 相机预览／倒计时拍摄／实时流推理；网格先显示，图像对照后台生成。
-- 标准路径（ComfyUI 的 SAM 3D Body 适配）与 Fast 路径切换；预加载、预热、显存释放。
-- Fast 身体／手部精修、384／512、骨干及检测器 TensorRT、解码器／MHR／中间预测编译开关，保存启动方案与实际配置。
-- 可选 [Embedl INT8 混合精度编码器](docs/EMBEDL_INT8_EXPERIMENT.md)：512 单人身体模式，沿用现有推理优化，独立预加载／预热及精度标记；需单独取得并配置本地引擎。
-- Fast 默认启用[单次解码内关键点反馈缓存](docs/FAST_FEEDBACK_CACHE.md)，减少重复采样和复制，保留原反馈对照及实际命中记录。
-- Fast 编译中间预测使用[MHR70 专用几何路径](docs/FAST_KEYPOINT_PATH.md)：精确依赖裁剪＋单人 CUDA Graph，最终仍输出完整网格，可关闭回退对照。
-- Fast 身体模式增加[最终完整预测图重放与同步/搬运优化](docs/FAST_EXECUTION.md)，用于单图、视频及实时流的共用推理后端，两项可独立回退。
-- 可旋转的 3D 预览、网格投影叠加、MHR 骨架、几何关节角、动作录制导出；原始与滤波数据分别保存。
-- 可选 MHR→SMPL 24 关节转换、MLP 平滑、MHR／SMPL One Euro 位置滤波。
-- 独立[手部实验页](docs/HAND_LAB.md)：手动 / 专用检测器自动找手、双手批量重建、Gemini 离线序列回放与 MP4、三维骨架 / 网格、相机投影与参数导出，显存独占；支持[手部 FP16 / INT8 512 TensorRT 与编译启动方案](docs/HAND_ACCELERATION.md)、中间关键点专用路径及最终仅生成手部顶点，可回退完整表面对照。
-- 独立 MHR 参数实验室：导入最近预测，或创建默认人体，修改原生参数和关节观察局部变化。
-- RGB-D 几何验证：相机内参与深度生成点云，SAM3 前／背景点分割，网格与可见表面对照；可选[深度位置校正与原始对照](docs/DEPTH_REFINEMENT.md)。
-- 离线深度拟合可选 [CUDA Graph 加速与单帧计时基线](docs/DEPTH_SPEED_BASELINE.md)，保留 CPU 参考和不同迭代预算的质量对照。
-- 多姿态采集、同一组输入跨方案运行、历史详细配置／删除／两项对照及联合统计。
-- SAM3 与人体模型进程互斥，避免两套模型同时占用显存（不管理其他应用）。
+| 身体方案 | 网络输入 | DINOv3 骨干 | 人体检测 | 解码器 / MHR / 中间预测编译 | 姿态预测 |
+| --- | --- | --- | --- | --- | --- |
+| 标准版身体 | 512 × 512 | Comfy BF16 路径 | 本基准传入固定框 | 关 / 关 / 关 | 标准路径默认 |
+| Fast FP16 512（身体 512 对照） | 512 × 512 | TensorRT FP16 | YOLO11m-Pose TensorRT，每次执行 | 开 / 开 / 开 | 3 次 + 最终预测 |
+| Fast INT8 512（Embedl） | 512 × 512 | TensorRT INT8/FP16 | 同上 | 开 / 开 / 开 | 3 次 + 最终预测 |
+| Fast FP16 384（演示最快） | 384 × 384 | TensorRT FP16 | 同上 | 开 / 开 / 开 | 3 次 + 最终预测 |
+| Fast INT8 384（本地实验） | 384 × 384 | TensorRT INT8/FP16 | 同上 | 开 / 开 / 开 | 3 次 + 最终预测 |
+
+分辨率指人体裁剪送入骨干的尺寸。INT8 表示骨干的混合精度执行，表内 Fast 方案的解码器和 MHR 默认保持 FP32。INT8 384 复用了 Embedl 512 的权重与量化尺度，重新生成 384 对应的位置表并适配静态输入，见 [INT8 384 实验](docs/EMBEDL_INT8_384.md)。
+
+| 可配置项 | 支持选项与限制 |
+| --- | --- |
+| 重建范围 | 标准版 512 或 Fast FP16 512 可选身体、身体＋手部精修。Fast 384 与 Embedl INT8 身体方案限定为身体模式 |
+| 骨干和检测器执行器 | Fast 可分别选择 PyTorch 或 TensorRT。Embedl INT8 骨干要求对应分辨率的单人 TensorRT 引擎 |
+| 编译 | Fast 的解码器、MHR 和中间预测可分别开关 |
+| 身体中间反馈次数 | Fast 身体支持 0、1、2、3 次中间反馈，各自仍执行一次最终预测 |
+| 预热 | 可设置 1–30 次，选择上传图、相机尺寸或两种布局。结果记录实际执行配置 |
+| Fast 执行优化 | 反馈缓存、中间 MHR70 专用路径、最终预测图重放和身体路径数据搬运优化，可按文档用环境变量关闭做消融 |
+
+配置限制与预设定义见 [launch_config.py](launch_config.py)。独立手部重建使用另一套 512 配置与检测流程，见 [手部加速](docs/HAND_ACCELERATION.md)。
+
+## 完整推理耗时与标准版输出对照
+
+使用 Gemini 336L 录制的同一组 **12 张全身姿态**，保持原始 RGB、标定内参及人体框一致。每方案使用正式 worker，启动预热 10 次，每姿态再预热 3 次、测量 20 次，共 **240 次**。以下均为单人身体模式，关闭独立手部精修、掩膜提示、深度拟合、SMPL 转换和时序滤波。
+
+| 方案 | 平均 / P95（ms） | 平均耗时比（标准版 ÷ 本行） | 对齐网格（mm） | 对齐 127 骨架点（mm） | 相机系网格（mm） | 双肘夹角（°） |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| 标准版 BF16 512 | 150.00 / 151.48 | 1.00× | 基准 | 基准 | 基准 | 基准 |
+| Fast FP16 512 | 75.98 / 78.18 | 1.97× | 5.590 | 4.274 | 6.444 | 0.677 |
+| Fast INT8 512 | 60.90 / 62.83 | 2.46× | 13.817 | 13.401 | 16.246 | 1.280 |
+| Fast FP16 384 | 53.99 / 56.46 | 2.78× | 17.452 | 17.790 | 38.611 | 2.070 |
+| Fast INT8 384 | **41.71 / 43.53** | **3.60×** | 19.327 | 19.252 | 39.926 | 2.411 |
+
+- **计时范围**为已解码图像进入 worker 后，到 CPU 拿到重建结果。Fast 包含逐次 YOLO、裁剪、网络和结果回传。标准版使用相同的预给检测框，计时从给定框开始，耗时比按此口径计算。全部计时在 CUDA 同步后读取，模型加载、预热、编译、文件读写、相机采集和显示在计时区间之外。
+- **精度用标准版一致性衡量。** 对齐距离以骨盆中心消除平移，保留朝向、尺寸与姿态差异。相机系网格距离保留相机平移差异。各列为对应点的欧氏距离或肘角绝对差，按 12 个姿态平均。标准版是 Comfy BF16 512 身体路径的预测参照，真实人体绝对误差和连续动作稳定性需要另行验证。
+- **结果按批次记录。** 标准版与 INT8 512 来自 [512 对照](docs/FAST384_VS_INT8_512.md)，两种 384 来自后续 [384 同批测试](docs/EMBEDL_INT8_384.md)，FP16 512 为 2026-11-21 使用同输入、同框和同预热规则的补测。各 worker 顺序运行，历史数字与补测数字用来比较量级。两种 384 的差值来自同一轮。对照脚本见 [compare_backbones_standard.py](scripts/compare_backbones_standard.py) 和 [check_embedl_384.py](scripts/check_embedl_384.py)，指标实现见 [report_standard_reference.py](scripts/report_standard_reference.py)。
+
+## Fast 路径优化
+
+| 优化 | 实现 | Fast FP16 384 完整推理均值（各自同批消融） |
+| --- | --- | ---: |
+| [反馈缓存与减少复制](docs/FAST_FEEDBACK_CACHE.md) | 在单次解码内复用相同采样和中间数据 | 65.407 → 63.876 ms |
+| [中间 MHR70 关键点专用路径](docs/FAST_KEYPOINT_PATH.md) | 只计算关键点需要的几何依赖，单人使用 CUDA Graph | 64.966 → 60.376 ms |
+| [最终预测图重放与数据搬运优化](docs/FAST_EXECUTION.md) | 重放完整预测核心，减少同步与 CPU 回传开销 | 57.443 → 53.820 ms |
+
+每行是独立消融，基线随批次与已有优化变化，耗时收益以完整方案实测为准。最终仍生成完整网格。MHR FP16 和混合精度已单独试验，完整推理均值约 41–42 ms，与 FP32 复测处于相同范围，默认保留 FP32。见 [MHR 精度实验](docs/MHR_PRECISION_EXPERIMENT.md)。
 
 ## 开始使用
 
-支持环境：Ubuntu、NVIDIA CUDA GPU；本地已在 RTX 4060 8GB 上使用。其他平台／显卡需要自行验证。模型不包含在仓库里。
+支持环境：Ubuntu、NVIDIA CUDA GPU；本地已在 RTX 4060 Laptop 8 GB 上验证。其他平台／显卡需要自行验证。模型不包含在仓库里。
 
 ```bash
 git clone https://github.com/hanzibo/sam3d-body-studio.git
@@ -41,9 +72,9 @@ python3 studio_paths.py --doctor
 python3 scripts/install_desktop.py --desktop
 ```
 
-默认“演示最快”需要先构建并登记 384 TensorRT 引擎。没有引擎时，在预热前选择 Fast 512、骨干／检测器 PyTorch，并关闭三个编译开关进行初次验证，或者使用标准版；不静默下载或切换执行路径。
+默认预设“演示最快”对应 **Fast FP16 384**，需要先构建并登记 FP16 384 骨干和 YOLO TensorRT 引擎。没有引擎时，在预热前选择 Fast 512、骨干／检测器 PyTorch，并关闭三个编译开关进行初次验证，或者使用标准版。TensorRT 引擎构建完成后可在兼容环境中重复加载，按方案预热。
 
-独立采集后续深度实验数据可运行 `./launch_rgbd_recorder.sh`。支持彩色／深度预览、倒计时、多姿态自动拍摄、重拍与续采；新增命名的连续 RGB-D 录制、动作提示和逐帧时间戳，不加载模型；见 [RGB-D 记录工具](docs/RGBD_RECORDER.md)。
+独立采集后续深度实验数据可运行 `./launch_rgbd_recorder.sh`。支持彩色／深度预览、倒计时、多姿态自动拍摄、重拍与续采；连续 RGB-D 录制支持自定义命名、动作提示和逐帧时间戳，采集期间不加载模型。见 [RGB-D 记录工具](docs/RGBD_RECORDER.md)。
 
 ## 目录与数据
 
@@ -61,7 +92,7 @@ python3 scripts/install_desktop.py --desktop
 
 第四个标签页“数据管理”支持分类统计、搜索、目录 / 图片 / 文本预览，以及将完整样本或运行移入系统回收站；当前任务及正在使用的数据受保护。各目录内容、删除边界与恢复方法见 [数据管理说明](docs/DATA_MANAGEMENT.md)。
 
-## 验证与范围
+## 运行检查
 
 ```bash
 python3 -m unittest discover -s tests -v
@@ -72,35 +103,27 @@ python mhr_filter_test.py
 python rgbd_geometry_test.py
 ```
 
-本次检查范围见 [验证记录](docs/VALIDATION.md)。持续集成检查源码编译与无模型测试；真实推理使用 `python scripts/check_inference.py --backend standard` 或 `--backend fast`，需要本地模型和 CUDA。GUI 与相机交互说明见安装文档。
+环境与功能验证见 [验证记录](docs/VALIDATION.md)。持续集成检查源码编译与无模型测试；真实推理使用 `python scripts/check_inference.py --backend standard` 或 `--backend fast`，需要本地模型和 CUDA。GUI 与相机交互说明见安装文档。
 
-384、减少中间预测、身体模式可能影响精度；RGB-D 评分仅是可见表面一致性，不是真值姿态或完整人体精度。计时须区分加载、预热、模型推理、传输与渲染，本仓库不承诺通用帧率。关节角为几何角度，滤波仅处理位置，不能代替有效旋转或机器人关节指令；本应用不控制机器人。
+## 对照工具
+
+- [桌面界面](gui/使用说明.md)支持静态图、相机实时流、彩色叠加和 3D 网格预览。支持骨架、几何关节角、可选 SMPL 转换及滤波，并保存配置、运行历史与原始／滤波动作数据。
+- [RGB-D 几何验证](gui/RGB-D几何验证说明.md)用标定内参与深度构造点云，可用同一组姿态对照多种方案的可见表面一致性。另有 [深度拟合](docs/DEPTH_REFINEMENT.md)、[连续跟踪实验](docs/RGBD_TRACKING_EXPERIMENT.md)和[同帧对照](docs/RGBD_THREE_METHOD_COMPARISON.md)。
+- [手部实验](docs/HAND_LAB.md)支持单／双手检测、独立重建、实时预览和导出。[MHR 实验室](gui/使用说明.md)可导入人体预测并编辑参数。
+- [离线视频](docs/VIDEO.md)支持多人分段提示与逐帧重建。[SAM3 掩膜提示](docs/MASK_PROMPTS.md)支持点选分割和掩膜膨胀／腐蚀，分割和人体推理分阶段使用显存。
 
 ## 致谢与引用
 
 - [SAM 3D Body 项目](https://github.com/facebookresearch/sam-3d-body)，[论文](https://arxiv.org/abs/2602.15989)：人体重建模型与基本推理流程。
 - [Fast SAM 3D Body 项目](https://github.com/yangtiming/Fast-SAM-3D-Body)，[主页](https://yangtiming.github.io/Fast-SAM-3D-Body-Page/)，[论文](https://arxiv.org/abs/2603.15603)：加速推理及 MHR→SMPL／平滑模块。
+- [Embedl SAM 3D Body](https://huggingface.co/embedl/sam-3d-body) 提供 DINOv3 INT8 量化导出。
 - [Momentum Human Rig (MHR)](https://github.com/facebookresearch/MHR)：参数化人体表示；[ComfyUI](https://github.com/Comfy-Org/ComfyUI)：标准推理适配；[SAM3](https://github.com/facebookresearch/sam3)：可选人体分割。
 - [Orbbec SDK](https://github.com/orbbec/pyorbbecsdk) 与 [Gemini 336L Python 示例](https://github.com/hanzibo/orbbec-gemini-336l-python-examples)：相机采集接口与实践参考。
 
-原论文 BibTeX 已按两个上游 README 整理至 [CITATIONS.bib](CITATIONS.bib)。研究中使用本工具时请引用原方法，而非将 Studio 的集成工作视为原模型或加速算法贡献。
+原论文 BibTeX 已按两个上游 README 整理至 [CITATIONS.bib](CITATIONS.bib)。研究中使用本项目时，请同时引用所用的原模型和上游加速方法。
 
 ## 许可证
 
 本仓库原创的 Studio 集成代码默认采用 **GPL-3.0-only**，见 [LICENSE](LICENSE)，文件头另有声明的除外。`calibrated_visualization.py` 改写自官方渲染代码，按 **SAM License** 标注；ComfyUI 加载器及 Fast 转换流程的改写来源也已单独声明。第三方权重、数据和人体资产不随本仓库发布，本许可证不重新授权这些内容。
 
 **许可审查尚有未决项：** GPL、SAM／DINOv3 自定义许可及可选 AGPL 组件的组合分发尚未确认兼容；分进程、单独下载和补齐署名不能自动解决这些问题。不要将整个运行栈理解为已确认可统一 GPL 发布或商业交付。逐项依据、已完成的修正和后续需要确认的授权，见 [许可证与来源审查](docs/LICENSE_AUDIT.md)、[逐文件清单](docs/provenance.json) 和 [第三方说明](THIRD_PARTY_NOTICES.md)。
-
-单图 SAM3 前景 / 背景点分割、掩膜膨胀 / 腐蚀和人体网络掩膜提示对照，见 [掩膜提示实验](docs/MASK_PROMPTS.md)。分割须在人体模型加载前完成，GUI 与独立进程均有显存互斥检查。
-
-离线视频多人重建、分段提示和结果恢复见 [视频重建说明](docs/VIDEO.md)。
-
-### RGB-D 时序细化实验与选点审计
-
-支持离线时间戳回放、无 SAM3 的投影深度对应细化、逐批实际点坐标导出及 SAM3 参考对照。视频重建页新增“RGB-D 跟踪分割…”入口，可手工修正提示/分段、保存参考修订并重算选点报告。当前为离线实验，尚未接入实时相机跟踪，也不宣称在线 10 Hz。参见 [实验与操作说明](docs/RGBD_TRACKING_EXPERIMENT.md)。
-
-### RGB-D 三方案连续对照
-
-新增 **RGB-D 跟踪对照** 页：同步查看逐帧网络、独立网络＋CUDA60和初始化＋连续细化的相机系网格与真实点云，支持四组顺序播放、暂停逐帧、视角联动和透明度。完整对比视频、两类深度误差及计时定义见 [实验说明](docs/RGBD_THREE_METHOD_COMPARISON.md)。
-
-连续跟踪对照还支持严格的“仅首帧初始化＋后续15步”消融，运行 `python rgbd_first_init.py`，与原三方案同帧比较；查看 [实验说明](docs/RGBD_THREE_METHOD_COMPARISON.md)。
