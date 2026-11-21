@@ -399,6 +399,102 @@
       "basis": "Studio-authored offline video manifests, point-prompt orchestration, process isolation, numerical frame exports, timestamp-aware rendering or regression checks. Separately installed upstream APIs are called without copying their implementation.",
       "sources": []
     },
+    "docs/images/acceleration-overlays/lunge-fast384.jpg": {
+      "kind": "README comparison image",
+      "license": "LicenseRef-US-Public-Domain",
+      "basis": "Source photo by Myles Stepp / U.S. Air Force. Cropped visualization of actual SAM 3D Body inference output projected onto the source RGB.",
+      "sources": [
+        "https://commons.wikimedia.org/wiki/File:Airman_performing_lunge.jpg"
+      ]
+    },
+    "docs/images/acceleration-overlays/lunge-fast512.jpg": {
+      "kind": "README comparison image",
+      "license": "LicenseRef-US-Public-Domain",
+      "basis": "Source photo by Myles Stepp / U.S. Air Force. Cropped visualization of actual SAM 3D Body inference output projected onto the source RGB.",
+      "sources": [
+        "https://commons.wikimedia.org/wiki/File:Airman_performing_lunge.jpg"
+      ]
+    },
+    "docs/images/acceleration-overlays/lunge-int8384.jpg": {
+      "kind": "README comparison image",
+      "license": "LicenseRef-US-Public-Domain",
+      "basis": "Source photo by Myles Stepp / U.S. Air Force. Cropped visualization of actual SAM 3D Body inference output projected onto the source RGB.",
+      "sources": [
+        "https://commons.wikimedia.org/wiki/File:Airman_performing_lunge.jpg"
+      ]
+    },
+    "docs/images/acceleration-overlays/lunge-int8512.jpg": {
+      "kind": "README comparison image",
+      "license": "LicenseRef-US-Public-Domain",
+      "basis": "Source photo by Myles Stepp / U.S. Air Force. Cropped visualization of actual SAM 3D Body inference output projected onto the source RGB.",
+      "sources": [
+        "https://commons.wikimedia.org/wiki/File:Airman_performing_lunge.jpg"
+      ]
+    },
+    "docs/images/acceleration-overlays/lunge-rgb.jpg": {
+      "kind": "README comparison image",
+      "license": "LicenseRef-US-Public-Domain",
+      "basis": "Source photo by Myles Stepp / U.S. Air Force. Cropped RGB preview.",
+      "sources": [
+        "https://commons.wikimedia.org/wiki/File:Airman_performing_lunge.jpg"
+      ]
+    },
+    "docs/images/acceleration-overlays/lunge-std512.jpg": {
+      "kind": "README comparison image",
+      "license": "LicenseRef-US-Public-Domain",
+      "basis": "Source photo by Myles Stepp / U.S. Air Force. Cropped visualization of actual SAM 3D Body inference output projected onto the source RGB.",
+      "sources": [
+        "https://commons.wikimedia.org/wiki/File:Airman_performing_lunge.jpg"
+      ]
+    },
+    "docs/images/acceleration-overlays/tree-fast384.jpg": {
+      "kind": "README comparison image",
+      "license": "CC0-1.0",
+      "basis": "Source photo by BodyBendYoga / Nappy.co. Cropped visualization of actual SAM 3D Body inference output projected onto the source RGB.",
+      "sources": [
+        "https://commons.wikimedia.org/wiki/File:Woman_yoga_pose.jpg"
+      ]
+    },
+    "docs/images/acceleration-overlays/tree-fast512.jpg": {
+      "kind": "README comparison image",
+      "license": "CC0-1.0",
+      "basis": "Source photo by BodyBendYoga / Nappy.co. Cropped visualization of actual SAM 3D Body inference output projected onto the source RGB.",
+      "sources": [
+        "https://commons.wikimedia.org/wiki/File:Woman_yoga_pose.jpg"
+      ]
+    },
+    "docs/images/acceleration-overlays/tree-int8384.jpg": {
+      "kind": "README comparison image",
+      "license": "CC0-1.0",
+      "basis": "Source photo by BodyBendYoga / Nappy.co. Cropped visualization of actual SAM 3D Body inference output projected onto the source RGB.",
+      "sources": [
+        "https://commons.wikimedia.org/wiki/File:Woman_yoga_pose.jpg"
+      ]
+    },
+    "docs/images/acceleration-overlays/tree-int8512.jpg": {
+      "kind": "README comparison image",
+      "license": "CC0-1.0",
+      "basis": "Source photo by BodyBendYoga / Nappy.co. Cropped visualization of actual SAM 3D Body inference output projected onto the source RGB.",
+      "sources": [
+        "https://commons.wikimedia.org/wiki/File:Woman_yoga_pose.jpg"
+      ]
+    },
+    "docs/images/acceleration-overlays/tree-rgb.jpg": {
+      "kind": "README comparison image",
+      "license": "CC0-1.0",
+      "basis": "Source photo by BodyBendYoga / Nappy.co. Cropped RGB preview.",
+      "sources": [
+        "https://commons.wikimedia.org/wiki/File:Woman_yoga_pose.jpg"
+      ]
+    },
+    "docs/images/acceleration-overlays/tree-std512.jpg": {
+      "kind": "README comparison image",
+      "license": "CC0-1.0",
+      "basis": "Source photo by BodyBendYoga / Nappy.co. Cropped visualization of actual SAM 3D Body inference output projected onto the source RGB.",
+      "sources": [
+        "https://commons.wikimedia.org/wiki/File:Woman_yoga_pose.jpg"
+      ]
+    },
     "docs/provenance.json": {
       "kind": "Studio documentation/configuration",
       "license": "GPL-3.0-only",

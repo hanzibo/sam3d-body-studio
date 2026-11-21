@@ -43,6 +43,21 @@
 - **精度用标准版一致性衡量。** 对齐距离以骨盆中心消除平移，保留朝向、尺寸与姿态差异。相机系网格距离保留相机平移差异。各列为对应点的欧氏距离或肘角绝对差，按 12 个姿态平均。标准版是 Comfy BF16 512 身体路径的预测参照，真实人体绝对误差和连续动作稳定性需要另行验证。
 - **结果按批次记录。** 标准版与 INT8 512 来自 [512 对照](docs/FAST384_VS_INT8_512.md)，两种 384 来自后续 [384 同批测试](docs/EMBEDL_INT8_384.md)，FP16 512 为 2026-11-21 使用同输入、同框和同预热规则的补测。各 worker 顺序运行，历史数字与补测数字用来比较量级。两种 384 的差值来自同一轮。对照脚本见 [compare_backbones_standard.py](scripts/compare_backbones_standard.py) 和 [check_embedl_384.py](scripts/check_embedl_384.py)，指标实现见 [report_standard_reference.py](scripts/report_standard_reference.py)。
 
+## 彩色网格叠加对比
+
+每列是一个公开样例，按上表顺序展示五个方案的实际预测。各方案使用相同的 RGB 和估算相机内参。Fast 逐次执行 YOLO，标准版使用同一人体框。浅蓝色网格使用各自预测的相机平移投影到彩色图上，保留原始姿态与位置差异。点击图片可放大。
+
+| 方案 | 弓步 | 单腿站立 |
+| --- | :---: | :---: |
+| 原始 RGB | [![弓步 · 原始 RGB](docs/images/acceleration-overlays/lunge-rgb.jpg)](docs/images/acceleration-overlays/lunge-rgb.jpg) | [![单腿站立 · 原始 RGB](docs/images/acceleration-overlays/tree-rgb.jpg)](docs/images/acceleration-overlays/tree-rgb.jpg) |
+| 标准版 BF16 512（基准） | [![弓步 · 标准版 BF16 512（基准）](docs/images/acceleration-overlays/lunge-std512.jpg)](docs/images/acceleration-overlays/lunge-std512.jpg) | [![单腿站立 · 标准版 BF16 512（基准）](docs/images/acceleration-overlays/tree-std512.jpg)](docs/images/acceleration-overlays/tree-std512.jpg) |
+| Fast FP16 512 | [![弓步 · Fast FP16 512](docs/images/acceleration-overlays/lunge-fast512.jpg)](docs/images/acceleration-overlays/lunge-fast512.jpg) | [![单腿站立 · Fast FP16 512](docs/images/acceleration-overlays/tree-fast512.jpg)](docs/images/acceleration-overlays/tree-fast512.jpg) |
+| Fast INT8 512 | [![弓步 · Fast INT8 512](docs/images/acceleration-overlays/lunge-int8512.jpg)](docs/images/acceleration-overlays/lunge-int8512.jpg) | [![单腿站立 · Fast INT8 512](docs/images/acceleration-overlays/tree-int8512.jpg)](docs/images/acceleration-overlays/tree-int8512.jpg) |
+| Fast FP16 384 | [![弓步 · Fast FP16 384](docs/images/acceleration-overlays/lunge-fast384.jpg)](docs/images/acceleration-overlays/lunge-fast384.jpg) | [![单腿站立 · Fast FP16 384](docs/images/acceleration-overlays/tree-fast384.jpg)](docs/images/acceleration-overlays/tree-fast384.jpg) |
+| Fast INT8 384 | [![弓步 · Fast INT8 384](docs/images/acceleration-overlays/lunge-int8384.jpg)](docs/images/acceleration-overlays/lunge-int8384.jpg) | [![单腿站立 · Fast INT8 384](docs/images/acceleration-overlays/tree-int8384.jpg)](docs/images/acceleration-overlays/tree-int8384.jpg) |
+
+两张图用于展示投影轮廓，性能与几何一致性指标来自上文的 12 姿态评测。照片来源为 Myles Stepp / U.S. Air Force（美国公共领域）及 BodyBendYoga / Nappy.co（CC0 1.0）。[弓步原图](https://commons.wikimedia.org/wiki/File:Airman_performing_lunge.jpg) · [单腿站立原图](https://commons.wikimedia.org/wiki/File:Woman_yoga_pose.jpg)
+
 ## Fast 路径优化
 
 | 优化 | 实现 | Fast FP16 384 完整推理均值（各自同批消融） |
