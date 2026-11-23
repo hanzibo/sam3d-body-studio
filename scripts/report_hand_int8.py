@@ -4,7 +4,7 @@ import argparse,json,sys
 from pathlib import Path
 import numpy as np
 ROOT=Path(__file__).resolve().parents[1];sys.path.insert(0,str(ROOT))
-from hand_sequence_metrics import summarize
+from studio.hand.hand_sequence_metrics import summarize
 p=argparse.ArgumentParser();p.add_argument('--directory',type=Path,required=True);p.add_argument('--baseline',type=Path,required=True);a=p.parse_args();root=a.directory
 paired=json.loads((root/'paired/paired.json').read_text());quality=json.loads((root/'comparison/hand-quality.json').read_text());differences=json.loads((root/'comparison/full-output-differences.json').read_text())
 lines=['# 手部 INT8 512 验证','', '基线：FP16 TRT 512 编码器、WiLoR FP16 TRT 640 检测器、FP32 解码器/MHR 编译 + CUDA Graph、反馈复制优化、中间关键点路径、最终手部表面。候选仅替换为既有 Embedl INT8/FP16 混合精度 512 编码器；没有重新量化/校准。六次预测和五次反馈不变。','', '## 引擎接口','', 'INT8 引擎固定 B=1，输入 `[1,3,512,512]`，输出 `[1,1280,32,32]`，IO FP16；双手分别编码后合为 B=2 送解码器。FP16 引擎原生支持 B=2。没有覆盖或新建引擎。','', '## 同进程配对计时','', '六个固定手框案例，每个方案预热 4 次，然后正反顺序交替各 30 次。完整推理含裁剪、H2D、网络、同步，不含检测、D2H、IO 和渲染；GPU 子项嵌套且包含 CPU 派发间隙。','', '| 批量 | FP16 推理 ms | INT8 推理 ms | 节省 | 降幅 | FP16 编码 ms | INT8 编码 ms |','|---|---:|---:|---:|---:|---:|---:|']

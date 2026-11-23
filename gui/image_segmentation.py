@@ -9,7 +9,7 @@ import time
 import cv2
 import numpy as np
 from PyQt5 import QtCore, QtGui, QtWidgets
-from mask_prompt import morph_mask, sha256
+from studio.segmentation.mask_prompt import morph_mask, sha256
 from studio_paths import path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -123,13 +123,13 @@ class ImageSegmentation(QtWidgets.QGroupBox):
     def reset_image(self):
         self.clear(); self.directory = None; self.input_file = None
 
-    def launch(self, mode, python, script, args):
+    def launch(self, mode, python, entry, args):
         self.mode = mode; self.cancelled = False; self.buffer = ''; self.event = None; self.log = ''; self.last_error = ''; self.started = time.monotonic()
         self.process.setWorkingDirectory(str(ROOT))
         env = QtCore.QProcessEnvironment.systemEnvironment()
         env.remove('QT_QPA_PLATFORM_PLUGIN_PATH'); env.remove('QT_QPA_FONTDIR')
         self.process.setProcessEnvironment(env)
-        self.process.start(str(python), [str(ROOT/script)] + args)
+        self.process.start(str(python), [*entry, *args])
         self.timer.start(); self.host.update_camera_controls()
 
     def segment(self):
@@ -152,7 +152,7 @@ class ImageSegmentation(QtWidgets.QGroupBox):
         except OSError as exc:
             self.status.setText('无法保存分割输入：'+str(exc)); return
         self.status.setText('正在加载 SAM3；分割进程完全退出后才允许预热人体模型…')
-        self.launch('segment', path('sam3_python'), 'sam3_segment.py', ['--request', str(request)])
+        self.launch('segment', path('sam3_python'), ['-m', 'studio.segmentation.sam3_segment'], ['--request', str(request)])
 
     def capture(self):
         if self.active or self.common_block(): return
@@ -161,7 +161,7 @@ class ImageSegmentation(QtWidgets.QGroupBox):
         self.host.source_path = None
         self.directory = ROOT/'outputs/rgbd'/datetime.now().strftime('%Y%m%d-%H%M%S-%f')
         self.status.setText('RGB-D 倒计时拍照；请让头脚完整入画')
-        self.launch('capture', path('camera_python'), 'rgbd_capture.py',
+        self.launch('capture', path('camera_python'), ['-m', 'studio.cameras.rgbd_capture'],
                     ['--output', str(self.directory), '--delay', str(self.host.delay_combo.currentData())])
 
     def read_output(self):

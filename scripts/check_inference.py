@@ -16,7 +16,7 @@ import time
 
 ROOT=Path(__file__).resolve().parents[1]
 sys.path.insert(0,str(ROOT))
-from launch_config import LaunchConfig
+from studio.core.launch_config import LaunchConfig
 from studio_paths import path
 
 

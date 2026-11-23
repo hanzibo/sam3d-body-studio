@@ -9,7 +9,7 @@ try:
     from torch.nn import functional as F
 except ImportError:
     torch = None
-from fast_feedback import FeedbackCall, install_fast_feedback_cache
+from studio.body.fast_feedback import FeedbackCall, install_fast_feedback_cache
 
 
 @unittest.skipIf(torch is None, 'requires PyTorch')

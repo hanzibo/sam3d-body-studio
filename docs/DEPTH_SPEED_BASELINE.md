@@ -35,17 +35,17 @@ CUDA 与 CPU 浮点规约顺序不同，可见性和最近点筛选也有离散�
 `PYTHON` 替换成部署配置中对应 Conda Python 的完整路径。无需新权重或 TensorRT 转换。
 
 ```bash
-PYTHON depth_pose_benchmark.py \
+PYTHON studio/rgbd/depth_pose_benchmark.py \
   --output outputs/depth-fusion/speed-RUN \
   --profiles fast384 fast512 standard512 \
   --variants cpu60 cuda60 cuda30 cuda15 cuda10 --warmups 1 --repeats 3
 
-PYTHON depth_pose_benchmark.py \
+PYTHON studio/rgbd/depth_pose_benchmark.py \
   --output outputs/depth-fusion/speed-pipeline-RUN \
   --profiles fast384 --variants cpu60 cuda60 cuda30 \
   --mode pipeline --warmups 1 --repeats 3
 
-PYTHON depth_speed_report.py outputs/depth-fusion/speed-RUN \
+PYTHON studio/rgbd/depth_speed_report.py outputs/depth-fusion/speed-RUN \
   --pipeline outputs/depth-fusion/speed-pipeline-RUN
 ```
 
@@ -56,7 +56,7 @@ PYTHON depth_speed_report.py outputs/depth-fusion/speed-RUN \
 原默认行为不变，可显式选择 CUDA 后端：
 
 ```bash
-PYTHON depth_pose_experiment.py \
+PYTHON studio/rgbd/depth_pose_experiment.py \
   --source outputs/depth-fusion/experiment-v1 \
   --masks outputs/depth-fusion/masks/masks.json \
   --output outputs/depth-fusion/experiment-cuda-RUN \

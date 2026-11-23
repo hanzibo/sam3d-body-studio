@@ -4,9 +4,9 @@
 import unittest
 try:
     import numpy as np
-    from depth_pose_refinement import (PoseDepthConfig, SurfaceFit, acceptance,
+    from studio.rgbd.depth_pose_refinement import (PoseDepthConfig, SurfaceFit, acceptance,
                                        delta_bounds, score_depth)
-    from depth_refinement import unproject, split_pixels
+    from studio.rgbd.depth_refinement import unproject, split_pixels
 except ImportError:
     np = None
 

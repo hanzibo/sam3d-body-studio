@@ -5,8 +5,8 @@ from pathlib import Path
 import numpy as np
 from PyQt5 import QtCore,QtGui,QtWidgets
 from rgbd_validation import CameraScene,to_view
-from rgbd_comparison_data import METHODS,LABELS,ALL_METHODS,METHOD_LABELS,comparison_methods,load_npz
-from video_project import file_hash
+from studio.rgbd.rgbd_comparison_data import METHODS,LABELS,ALL_METHODS,METHOD_LABELS,comparison_methods,load_npz
+from studio.video.video_project import file_hash
 
 ROOT=Path(__file__).resolve().parents[1]
 

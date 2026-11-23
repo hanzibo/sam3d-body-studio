@@ -27,7 +27,7 @@
 | 预热 | 可设置 1–30 次，选择上传图、相机尺寸或两种布局。结果记录实际执行配置 |
 | Fast 执行优化 | 反馈缓存、中间 MHR70 专用路径、最终预测图重放和身体路径数据搬运优化，可按文档用环境变量关闭做消融 |
 
-配置限制与预设定义见 [launch_config.py](launch_config.py)。独立手部重建使用另一套 512 配置与检测流程，见 [手部加速](docs/HAND_ACCELERATION.md)。
+配置限制与预设定义见 [studio/core/launch_config.py](studio/core/launch_config.py)。独立手部重建使用另一套 512 配置与检测流程，见 [手部加速](docs/HAND_ACCELERATION.md)。
 
 ## 完整推理耗时与标准版输出对照
 
@@ -97,7 +97,12 @@ python3 scripts/install_desktop.py --desktop
 
 | 路径 | 用途 | 是否发布 |
 | --- | --- | --- |
-| `gui/`、根目录 Python／启动脚本 | 界面、隔离推理、采集和评估 | 是 |
+| [`studio/body/`](studio/body) | 标准版和 Fast 推理、DINOv3/TensorRT 加速、SMPL 与人体渲染 | 是 |
+| [`studio/hand/`](studio/hand)、[`studio/mhr/`](studio/mhr) | 独立手部重建、实时滤波与 MHR 参数实验室 | 是 |
+| [`studio/cameras/`](studio/cameras)、[`studio/rgbd/`](studio/rgbd) | 相机进程、RGB-D 采集、深度评估和跟踪实验 | 是 |
+| [`studio/segmentation/`](studio/segmentation)、[`studio/video/`](studio/video) | SAM3 提示分割、逐帧重建与视频导出 | 是 |
+| [`studio/core/`](studio/core)、[`gui/`](gui) | 启动方案、共享运行逻辑、进程协议与桌面界面 | 是 |
+| 根目录的 `launch*.sh`、`launch_hand.py`、`studio_paths.py`、`build-backbone.sh`、`run_comfy.sh`、`engine_registry.py` | 常用启动与部署入口 | 是 |
 | `docs/`、`requirements/`、`dependencies.json`、`scripts/`、`tests/` | 文档、依赖版本、部署及验证 | 是 |
 | `third_party/` | 按固定提交获取上游源码 | 否 |
 | `models/`、`assets/smpl/` | 权重、TensorRT 引擎、授权 SMPL 模型 | 否 |
@@ -113,11 +118,10 @@ python3 scripts/install_desktop.py --desktop
 
 ```bash
 python3 -m unittest discover -s tests -v
-# 以下两个测试需要 requirements/gui.txt 中的数值依赖
-python test_fast_selection.py
-python mhr_filter_test.py
+# MHR 滤波检查需要 requirements/gui.txt 中的数值依赖
+python -m tests.mhr_filter_smoke
 # 可选 RGB-D 渲染检查：还需 pyrender 和可用的 EGL/OpenGL
-python rgbd_geometry_test.py
+python -m tests.rgbd_geometry_smoke
 ```
 
 环境与功能验证见 [验证记录](docs/VALIDATION.md)。持续集成检查源码编译与无模型测试；真实推理使用 `python scripts/check_inference.py --backend standard` 或 `--backend fast`，需要本地模型和 CUDA。GUI 与相机交互说明见安装文档。
@@ -141,6 +145,6 @@ python rgbd_geometry_test.py
 
 ## 许可证
 
-本仓库原创的 Studio 集成代码默认采用 **GPL-3.0-only**，见 [LICENSE](LICENSE)，文件头另有声明的除外。`calibrated_visualization.py` 改写自官方渲染代码，按 **SAM License** 标注；ComfyUI 加载器及 Fast 转换流程的改写来源也已单独声明。第三方权重、数据和人体资产不随本仓库发布，本许可证不重新授权这些内容。
+本仓库原创的 Studio 集成代码默认采用 **GPL-3.0-only**，见 [LICENSE](LICENSE)，文件头另有声明的除外。`studio/body/calibrated_visualization.py` 改写自官方渲染代码，按 **SAM License** 标注；ComfyUI 加载器及 Fast 转换流程的改写来源也已单独声明。第三方权重、数据和人体资产不随本仓库发布，本许可证不重新授权这些内容。
 
 **许可审查尚有未决项：** GPL、SAM／DINOv3 自定义许可及可选 AGPL 组件的组合分发尚未确认兼容；分进程、单独下载和补齐署名不能自动解决这些问题。不要将整个运行栈理解为已确认可统一 GPL 发布或商业交付。逐项依据、已完成的修正和后续需要确认的授权，见 [许可证与来源审查](docs/LICENSE_AUDIT.md)、[逐文件清单](docs/provenance.json) 和 [第三方说明](THIRD_PARTY_NOTICES.md)。

@@ -13,8 +13,8 @@
 本机 config/local.json 新增 kinect_python=/home/hzb/miniconda3/envs/kinect2/bin/python；可移植模板见 config/paths.example.json。需要该环境已安装 /home/hzb/Work/kinect_ws 的 kinect2 SDK及OpenCV。无需复制/改动SDK源码。
 
 - studio_paths.py：camera --backend kinect 选择独立解释器/worker。
-- kinect_camera_worker.py：既有 Unix socket 协议的 Kinect 实现，支持 ready/frame/capture/countdown/photo/cancel/stop/error。
-- kinect_rgbd_capture.py：RGB-D采样、预览、时间差门限及配准导出，复用 @@RGBD 事件格式。
+- studio/cameras/kinect_camera_worker.py：既有 Unix socket 协议的 Kinect 实现，支持 ready/frame/capture/countdown/photo/cancel/stop/error。
+- studio/cameras/kinect_rgbd_capture.py：RGB-D采样、预览、时间差门限及配准导出，复用 @@RGBD 事件格式。
 - gui/camera_client.py、gui/app.py：相机选择、通用元数据和进程生命周期。
 - gui/hand_live.py、gui/rgbd_validation.py：同步相机入口和RGB-D路由。
 

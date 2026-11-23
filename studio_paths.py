@@ -106,16 +106,24 @@ def main():
     executable = path('kinect_python' if kinect else interpreter+'_python')
     if not executable.is_file():
         parser.exit(1, f'Python environment missing: {executable}\nConfigure {CONFIG_FILE}; see docs/INSTALL.md\n')
-    script = {'recorder':'gui/rgbd_recorder.py','gui':'gui/app.py','standard':'resident_worker.py','fast':'fast_worker.py',
-              'camera':'camera_worker.py','render':'render_comparison.py','single':'run_comfy.py',
-              'build':'build_backbone.py'}[kind]
-    if kinect:script='kinect_camera_worker.py'
-    if kind == 'camera' and args.backend == 'webcam':script='webcam_camera_worker.py'
+    scripts = {'recorder':'gui/rgbd_recorder.py', 'gui':'gui/app.py'}
+    modules = {
+        'standard':'studio.body.resident_worker', 'fast':'studio.body.fast_worker',
+        'render':'studio.body.render_comparison', 'single':'studio.body.run_comfy',
+        'build':'studio.body.build_backbone',
+    }
+    if kind == 'camera':
+        modules['camera'] = {
+            'orbbec':'studio.cameras.camera_worker',
+            'kinect':'studio.cameras.kinect_camera_worker',
+            'webcam':'studio.cameras.webcam_camera_worker',
+        }[args.backend]
+    entry = [str(ROOT/scripts[kind])] if kind in scripts else ['-m', modules[kind]]
     if kind == 'gui':
         folder = ROOT/'outputs/gui'; folder.mkdir(parents=True, exist_ok=True)
         with (folder/'desktop.log').open('ab') as log:
             os.dup2(log.fileno(), 1); os.dup2(log.fileno(), 2)
     os.chdir(ROOT)
-    os.execve(str(executable), [str(executable), '-u', str(ROOT/script), *extra], environment('gui' if kind == 'recorder' else kind))
+    os.execve(str(executable), [str(executable), '-u', *entry, *extra], environment('gui' if kind == 'recorder' else kind))
 
 if __name__ == '__main__': main()

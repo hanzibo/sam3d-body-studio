@@ -11,7 +11,7 @@ import sys
 ROOT=Path(__file__).resolve().parents[1]
 sys.path.insert(0,str(ROOT))
 from studio_paths import environment,path
-from gpu_lease import acquire_gpu_lease
+from studio.core.gpu_lease import acquire_gpu_lease
 
 
 def main():
@@ -32,22 +32,22 @@ def main():
               '--compile','--trt-backbone',str(path(f'backbone_engine_{a.image_size}')),
               '--trt-yolo',str(path('yolo_engine')),'--image-size',str(a.image_size),
               '--inference-type','body','--warmup',str(a.warmup),'--runs','3']
-    from offline_dinov3 import local_dinov3_source
+    from studio.core.offline_dinov3 import local_dinov3_source
     ns={'__name__':'__main__','__file__':str(loader)}
     with local_dinov3_source():
         exec(compile(loader.read_text().split('faces=estimator.faces.copy()')[0],str(loader),'exec'),ns)
     torch,np,cv2=ns['torch'],ns['np'],ns['cv2']
-    from fast_feedback import install_fast_feedback_cache,FeedbackCall
+    from studio.body.fast_feedback import install_fast_feedback_cache,FeedbackCall
     model=ns['model'];feedback=install_fast_feedback_cache(model);forward=ns['forward']
-    from fast_keypoints import install_fast_keypoint_path
+    from studio.body.fast_keypoints import install_fast_keypoint_path
     control=install_fast_keypoint_path(model)
     report=dict(schema='fast_keypoints_benchmark_v1',image_size=a.image_size,
                 gpu=torch.cuda.get_device_name(),settings=ns['settings'],
                 warmup=a.warmup,runs_per_block=a.runs,
                 scope='body, TRT backbone+YOLO, decoder/MHR/intermediate compile; full inference includes detector/crop/network/CPU outputs; excludes IO/load/render/export',
-                adapter_sha256=hashlib.sha256((ROOT/'fast_keypoints.py').read_bytes()).hexdigest(),
+                adapter_sha256=hashlib.sha256((ROOT/'studio/body/fast_keypoints.py').read_bytes()).hexdigest(),
                 source_revision=__import__('subprocess').check_output(['git','-C',str(path('fast_repo')),'rev-parse','HEAD'],text=True).strip())
-    (a.output/'fast_keypoints-tested.py').write_bytes((ROOT/'fast_keypoints.py').read_bytes())
+    (a.output/'fast_keypoints-tested.py').write_bytes((ROOT/'studio/body/fast_keypoints.py').read_bytes())
     def summary(values):
         return dict(mean_ms=float(np.mean(values)),median_ms=float(np.median(values)),p95_ms=float(np.percentile(values,95)),n=len(values))
     def copy_outputs(outputs):
@@ -83,8 +83,8 @@ def main():
             blocks.append(dict(variant=label,**summary(times)))
     report['keypoint_path']=dict(control)
     report['feedback_cache']=dict(feedback)
-    report['feedback_adapter_sha256']=hashlib.sha256((ROOT/'fast_feedback.py').read_bytes()).hexdigest()
-    (a.output/'fast_feedback-tested.py').write_bytes((ROOT/'fast_feedback.py').read_bytes())
+    report['feedback_adapter_sha256']=hashlib.sha256((ROOT/'studio/body/fast_feedback.py').read_bytes()).hexdigest()
+    (a.output/'fast_feedback-tested.py').write_bytes((ROOT/'studio/body/fast_feedback.py').read_bytes())
     report['baseline_note']='Both variants use feedback cache; full_mhr=full MHR intermediate, mhr70=selected MHR70 intermediate. Final full mesh unchanged.'
     report['full_inference']={k:summary(v) for k,v in values.items()}
     report['timing_blocks']=blocks
@@ -145,7 +145,7 @@ def main():
         os.environ['BODY_INTERM_PRED_LAYERS']='0,1,2'
         # Different masks and camera intrinsics in consecutive calls.
         mask_checks=[]
-        from mask_prompt import FixedMaskSegmentor
+        from studio.segmentation.mask_prompt import FixedMaskSegmentor
         h,w=ns['rgb'].shape[:2]
         for factor in (1.,.8):
             mask=np.zeros((h,w),np.uint8);mask[int(h*.1):int(h*.95),int(w*.2):int(w*.8)]=1

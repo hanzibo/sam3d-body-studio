@@ -4,7 +4,7 @@ import argparse,json,sys
 from pathlib import Path
 import numpy as np
 ROOT=Path(__file__).resolve().parents[1];sys.path.insert(0,str(ROOT))
-from hand_sequence_metrics import summarize
+from studio.hand.hand_sequence_metrics import summarize
 p=argparse.ArgumentParser();p.add_argument('--directory',type=Path,required=True);a=p.parse_args();root=a.directory
 paired=json.loads((root/'paired/paired.json').read_text());rows=[]
 for batch in (1,2):

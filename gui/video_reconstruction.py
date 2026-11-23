@@ -11,9 +11,9 @@ import cv2
 from PyQt5 import QtCore,QtGui,QtWidgets
 from rgbd_validation import MaskCanvas
 from profile_panel import ProfilePanel
-from launch_config import LaunchConfig
+from studio.core.launch_config import LaunchConfig
 from studio_paths import path,environment
-from video_project import ROOT,load_project,frame_path,add_track,put_segment,save_json,mask_at,require_masks
+from studio.video.video_project import ROOT,load_project,frame_path,add_track,put_segment,save_json,mask_at,require_masks
 
 
 class VideoReconstruction(QtWidgets.QWidget):
@@ -147,7 +147,7 @@ class VideoReconstruction(QtWidgets.QWidget):
                 data=json.loads(file.read_text());candidates.append((f'{data["name"]} · {len(data["frames"])} 帧 / {data["hz"]:g} Hz · {file.parent.name}',file.parent))
             except (OSError,ValueError,KeyError):continue
         if not candidates:
-            self.status.setText('尚无已准备的 RGB-D 跟踪实验，请先使用 rgbd_tracking.py prepare 准备录制序列。');return
+            self.status.setText('尚无已准备的 RGB-D 跟踪实验，请先使用 python -m studio.rgbd.rgbd_tracking prepare 准备录制序列。');return
         choice,ok=QtWidgets.QInputDialog.getItem(self,'选择 RGB-D 序列（去畸变 RGB）','只修改点提示及分段；原始 RGB-D 保留。',[c[0] for c in candidates],0,False)
         if ok:
             try:self.load(next(path for title,path in candidates if title==choice))
@@ -156,8 +156,8 @@ class VideoReconstruction(QtWidgets.QWidget):
     def audit_report_file(self):
         if not self.directory or not self.project or self.project.get('source_kind')!='rgbd_tracking':return None
         try:
-            from rgbd_tracking_reference import reference_directory
-            from video_project import file_hash
+            from studio.rgbd.rgbd_tracking_reference import reference_directory
+            from studio.video.video_project import file_hash
             ref=reference_directory(self.directory);suffix='' if ref.name=='reference_masks' else '-'+file_hash(ref/'manifest.json')[:10]
             report=self.directory/f'comparison-15{suffix}'/'report.html'
             return report if report.is_file() else None
@@ -166,7 +166,7 @@ class VideoReconstruction(QtWidgets.QWidget):
     def export_reference(self):
         if self.active or not self.project:return
         try:
-            from rgbd_tracking_reference import export_reviewed_reference
+            from studio.rgbd.rgbd_tracking_reference import export_reviewed_reference
             if QtWidgets.QMessageBox.question(self,'保存已核查参考','确认已检查全身掩膜（包括头、裤子和四肢），并修正失跟分段？\n会保存不可覆盖的新参考版本；已有对照结果保留。SAM3 掩膜仍不是人工逐像素真值。')!=QtWidgets.QMessageBox.Yes:return
             directory=export_reviewed_reference(self.directory)
             self.status.setText('参考掩膜已保存：'+str(directory)+'。可据此重新评估候选版实际选点；旧报告不会被覆盖。')
@@ -310,7 +310,7 @@ class VideoReconstruction(QtWidgets.QWidget):
         for k,v in environment('standard').items():env.insert(k,v)
         self.process.setProcessEnvironment(env);self.process.setWorkingDirectory(str(ROOT))
         executable=path('sam3_python' if mode=='segment' else 'standard_python')
-        self.process.start(str(executable),['-u',str(ROOT/'video_pipeline.py'),'--mode',mode,'--directory',str(self.directory),*args])
+        self.process.start(str(executable),['-u','-m','studio.video.video_pipeline','--mode',mode,'--directory',str(self.directory),*args])
         self.status.setText('任务启动中；可以取消，已完成分段和预测会保留。');self.refresh();self.host.update_camera_controls()
 
     def read(self):

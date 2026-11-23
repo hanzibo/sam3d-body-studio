@@ -5,9 +5,9 @@ from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1];sys.path.insert(0,str(ROOT))
 from studio_paths import path
 sys.path.insert(0,str(path('official_repo')))
-from hand_config import HandExecution
-from hand_engine import HandEngine
-from gpu_lease import acquire_gpu_lease
+from studio.hand.hand_config import HandExecution
+from studio.hand.hand_engine import HandEngine
+from studio.core.gpu_lease import acquire_gpu_lease
 import cv2,numpy as np
 
 

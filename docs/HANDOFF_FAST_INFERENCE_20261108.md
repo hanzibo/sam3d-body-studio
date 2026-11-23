@@ -21,15 +21,15 @@ Fast Python：`/run/media/hzb/Data/conda-envs/fast-sam3d-body/bin/python`。本�
 1. `/home/hzb/Work/sam3d-body-deploy/docs/FAST_EXECUTION.md`：最新阶段、计时边界、消融、连续帧验收。
 2. `/home/hzb/Work/sam3d-body-deploy/docs/FAST_KEYPOINT_PATH.md`：中间 MHR70 专用几何计算及 CUDA Graph。
 3. `/home/hzb/Work/sam3d-body-deploy/docs/FAST_FEEDBACK_CACHE.md`：单次解码内反馈缓存和减少复制。
-4. `/home/hzb/Work/sam3d-body-deploy/fast_worker.py`：安装时机、开关、共用 forward、ready/inference.json 报告。
-5. `/home/hzb/Work/sam3d-body-deploy/fast_feedback.py`、`fast_keypoints.py`、`fast_execution.py`：具体实现。
-6. `launch_config.py`、`studio_paths.py`、`stream_protocol.py`、`gui/live_stream.py`：启动配置、资源、实时流协议与调度。文件均位于上述 Studio 根目录。
+4. `/home/hzb/Work/sam3d-body-deploy/studio/body/fast_worker.py`：安装时机、开关、共用 forward、ready/inference.json 报告。
+5. `/home/hzb/Work/sam3d-body-deploy/studio/body/fast_feedback.py`、`studio/body/fast_keypoints.py`、`studio/body/fast_execution.py`：具体实现。
+6. `studio/core/launch_config.py`、`studio_paths.py`、`studio/core/stream_protocol.py`、`gui/live_stream.py`：启动配置、资源、实时流协议与调度。文件均位于上述 Studio 根目录。
 
 ## 最近已完成的四类优化
 
 ### 1. 单次解码内反馈缓存和减少复制
 
-实现：`fast_feedback.py`，入口 `install_fast_feedback_cache(model)`。
+实现：`studio/body/fast_feedback.py`，入口 `install_fast_feedback_cache(model)`。
 
 - 默认三个中间预测对应五次反馈；同一预测结果会连续用于后续层，原来重复做图像采样与二维/三维位置编码。
 - 在一次 decoder 调用内缓存同一 pose-output 对象对应的不可变反馈量，将默认五次计算变为三次计算、两次命中。
@@ -39,7 +39,7 @@ Fast Python：`/run/media/hzb/Data/conda-envs/fast-sam3d-body/bin/python`。本�
 
 ### 2. 中间关键点专用 MHR70 路径与图重放
 
-实现：`fast_keypoints.py`，`SelectedMHR70`、`install_fast_keypoint_path(model)`。
+实现：`studio/body/fast_keypoints.py`，`SelectedMHR70`、`install_fast_keypoint_path(model)`。
 
 - 从原 `[308,18566]` 回归矩阵前70行全部非零系数提取依赖，不按阈值近似。
 - 中间阶段只需要468个表面顶点和50个骨架节点参与回归；原路径先计算18439顶点和308地标。
@@ -51,7 +51,7 @@ Fast Python：`/run/media/hzb/Data/conda-envs/fast-sam3d-body/bin/python`。本�
 
 ### 3. 最终完整人体预测核心 CUDA Graph
 
-实现：`fast_execution.py`，`FinalBodyReplay`、`install_final_body_replay(model)`。
+实现：`studio/body/fast_execution.py`，`FinalBodyReplay`、`install_final_body_replay(model)`。
 
 - 包装已编译的完整身体预测核心，覆盖姿态 head、完整 MHR、相机及投影计算。
 - 预热时捕获图，每次复制九个张量输入；相机主点布尔选项也在图签名内。
@@ -61,7 +61,7 @@ Fast Python：`/run/media/hzb/Data/conda-envs/fast-sam3d-body/bin/python`。本�
 
 ### 4. 身体模式同步、分配与 GPU→CPU 传输优化
 
-实现：`fast_execution.py`，`install_body_io()`、`_quiet_method()`、`packed_to_cpu()`。
+实现：`studio/body/fast_execution.py`，`install_body_io()`、`_quiet_method()`、`packed_to_cpu()`。
 
 - 对本实例的 `process_one_image`、`run_inference`、`forward_pose_branch` 生成运行时 AST 适配版本。
 - 只删除独立诊断语句：`print()`、分段计时 `torch.cuda.synchronize()`、每帧 `empty_cache()`。

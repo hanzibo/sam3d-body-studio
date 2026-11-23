@@ -12,7 +12,7 @@ import time
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 from studio_paths import environment, path
-from gpu_lease import acquire_gpu_lease
+from studio.core.gpu_lease import acquire_gpu_lease
 from benchmark_embedl_encoder import memory_guard
 
 
@@ -30,7 +30,7 @@ def main():
     import numpy as np
     import torch
     from tools.build_detector import HumanDetector
-    from embedl_backbone import EmbedlTensorRTBackbone
+    from studio.body.embedl_backbone import EmbedlTensorRTBackbone
     torch.set_num_threads(4)
     cases = json.loads(Path('/run/media/hzb/Data/experiments/standard-reference-yolo-20261109/manifest.json').read_text())['cases']
     images = [cv2.imread(case['image']) for case in cases]

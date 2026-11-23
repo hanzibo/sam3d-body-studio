@@ -4,7 +4,7 @@ import argparse,csv,json,sys
 from pathlib import Path
 import numpy as np
 ROOT=Path(__file__).resolve().parents[1];sys.path.insert(0,str(ROOT))
-from hand_automatic import iou
+from studio.hand.hand_automatic import iou
 p=argparse.ArgumentParser();p.add_argument('--baseline',type=Path,required=True);p.add_argument('--candidate',type=Path,required=True);p.add_argument('--output',type=Path,required=True);a=p.parse_args();rows=[];summaries={}
 for candidate in sorted(a.candidate.iterdir()):
  reference=a.baseline/candidate.name

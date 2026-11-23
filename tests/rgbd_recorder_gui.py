@@ -10,8 +10,8 @@ ROOT=Path(__file__).resolve().parents[1]
 sys.path[:0]=[str(ROOT/'gui'),str(ROOT)]
 from PyQt5 import QtWidgets
 from rgbd_recorder import Recorder
-from recorder_session import RecordingSession,recording_active
-from rgbd_batch import PoseSet
+from studio.rgbd.recorder_session import RecordingSession,recording_active
+from studio.rgbd.rgbd_batch import PoseSet
 
 app=QtWidgets.QApplication([])
 

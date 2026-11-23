@@ -4,8 +4,8 @@ import json,subprocess,sys
 from pathlib import Path
 import numpy as np
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]))
-from rgbd_comparison_data import load_npz,METHODS,comparison_methods
-from video_project import file_hash
+from studio.rgbd.rgbd_comparison_data import load_npz,METHODS,comparison_methods
+from studio.video.video_project import file_hash
 
 
 def audit(root):

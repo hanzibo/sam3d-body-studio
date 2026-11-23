@@ -4,8 +4,8 @@ import sys
 from pathlib import Path
 import numpy as np
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]))
-from rgbd_comparison_report import DepthRenderer,SceneRenderer
-from rgbd_comparison_data import load_npz
+from studio.rgbd.rgbd_comparison_report import DepthRenderer,SceneRenderer
+from studio.rgbd.rgbd_comparison_data import load_npz
 import json
 root=Path(sys.argv[1]);a=load_npz(root/'frames/000000.npz');faces=load_npz(root/'topology.npz')['faces'];k=json.loads((root/'inputs.json').read_text())['k']
 r=DepthRenderer(faces,k);v=a['vertices'][2];center=(v.min(0)+v.max(0))*.5*[1,-1,-1];s=SceneRenderer(faces,center,r.renderer)

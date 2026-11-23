@@ -7,7 +7,7 @@ ROOT=Path(__file__).resolve().parents[1]
 sys.path.insert(0,str(ROOT));sys.path.insert(0,str(ROOT/'gui'))
 from PyQt5 import QtCore,QtTest
 from app import create_application,MainWindow
-from rgbd_comparison_data import load_npz
+from studio.rgbd.rgbd_comparison_data import load_npz
 
 app=create_application();w=MainWindow();w.resize(1640,1000);w.show();v=w.tracking_comparison
 output=Path(sys.argv[1]).resolve() if len(sys.argv)>1 else ROOT/'outputs/depth-fusion/tracking-comparison-v1';checks={}

@@ -4,7 +4,7 @@ from types import SimpleNamespace as NS
 import cv2
 import numpy as np
 import pytest
-from hand_warmup import camera_variant,load_sample,warmup_local_sample
+from studio.hand.hand_warmup import camera_variant,load_sample,warmup_local_sample
 
 
 def sample(tmp_path,height=720):

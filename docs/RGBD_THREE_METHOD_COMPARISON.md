@@ -5,7 +5,7 @@
 使用已准备的 `outputs/depth-fusion/tracking-v1/{arms,cross,turn,recover}`，每组相同 200 帧，约 10 Hz 输入采样。不是 10 Hz 在线性能声明。
 
 ```bash
-/run/media/hzb/Data/conda-envs/sam3d-body/bin/python rgbd_comparison.py
+/run/media/hzb/Data/conda-envs/sam3d-body/bin/python -m studio.rgbd.rgbd_comparison
 ```
 
 控制器使用当前配置的 Fast 与 Standard Conda 环境，推理在一个 GPU 独占 worker 内顺序运行；SAM3 不常驻。可用 `--stage infer` / `--stage evaluate` 分开执行。每个结果帧和网络缓存有内容哈希；只有清单、输入、标定、配置和源码匹配时才续跑。改变实验代码或输入需选新的 `--output`，不得覆盖历史结果。
@@ -23,7 +23,7 @@
 新增第四列可独立复现，不重跑或覆盖已完成的前三列：
 
 ```bash
-/run/media/hzb/Data/conda-envs/sam3d-body/bin/python rgbd_first_init.py
+/run/media/hzb/Data/conda-envs/sam3d-body/bin/python -m studio.rgbd.rgbd_first_init
 ```
 
 默认输出 `outputs/depth-fusion/tracking-comparison-four-v1/`。前三列的网格、关节、指标和计时逐项原样复用，并校验内容哈希；只运行新增的首帧初始化消融。视频前三列复用原始已导出帧后重新编码，第四列采用相同观察相机和参考测量。每组 200 帧；四列视频为 2560×840，播放速度仍是源时间。

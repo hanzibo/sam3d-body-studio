@@ -54,7 +54,7 @@ python -m pip install -r requirements/fast-extra.txt
 | 离线骨干源码 | `dinov3_repo`，默认 `models/torch-hub/hub/facebookresearch_dinov3_main`；通过固定提交依赖脚本获取 |
 | 可选 TensorRT | 对应 512／384 骨干 engine、YOLO engine；本机生成后登记，见下一节 |
 
-Fast 当前验证的原始模型文件 SHA256 固定在 `fast_worker.py`，标准 safetensors 也有固定校验；不兼容或被改写的文件会拒绝加载。更换其他模型版本需要审查并适配，不能仅重命名。TensorRT 引擎登记只用于防止文件意外变化，不代表安全扫描。
+Fast 当前验证的原始模型文件 SHA256 固定在 `studio/body/fast_worker.py`，标准 safetensors 也有固定校验；不兼容或被改写的文件会拒绝加载。更换其他模型版本需要审查并适配，不能仅重命名。TensorRT 引擎登记只用于防止文件意外变化，不代表安全扫描。
 
 ```bash
 python3 studio_paths.py --doctor
@@ -111,7 +111,7 @@ python3 scripts/check_inference.py --backend fast
 python3 scripts/check_inference.py --backend fast --eager
 ```
 
-`mhr_filter_test.py` 默认只使用合成数据；若要验证 SMPL／MHR 共存，可在具备模型的环境显式运行 `python mhr_filter_test.py --smpl-input /absolute/path/to/person_00.npz`。
+`tests/mhr_filter_smoke.py` 默认只使用合成数据；若要验证 SMPL／MHR 共存，可在具备模型的环境显式运行 `python -m tests.mhr_filter_smoke --smpl-input /absolute/path/to/person_00.npz`。
 
 检查会启动独立 worker，校验配置、就绪信号、输出顶点形状和有限性，最后退出并释放模型。默认使用上游 dancing 示例，不随本仓库复制。结果仅保存在 `outputs/release-validation/`。不涉及相机实拍、机器人控制或精度数据集评测。
 

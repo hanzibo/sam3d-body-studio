@@ -14,7 +14,7 @@ import numpy as np
 
 ROOT=Path(__file__).resolve().parents[1]
 sys.path.insert(0,str(ROOT))
-from launch_config import PRESETS
+from studio.core.launch_config import PRESETS
 from benchmark_embedl_encoder import memory_guard
 from compare_backbones_standard import run, sha256
 from report_standard_reference import compare_prediction

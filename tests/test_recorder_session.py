@@ -5,9 +5,9 @@ import json
 from pathlib import Path
 import tempfile
 import unittest
-from recorder_session import RecordingSession, recording_active
-from rgbd_batch import PoseSet
-from data_catalog import scan, validate_delete
+from studio.rgbd.recorder_session import RecordingSession, recording_active
+from studio.rgbd.rgbd_batch import PoseSet
+from studio.core.data_catalog import scan, validate_delete
 
 
 class RecorderSessionTests(unittest.TestCase):

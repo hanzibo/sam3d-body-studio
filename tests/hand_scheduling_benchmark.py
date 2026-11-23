@@ -14,7 +14,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path[:0] = [str(ROOT/'gui'), str(ROOT)]
 from PyQt5 import QtCore, QtNetwork
 from app import MainWindow, create_application
-from hand_sequence import read_sequence
+from studio.hand.hand_sequence import read_sequence
 
 
 def wait(app, predicate, seconds=180):

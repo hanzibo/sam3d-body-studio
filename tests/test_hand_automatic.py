@@ -3,8 +3,8 @@ import json
 from pathlib import Path
 import numpy as np
 import pytest
-from hand_automatic import HandSideTracker,choose_hands,pack_scene
-from hand_sequence import read_sequence
+from studio.hand.hand_automatic import HandSideTracker,choose_hands,pack_scene
+from studio.hand.hand_sequence import read_sequence
 
 
 def hand(side,box,score=.9):return dict(side=side,raw_side=side,bbox=box,score=score)
@@ -26,8 +26,8 @@ def test_never_invent_opposite_side_for_single_detection():
 @pytest.mark.parametrize('stabilize',[False,True])
 def test_forced_side_and_confidence_apply_before_reconstruction(monkeypatch,stabilize):
  from types import SimpleNamespace as NS
- from hand_automatic import AutomaticHands
- import hand_automatic
+ from studio.hand.hand_automatic import AutomaticHands
+ import studio.hand.hand_automatic as hand_automatic
  candidates=[hand('right',[0,0,40,80],.91),hand('left',[0,0,40,80],.84)]
  calls=[];thresholds=[]
  def detect(rgb,confidence):thresholds.append(confidence);return candidates,1.

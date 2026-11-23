@@ -4,11 +4,11 @@ import os,sys,hashlib,json,shutil,argparse
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1];sys.path.insert(0,str(ROOT))
 from studio_paths import path,environment
-from gpu_lease import acquire_gpu_lease
+from studio.core.gpu_lease import acquire_gpu_lease
 p=argparse.ArgumentParser();p.add_argument('--output',type=Path,required=True);a=p.parse_args()
 os.environ.update(environment('fast'));os.environ['YOLO_AUTOINSTALL']='false'
 lease=acquire_gpu_lease('exclusive')
-from hand_automatic import DETECTOR_SHA256
+from studio.hand.hand_automatic import DETECTOR_SHA256
 source=path('hand_detector_checkpoint')
 with source.open('rb') as f:digest=hashlib.file_digest(f,'sha256').hexdigest()
 if digest!=DETECTOR_SHA256:raise ValueError('Unexpected hand detector checkpoint')

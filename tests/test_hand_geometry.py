@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: GPL-3.0-only
 import numpy as np
 import pytest
-from hand_geometry import validate_bbox,mirror_geometry,hand_topology,validate_hand_outputs
+from studio.hand.hand_geometry import validate_bbox,mirror_geometry,hand_topology,validate_hand_outputs
 
 @pytest.mark.parametrize('box',[[1,2,1,30],[-1,2,40,60],[0,0,11,50],[0,0,101,50],[0,0,float('nan'),50]])
 def test_invalid_hand_roi(box):

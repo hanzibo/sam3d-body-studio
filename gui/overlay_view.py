@@ -10,7 +10,7 @@ from OpenGL import GL
 from OpenGL.raw.GL.VERSION.GL_1_1 import glGenTextures as raw_gen_textures
 from OpenGL.GL.shaders import compileProgram, compileShader
 from mesh_geometry import vertex_normals
-from pose_data import EDGES, COLORS, angle_text
+from studio.body.pose_data import EDGES, COLORS, angle_text
 
 
 def camera_projection(matrix, width, height, near=.01, far=1000.):

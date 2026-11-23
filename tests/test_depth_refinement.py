@@ -4,7 +4,7 @@
 import unittest
 try:
     import numpy as np
-    from depth_refinement import DepthConfig, solve_translation, refine_translation, unproject, split_pixels
+    from studio.rgbd.depth_refinement import DepthConfig, solve_translation, refine_translation, unproject, split_pixels
 except ImportError:
     np=None
 

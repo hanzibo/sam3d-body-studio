@@ -8,7 +8,7 @@ worker 固定请求标定文件的分辨率，实机当前为1280×720；使用�
 
 图像先通过预计算 OpenCV remap 去畸变，保留完整画幅，使用同一 K 作为输出内参，不裁切、不镜像。边缘可能有黑色无效区域。预览、PNG照片和推理输入使用同样的校正；不应再次去畸变。camera.json 中保存原始畸变、校正标志、有效零畸变、标定文件SHA256和验证指标。身体与手部读取 intrinsics；原始K保持有效。选择前置摄像头时自动开启身体页“使用相机真实内参”，用户之后仍可手动关闭进行对照。
 
-启动器 --launch camera --backend webcam 使用已有 camera_python 环境中的 OpenCV，不引入相机SDK到GUI/模型进程。实现见 webcam_camera_worker.py、studio_paths.py、gui/app.py、gui/rgbd_validation.py；手部复用现有共享 CameraClient，无需单独打开设备。
+启动器 --launch camera --backend webcam 使用已有 camera_python 环境中的 OpenCV，不引入相机SDK到GUI/模型进程。实现见 studio/cameras/webcam_camera_worker.py、studio_paths.py、gui/app.py、gui/rgbd_validation.py；手部复用现有共享 CameraClient，无需单独打开设备。
 
 V4L2默认没有暴露传感器时间戳，received_monotonic 记录 cap.read 完成时的主机时间，device_timestamp_us=null。界面供帧目标15/30FPS不等于实际采集/推理FPS。
 

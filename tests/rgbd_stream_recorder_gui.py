@@ -11,8 +11,8 @@ ROOT=Path(__file__).resolve().parents[1]
 sys.path[:0]=[str(ROOT/'gui'),str(ROOT)]
 from PyQt5 import QtWidgets
 from rgbd_recorder import Recorder
-from rgbd_sequence import RGBDSequence
-from recorder_session import recording_active
+from studio.rgbd.rgbd_sequence import RGBDSequence
+from studio.rgbd.recorder_session import recording_active
 
 p=argparse.ArgumentParser();p.add_argument('--hardware',action='store_true');p.add_argument('--duration',type=int,default=5);p.add_argument('--fps',type=int,default=30);args=p.parse_args()
 app=QtWidgets.QApplication([])
@@ -30,7 +30,7 @@ from pathlib import Path
 import cv2,numpy as np
 import os
 sys.path.insert(0,os.getcwd())
-from rgbd_sequence import SequenceWriter,action_plan
+from studio.rgbd.rgbd_sequence import SequenceWriter,action_plan
 p=argparse.ArgumentParser();p.add_argument('--output');p.add_argument('--name');a=p.parse_args()
 def emit(kind,**kw):print('@@RGBD '+json.dumps(dict(type=kind,**kw)),flush=True)
 rgb=np.full((120,160,3),100,np.uint8);raw=np.full((120,160),2000,np.uint16)

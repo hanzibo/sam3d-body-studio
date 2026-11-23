@@ -47,7 +47,7 @@ systemd-run --user --scope -p MemoryMax=7G -p MemorySwapMax=2G \
 
 其他机器需在 `config/local.json` 设置 `backbone_engine_int8_512`，并用 `engine_registry.py --register` 注册可信本机构建的引擎。
 启动时只加载已存在的引擎，不自动转换或重建。默认位置见 `config/paths.example.json`。
-适配器 `embedl_backbone.py` 使用 Torch CUDA 缓冲区和当前流，不依赖 PyCUDA；严格校验所选 384/512 静态引擎／单人／FP16 IO。
+适配器 `studio/body/embedl_backbone.py` 使用 Torch CUDA 缓冲区和当前流，不依赖 PyCUDA；严格校验所选 384/512 静态引擎／单人／FP16 IO。
 未修改上游源码，也未将模型或引擎加入仓库。
 
 ## 实测结论

@@ -10,7 +10,7 @@ import numpy as np
 ROOT=Path(__file__).resolve().parents[1];sys.path[:0]=[str(ROOT/'gui'),str(ROOT)]
 from PyQt5 import QtCore
 from app import MainWindow,create_application
-from video_project import save_json,add_track
+from studio.video.video_project import save_json,add_track
 
 with tempfile.TemporaryDirectory() as tmp:
     QtCore.QSettings.setPath(QtCore.QSettings.NativeFormat,QtCore.QSettings.UserScope,tmp)

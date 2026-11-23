@@ -5,12 +5,12 @@ from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1];sys.path.insert(0,str(ROOT))
 from studio_paths import path
 sys.path.insert(0,str(path('official_repo')))
-from gpu_lease import acquire_gpu_lease
-from hand_engine import HandEngine
-from hand_config import HandExecution
+from studio.core.gpu_lease import acquire_gpu_lease
+from studio.hand.hand_engine import HandEngine
+from studio.hand.hand_config import HandExecution
 import cv2,numpy as np
 from dataclasses import replace
-from hand_acceleration import HandTRTBackbone
+from studio.hand.hand_acceleration import HandTRTBackbone
 
 p=argparse.ArgumentParser();p.add_argument('--output',type=Path,required=True);p.add_argument('--repeats',type=int,default=20);a=p.parse_args()
 a.output.mkdir(parents=True,exist_ok=True)

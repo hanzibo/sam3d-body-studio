@@ -26,7 +26,7 @@ class Fixture:
 @unittest.skipIf(torch is None, 'requires optional PyTorch')
 class ExecutionTests(unittest.TestCase):
     def test_transform_only_diagnostics_and_preserves_errors(self):
-        from fast_execution import _quiet_method
+        from studio.body.fast_execution import _quiet_method
         obj=Fixture();quiet,digest=_quiet_method(obj.calculate)
         self.assertEqual(len(digest),64)
         with patch('torch.cuda.synchronize') as sync, patch('torch.cuda.empty_cache') as clear:
@@ -37,7 +37,7 @@ class ExecutionTests(unittest.TestCase):
             sync.assert_called_once();clear.assert_called_once()
 
     def test_final_replay_fallback_cpu_training_and_gradients(self):
-        from fast_execution import FinalBodyReplay
+        from studio.body.fast_execution import FinalBodyReplay
         calls=[]
         def original(*args,**kwargs):calls.append((args,kwargs));return 'original'
         model=SimpleNamespace(training=False)
@@ -52,7 +52,7 @@ class ExecutionTests(unittest.TestCase):
         self.assertFalse(replay.status()['graph_captured'])
 
     def test_cpu_pack_preserves_needed_fields(self):
-        from fast_execution import packed_to_cpu
+        from studio.body.fast_execution import packed_to_cpu
         def recursive(value,target):return value
         data={'keep':torch.arange(8).view(2,4),'drop':torch.ones(12),'none':None}
         got=packed_to_cpu(data,recursive,{'keep','none'})
@@ -62,7 +62,7 @@ class ExecutionTests(unittest.TestCase):
 
     def test_real_source_output_keys_and_diagnostic_only_changes(self):
         from studio_paths import path
-        from fast_execution import _QuietBody
+        from studio.body.fast_execution import _QuietBody
         from pathlib import Path
         source=path('fast_repo')/'sam_3d_body/sam_3d_body_estimator.py'
         if not source.is_file():self.skipTest('requires optional Fast checkout')

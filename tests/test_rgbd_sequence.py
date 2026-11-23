@@ -7,9 +7,9 @@ import tempfile
 import unittest
 from unittest.mock import patch
 import numpy as np
-from rgbd_sequence import SequenceWriter, RGBDSequence, safe_name, action_plan
-from recorder_session import recording_active
-from data_catalog import scan, validate_delete
+from studio.rgbd.rgbd_sequence import SequenceWriter, RGBDSequence, safe_name, action_plan
+from studio.rgbd.recorder_session import recording_active
+from studio.core.data_catalog import scan, validate_delete
 
 
 class SequenceTests(unittest.TestCase):

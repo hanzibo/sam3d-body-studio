@@ -27,7 +27,7 @@ The input resolution is the size of the person crop passed to the backbone. INT8
 | Warmup | Choose 1–30 runs and the uploaded-image layout, camera-size layout, or both. Results record the actual configuration |
 | Fast execution optimizations | Feedback caching, the intermediate MHR70 path, final prediction graph replay, and body-path data transfer optimizations can be disabled through environment variables for ablation |
 
-See [launch_config.py](launch_config.py) for preset definitions and validation rules. Standalone hand reconstruction has its own 512 profiles and detection pipeline. See [Hand acceleration](docs/HAND_ACCELERATION.md).
+See [studio/core/launch_config.py](studio/core/launch_config.py) for preset definitions and validation rules. Standalone hand reconstruction has its own 512 profiles and detection pipeline. See [Hand acceleration](docs/HAND_ACCELERATION.md).
 
 ## Full Inference Latency and Agreement with Standard
 
@@ -97,7 +97,12 @@ Run `./launch_rgbd_recorder.sh` for standalone RGB-D recording. It supports colo
 
 | Path | Purpose | Included in the repository |
 | --- | --- | --- |
-| `gui/`, root Python and launcher scripts | Interface, isolated inference, capture, and evaluation | Yes |
+| [`studio/body/`](studio/body) | Standard and Fast workers, DINOv3/TensorRT adapters, SMPL, and body rendering | Yes |
+| [`studio/hand/`](studio/hand), [`studio/mhr/`](studio/mhr) | Standalone hand reconstruction, live filtering, and the MHR parameter lab | Yes |
+| [`studio/cameras/`](studio/cameras), [`studio/rgbd/`](studio/rgbd) | Camera workers, RGB-D recording, depth evaluation, and tracking experiments | Yes |
+| [`studio/segmentation/`](studio/segmentation), [`studio/video/`](studio/video) | SAM3 prompts, per-frame reconstruction, and video export | Yes |
+| [`studio/core/`](studio/core), [`gui/`](gui) | Launch profiles, shared runtime and worker protocols, and desktop interface | Yes |
+| Root `launch*.sh`, `launch_hand.py`, `studio_paths.py`, `build-backbone.sh`, `run_comfy.sh`, and `engine_registry.py` | Stable launch and setup commands | Yes |
 | `docs/`, `requirements/`, `dependencies.json`, `scripts/`, `tests/` | Documentation, dependency versions, setup, and validation | Yes |
 | `third_party/` | Upstream source obtained at pinned commits | No |
 | `models/`, `assets/smpl/` | Weights, TensorRT engines, and licensed SMPL assets | No (model assets) |
@@ -113,11 +118,10 @@ The Data Management tab shows usage by category and supports search, folder and 
 
 ```bash
 python3 -m unittest discover -s tests -v
-# The next two checks need the numerical dependencies in requirements/gui.txt.
-python test_fast_selection.py
-python mhr_filter_test.py
+# MHR filter smoke check. Requires the numerical dependencies in requirements/gui.txt.
+python -m tests.mhr_filter_smoke
 # Optional RGB-D rendering check. Requires pyrender and a working EGL/OpenGL setup.
-python rgbd_geometry_test.py
+python -m tests.rgbd_geometry_smoke
 ```
 
 CI checks source compilation and runs tests that require no model assets. To test actual inference with local models and CUDA, run `python scripts/check_inference.py --backend standard` or `python scripts/check_inference.py --backend fast`. See the [validation record](docs/VALIDATION.md) and the [installation guide](docs/INSTALL.md) for GUI and camera setup.
@@ -141,6 +145,6 @@ When using this project in research, cite the original models and acceleration m
 
 ## License
 
-Original integration code is **GPL-3.0-only** unless a file header specifies otherwise. `calibrated_visualization.py` adapts the official renderer under the SAM License. The ComfyUI loader and adaptations of the Fast conversion pipeline have separate provenance notices. Third-party weights, datasets, and human model assets are obtained separately and remain subject to their own terms. See [LICENSE](LICENSE) and [third-party notices](THIRD_PARTY_NOTICES.md).
+Original integration code is **GPL-3.0-only** unless a file header specifies otherwise. `studio/body/calibrated_visualization.py` adapts the official renderer under the SAM License. The ComfyUI loader and adaptations of the Fast conversion pipeline have separate provenance notices. Third-party weights, datasets, and human model assets are obtained separately and remain subject to their own terms. See [LICENSE](LICENSE) and [third-party notices](THIRD_PARTY_NOTICES.md).
 
 Compatibility for combined distribution under GPL, the custom SAM and DINOv3 terms, and optional AGPL components remains unresolved. Separate processes, separate downloads, and attribution do not establish compatibility for GPL distribution of the full stack or commercial delivery. See the [license audit](docs/LICENSE_AUDIT.md) and [file provenance inventory](docs/provenance.json).

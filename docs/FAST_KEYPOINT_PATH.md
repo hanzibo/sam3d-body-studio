@@ -1,6 +1,6 @@
 # Fast 中间关键点专用路径
 
-2026-11-08，Studio 运行时适配 `fast_keypoints.py`，不修改上游源码、模型权重和 TensorRT 引擎。正式后端 `fast_worker.py` 在权重加载后、预热前安装。
+2026-11-08，Studio 运行时适配 `studio/body/fast_keypoints.py`，不修改上游源码、模型权重和 TensorRT 引擎。正式后端 `studio/body/fast_worker.py` 在权重加载后、预热前安装。
 
 ## 计算范围
 

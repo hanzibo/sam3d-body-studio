@@ -7,7 +7,7 @@ from pathlib import Path
 try:
     import cv2
     import numpy as np
-    from mask_prompt import morph_mask, read_prompt, sha256, FixedMaskSegmentor
+    from studio.segmentation.mask_prompt import morph_mask, read_prompt, sha256, FixedMaskSegmentor
 except ImportError:
     cv2 = None
 

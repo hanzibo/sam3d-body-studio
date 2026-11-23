@@ -6,9 +6,9 @@ ROOT=Path(__file__).resolve().parents[1];sys.path.insert(0,str(ROOT))
 from studio_paths import path
 sys.path.insert(0,str(path('official_repo')))
 import cv2,numpy as np
-from hand_engine import HandEngine
-from hand_acceleration import HandExecution
-from gpu_lease import acquire_gpu_lease
+from studio.hand.hand_engine import HandEngine
+from studio.hand.hand_acceleration import HandExecution
+from studio.core.gpu_lease import acquire_gpu_lease
 
 p=argparse.ArgumentParser();p.add_argument('--variant',choices=['native','trt','decoder','mhr','graph','all','reduced','tf32','feedback','keypoints','feedback_keypoints'],required=True)
 p.add_argument('--output',type=Path,required=True);p.add_argument('--reference',type=Path);p.add_argument('--repeats',type=int,default=10);a=p.parse_args()

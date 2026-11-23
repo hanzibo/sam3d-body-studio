@@ -11,7 +11,7 @@ import time
 import uuid
 import numpy as np
 from PyQt5 import QtCore, QtGui
-from gui_camera import select_camera_intrinsics
+from studio.cameras.gui_camera import select_camera_intrinsics
 
 ROOT = Path(__file__).resolve().parents[1]
 

@@ -18,7 +18,7 @@ class KeypointTests(unittest.TestCase):
         root = path('fast_checkpoint_dir')
         if not (root/'assets/mhr_model.pt').is_file():
             raise unittest.SkipTest('requires locally installed MHR asset')
-        from fast_keypoints import SelectedMHR70
+        from studio.body.fast_keypoints import SelectedMHR70
         torch.set_num_threads(4)
         cls.mhr = torch.jit.load(str(root/'assets/mhr_model.pt'), map_location='cpu').eval()
         state = torch.load(root/'model.ckpt', weights_only=True, mmap=True, map_location='cpu')
@@ -53,7 +53,7 @@ class KeypointTests(unittest.TestCase):
                 torch.testing.assert_close(actual, expected, atol=1e-6, rtol=1e-6)
 
     def test_final_training_gradients_correctives_and_hand_fallback(self):
-        from fast_keypoints import install_fast_keypoint_path
+        from studio.body.fast_keypoints import install_fast_keypoint_path
         sentinel = object()
         calls = []
         def original(*args, **kwargs):

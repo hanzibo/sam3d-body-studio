@@ -35,11 +35,11 @@
 
 ```bash
 # 使用配置好的对应 Conda Python；先关闭 Studio 模型和相机。
-SAM3_PYTHON sam3_person_batch.py --audit INPUT_AUDIT.json --output outputs/experiment/masks
-GUI_PYTHON depth_experiment.py --masks outputs/experiment/masks/masks.json --output outputs/experiment/run
-GUI_PYTHON depth_report.py --experiment outputs/experiment/run --masks outputs/experiment/masks/masks.json
+SAM3_PYTHON studio/segmentation/sam3_person_batch.py --audit INPUT_AUDIT.json --output outputs/experiment/masks
+GUI_PYTHON studio/rgbd/depth_experiment.py --masks outputs/experiment/masks/masks.json --output outputs/experiment/run
+GUI_PYTHON studio/rgbd/depth_report.py --experiment outputs/experiment/run --masks outputs/experiment/masks/masks.json
 # 人工检查掩膜后，可选将结果复制进原样本的历史索引（不修改原始 RGB-D）
-GUI_PYTHON depth_report.py --experiment outputs/experiment/run --masks outputs/experiment/masks/masks.json --publish --masks-reviewed --pose-set /path/to/pose-set
+GUI_PYTHON studio/rgbd/depth_report.py --experiment outputs/experiment/run --masks outputs/experiment/masks/masks.json --publish --masks-reviewed --pose-set /path/to/pose-set
 ```
 
 实验按完整预测和评估文件续跑；失败的部分目录需保留并重命名后重试。所有权重保持原样，无需训练或重新转换 TensorRT。
@@ -48,7 +48,7 @@ GUI_PYTHON depth_report.py --experiment outputs/experiment/run --masks outputs/e
 
 ## 2026-11-06：第二阶段，受约束 MHR 表面拟合
 
-在同一分支、同一批 12 个 Gemini 静态姿态、同一批 36 个冻结网络输出上继续验证。没有重新训练网络，也没有把深度输入骨干。新增 `depth_pose_experiment.py` 依次生成独立的仅平移基线、固定尺度、整体朝向、身体姿态结果；原始数组不覆盖。
+在同一分支、同一批 12 个 Gemini 静态姿态、同一批 36 个冻结网络输出上继续验证。没有重新训练网络，也没有把深度输入骨干。新增 `studio/rgbd/depth_pose_experiment.py` 依次生成独立的仅平移基线、固定尺度、整体朝向、身体姿态结果；原始数组不覆盖。
 
 - 384 检查：12 对 Fast 384/512 使用相同检测框、相同实际 RGB 内参。提取当前 Fast `camera_head.py` 的实际投影函数，在固定网络相机预测、原图尺寸、框和内参时，仅改变网络尺寸属性，计算出的平移差为 0。因此未发现投影公式直接乘错 384/512 比例；这不排除上游特征、裁剪实现或训练分辨率适应性的问题，也不能据此断言所有坐标处理无误。
 - 尺度：姿态 1–3 仅用于估计每配置共用的米制倍率，范围 ±5%；至少两张满足接受条件且估计范围小于 3% 才使用中位数。三配置均未取得一致证据，故倍率全部保持 1。它是统一的外部尺度乘数，身份形状仍来自各帧原始预测，不是完整的跨帧固定身份模型。其余 9 张不用于尺度校准。
@@ -78,9 +78,9 @@ GUI 重载原样本集后，历史项以 `depth-v2-配置-阶段` 区分。选�
 复现（先释放 Studio 模型；路径按本机配置替换）：
 
 ```bash
-GUI_PYTHON depth_camera_audit.py --source outputs/depth-fusion/experiment-v1 --output outputs/depth-fusion/experiment-v2/camera-audit.json
-GUI_PYTHON depth_pose_experiment.py --source outputs/depth-fusion/experiment-v1 --masks outputs/depth-fusion/masks/masks.json --output outputs/depth-fusion/experiment-v2
-GUI_PYTHON depth_pose_report.py --experiment outputs/depth-fusion/experiment-v2 --source outputs/depth-fusion/experiment-v1 --masks outputs/depth-fusion/masks/masks.json --publish
+GUI_PYTHON studio/rgbd/depth_camera_audit.py --source outputs/depth-fusion/experiment-v1 --output outputs/depth-fusion/experiment-v2/camera-audit.json
+GUI_PYTHON studio/rgbd/depth_pose_experiment.py --source outputs/depth-fusion/experiment-v1 --masks outputs/depth-fusion/masks/masks.json --output outputs/depth-fusion/experiment-v2
+GUI_PYTHON studio/rgbd/depth_pose_report.py --experiment outputs/depth-fusion/experiment-v2 --source outputs/depth-fusion/experiment-v1 --masks outputs/depth-fusion/masks/masks.json --publish
 GUI_PYTHON tests/mhr_depth_roundtrip.py outputs/depth-fusion/experiment-v2
 ```
 

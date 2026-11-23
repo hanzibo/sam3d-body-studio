@@ -10,7 +10,7 @@ ROOT=Path(__file__).resolve().parents[1]
 sys.path[:0]=[str(ROOT/'gui'),str(ROOT)]
 from PyQt5 import QtCore
 from app import create_application,MainWindow
-from gpu_lease import acquire_gpu_lease
+from studio.core.gpu_lease import acquire_gpu_lease
 OUT=Path('/run/media/hzb/Data/experiments/hand-lab-20261112')
 DATA=Path('/run/media/hzb/Data/experiments/wilor/datasets')
 

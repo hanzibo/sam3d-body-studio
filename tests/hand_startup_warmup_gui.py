@@ -10,7 +10,7 @@ import time
 ROOT=Path(__file__).resolve().parents[1];sys.path[:0]=[str(ROOT/'gui'),str(ROOT)]
 from PyQt5 import QtCore,QtGui
 from app import MainWindow,create_application
-from hand_sequence import read_sequence
+from studio.hand.hand_sequence import read_sequence
 
 OUT=Path(os.environ.get('HAND_STARTUP_OUT','/run/media/hzb/Data/experiments/hand-startup-warmup-20261113'));OUT.mkdir(parents=True,exist_ok=True)
 def wait(app,predicate,seconds=300):

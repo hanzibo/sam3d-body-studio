@@ -19,7 +19,7 @@ import time
 
 ROOT=Path(__file__).resolve().parents[1]
 sys.path.insert(0,str(ROOT))
-from launch_config import PRESETS
+from studio.core.launch_config import PRESETS
 from benchmark_embedl_encoder import memory_guard
 
 

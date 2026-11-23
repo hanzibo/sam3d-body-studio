@@ -4,7 +4,7 @@
 import unittest
 try:
     import torch
-    from depth_pose_accelerated import corrective_features
+    from studio.rgbd.depth_pose_accelerated import corrective_features
 except ImportError:
     torch = None
 

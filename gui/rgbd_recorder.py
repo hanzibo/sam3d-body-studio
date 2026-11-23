@@ -13,7 +13,7 @@ import time
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 from studio_paths import environment, path
-from recorder_session import RecordingSession
+from studio.rgbd.recorder_session import RecordingSession
 from PyQt5 import QtCore, QtGui, QtWidgets
 
 
@@ -46,7 +46,7 @@ class Preview(QtWidgets.QWidget):
 class Recorder(QtWidgets.QMainWindow):
     def __init__(self, camera_python=None, capture_script=None, stream_script=None, sequence_root=None):
         super().__init__();self.setWindowTitle('RGB-D 数据采集 · SAM 3D Body Studio');self.resize(1360,960)
-        self.camera_python=str(camera_python or path('camera_python'));self.capture_script=str(capture_script or ROOT/'rgbd_capture.py')
+        self.camera_python=str(camera_python or path('camera_python'));self.capture_entry=[str(capture_script)] if capture_script is not None else ['-m','studio.cameras.rgbd_capture']
         self.session=None;self.state='idle';self.pending=None;self.pending_index=None
         self.event=None;self.buffer='';self.cancelled=False;self.auto_sequence=False
         self.frame_count=0;self.last_frame=0.;self.log_lines=[];self.worker_started=0.
@@ -180,7 +180,7 @@ class Recorder(QtWidgets.QMainWindow):
         self.process.setProcessEnvironment(env);self.process.setWorkingDirectory(str(ROOT))
         self.state='connecting';self.worker_started=time.monotonic();self.rgb.overlay='正在连接相机…';self.rgb.update()
         self.status.setText('正在连接 Gemini 336L；若提示设备占用，请关闭其他窗口中的相机预览。')
-        self.process.start(self.camera_python,['-u',self.capture_script,'--output',str(self.pending),'--preview','--depth-preview'])
+        self.process.start(self.camera_python,['-u',*self.capture_entry,'--output',str(self.pending),'--preview','--depth-preview'])
         self.refresh()
 
     def begin_capture(self):

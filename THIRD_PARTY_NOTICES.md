@@ -1,6 +1,6 @@
 # Attribution and licensing boundaries
 
-Copyright © 2026 hanzibo and contributors, for original Studio contributions. The default grant is GPL-3.0-only, except for files explicitly marked otherwise. In particular, `calibrated_visualization.py` is an adaptation under the SAM License, **not** the root GPL grant. Upstream copyright and permission notices are retained for adaptations.
+Copyright © 2026 hanzibo and contributors, for original Studio contributions. The default grant is GPL-3.0-only, except for files explicitly marked otherwise. In particular, `studio/body/calibrated_visualization.py` is an adaptation under the SAM License, **not** the root GPL grant. Upstream copyright and permission notices are retained for adaptations.
 
 SAM 3D Body Studio builds on the following projects. It does not claim authorship of their neural networks, learned parameters, acceleration methods, rig definitions, or licensed assets. Full upstream repositories are obtained separately at the revisions in `dependencies.json`; some Studio files adapt upstream loader, rendering or conversion workflows, as identified in their headers and [the source audit](docs/LICENSE_AUDIT.md). Bibliographic entries in `CITATIONS.bib` are reproduced from the SAM 3D Body and Fast SAM 3D Body project READMEs (checked 2026-11-05).
 

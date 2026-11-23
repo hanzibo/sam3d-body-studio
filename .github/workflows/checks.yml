@@ -15,7 +15,7 @@ jobs:
       - run: python -m compileall -q -x 'third_party|outputs|envs' .
       - run: python -m unittest discover -s tests -v
       - run: pip install -r requirements/gui.txt
-      - run: python test_fast_selection.py && python mhr_filter_test.py
+      - run: python -m tests.test_fast_selection && python -m tests.mhr_filter_smoke
       - run: QT_QPA_PLATFORM=offscreen python tests/gui_startup.py
       - run: QT_QPA_PLATFORM=offscreen python tests/data_manager_gui.py
       - run: python -m unittest discover -s tests -p test_mask_prompt.py -v

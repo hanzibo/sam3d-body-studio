@@ -5,7 +5,7 @@ from typing import Optional
 from types import SimpleNamespace
 import pytest
 torch=pytest.importorskip('torch')
-from hand_decoder import scheduled_forward
+from studio.hand.hand_decoder import scheduled_forward
 from studio_paths import path
 
 

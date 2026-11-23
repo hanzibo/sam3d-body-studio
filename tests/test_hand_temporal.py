@@ -2,7 +2,7 @@
 import numpy as np
 import pytest
 from scipy.spatial.transform import Rotation
-from hand_temporal import HandTemporalFilter,RotationOneEuro,filter_options
+from studio.hand.hand_temporal import HandTemporalFilter,RotationOneEuro,filter_options
 
 OPTIONS=dict(pose=True,position=False,min_cutoff=1.5,beta=.5,d_cutoff=1.)
 def inputs(n=1):

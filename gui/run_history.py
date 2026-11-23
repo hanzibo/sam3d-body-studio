@@ -5,7 +5,7 @@ import csv
 import json
 from pathlib import Path
 from PyQt5 import QtWidgets
-from launch_config import ROOT, LaunchConfig
+from studio.core.launch_config import ROOT, LaunchConfig
 
 HISTORY=ROOT/'outputs/gui/run-history.json'
 

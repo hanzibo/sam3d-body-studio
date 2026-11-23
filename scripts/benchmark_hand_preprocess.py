@@ -5,10 +5,10 @@ from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1];sys.path.insert(0,str(ROOT))
 from studio_paths import environment
 os.environ.update(environment('fast'))
-from gpu_lease import acquire_gpu_lease
+from studio.core.gpu_lease import acquire_gpu_lease
 lease=acquire_gpu_lease('exclusive')
 import torch,cv2,numpy as np
-from hand_automatic import HandDetector
+from studio.hand.hand_automatic import HandDetector
 p=argparse.ArgumentParser();p.add_argument('--output',required=True,type=Path);a=p.parse_args();a.output.mkdir(parents=True,exist_ok=True)
 torch.set_num_threads(4)
 detectors={key:HandDetector('trt_fp16',optimized_preprocess=key=='candidate') for key in ('baseline','candidate')}

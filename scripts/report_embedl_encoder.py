@@ -18,7 +18,7 @@ def main():
     a=p.parse_args()
     r=json.loads((a.experiment/'full/full.json').read_text())
     enc=json.loads((a.experiment/'encoder/encoder.json').read_text())
-    from pose_data import joint_angles
+    from studio.body.pose_data import joint_angles
     rows=[]
     for i,c in enumerate(r['checks']):
         pair={name:np.load(a.experiment/f'full/case-{i:02d}-{name}.npz',allow_pickle=False) for name in ['fp16','int8']}
@@ -65,7 +65,7 @@ def main():
     print(json.dumps({k:v for k,v in summary.items() if k!='cases'},ensure_ascii=False,indent=2),flush=True)
     if not a.render:return
     from studio_paths import environment,path
-    from gpu_lease import acquire_gpu_lease
+    from studio.core.gpu_lease import acquire_gpu_lease
     lease=acquire_gpu_lease('exclusive')
     os.environ.update(environment('fast'))
     sys.path.insert(0,str(path('fast_repo')))

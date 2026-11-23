@@ -5,7 +5,7 @@ import sys,time,json,base64,tempfile,os
 ROOT=Path(__file__).resolve().parents[1];sys.path[:0]=[str(ROOT/'gui'),str(ROOT)]
 from PyQt5 import QtCore,QtGui
 from app import MainWindow,create_application
-from hand_sequence import read_sequence
+from studio.hand.hand_sequence import read_sequence
 OUT=Path(os.environ.get('HAND_LIVE_OUT','/run/media/hzb/Data/experiments/hand-live-20261113'));OUT=OUT/('fp16' if os.environ.get('HAND_LIVE_FP16') else 'int8');OUT.mkdir(parents=True,exist_ok=True)
 def wait(app,predicate,seconds=180):
  end=time.monotonic()+seconds

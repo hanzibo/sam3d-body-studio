@@ -6,7 +6,7 @@ from pathlib import Path
 import tempfile
 import unittest
 
-from launch_config import LaunchConfig, PRESETS, backbone_engine, required_resources
+from studio.core.launch_config import LaunchConfig, PRESETS, backbone_engine, required_resources
 from studio_paths import path
 
 INT8='Fast INT8 512 身体（Embedl）'

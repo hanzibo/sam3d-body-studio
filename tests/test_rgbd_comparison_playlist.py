@@ -2,7 +2,7 @@
 """Regression: different MP4 time bases must not stretch concatenated playback."""
 import json,subprocess,tempfile,unittest
 from pathlib import Path
-from rgbd_comparison_playlist import make_playlist
+from studio.rgbd.rgbd_comparison_playlist import make_playlist
 
 class PlaylistTests(unittest.TestCase):
     def test_different_input_time_bases_keep_duration_and_every_frame(self):

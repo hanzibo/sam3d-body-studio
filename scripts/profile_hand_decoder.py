@@ -6,9 +6,9 @@ from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1];sys.path.insert(0,str(ROOT))
 from studio_paths import path
 sys.path.insert(0,str(path('official_repo')))
-from gpu_lease import acquire_gpu_lease
-from hand_engine import HandEngine
-from hand_config import HandExecution
+from studio.core.gpu_lease import acquire_gpu_lease
+from studio.hand.hand_engine import HandEngine
+from studio.hand.hand_config import HandExecution
 import cv2,numpy as np,torch
 
 p=argparse.ArgumentParser();p.add_argument('--output',type=Path,required=True);p.add_argument('--runs',type=int,default=20);p.add_argument('--optimized',action='store_true');a=p.parse_args()
@@ -44,7 +44,7 @@ for n in (1,2):
   return original(*args,**kwargs)
  decoder.forward=forward;restores.append((decoder,'forward',original))
  if a.optimized:
-  from hand_feedback import HandFeedbackCall
+  from studio.hand.hand_feedback import HandFeedbackCall
   patch(HandFeedbackCall,'__call__','feedback')
  for i,layer in enumerate(decoder.layers):patch(layer,'_call_impl',f'layer_{i}')
  patch(model.head_pose_hand,'mhr_forward','mhr_total')

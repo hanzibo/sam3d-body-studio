@@ -5,8 +5,8 @@ from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1];sys.path.insert(0,str(ROOT))
 from studio_paths import environment
 os.environ.update(environment('fast'))
-from gpu_lease import acquire_gpu_lease
-from hand_automatic import HandDetector,choose_hands,iou
+from studio.core.gpu_lease import acquire_gpu_lease
+from studio.hand.hand_automatic import HandDetector,choose_hands,iou
 import cv2,numpy as np
 p=argparse.ArgumentParser();p.add_argument('--output',type=Path,required=True);a=p.parse_args();a.output.mkdir(parents=True,exist_ok=True)
 lease=acquire_gpu_lease('exclusive');detectors={key:HandDetector(key) for key in ('native','trt_fp16')};images=[]

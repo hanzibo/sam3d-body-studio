@@ -18,11 +18,11 @@ from camera_client import CameraClient
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
-from backends import BACKENDS, missing_resources
-from launch_config import LaunchConfig, PRESETS
+from studio.core.backends import BACKENDS, missing_resources
+from studio.core.launch_config import LaunchConfig, PRESETS
 from profile_panel import ProfilePanel
 from run_history import record_report, show_history
-from gui_camera import select_camera_intrinsics
+from studio.cameras.gui_camera import select_camera_intrinsics
 from live_stream import LiveStream
 from mesh_geometry import FastMeshData
 from mhr_lab import MhrLab
@@ -34,8 +34,8 @@ from data_manager import DataManager
 from image_segmentation import ImageSegmentation
 from video_reconstruction import VideoReconstruction
 from tracking_comparison import RgbdComparison
-from pose_data import EDGES, COLORS
-from smpl_stage import SMPL_EDGES
+from studio.body.pose_data import EDGES, COLORS
+from studio.body.smpl_stage import SMPL_EDGES
 from studio_paths import path
 REPO = path('official_repo')
 CHECKPOINT = path('standard_checkpoint')

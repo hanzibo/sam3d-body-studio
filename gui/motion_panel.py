@@ -3,8 +3,8 @@
 """Shared pose layers, angles and recording controls for still/live results."""
 from pathlib import Path
 from PyQt5 import QtCore, QtGui, QtWidgets
-from pose_data import extract_pose, joint_angles, angle_text
-from motion_recording import MotionRecorder
+from studio.body.pose_data import extract_pose, joint_angles, angle_text
+from studio.body.motion_recording import MotionRecorder
 
 
 class MotionPanel(QtWidgets.QWidget):

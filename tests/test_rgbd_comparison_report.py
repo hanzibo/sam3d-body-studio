@@ -1,11 +1,11 @@
 # SPDX-License-Identifier: GPL-3.0-only
 import unittest
 import numpy as np
-from rgbd_comparison_report import metrics_for,summarize
+from studio.rgbd.rgbd_comparison_report import metrics_for,summarize
 
 class MetricTests(unittest.TestCase):
     def test_common_frames_and_own_valid_errors_expose_survivor_bias(self):
-        from rgbd_comparison_data import ALL_METHODS
+        from studio.rgbd.rgbd_comparison_data import ALL_METHODS
         rows=[]
         for method in ALL_METHODS:
             for frame in (0,1):

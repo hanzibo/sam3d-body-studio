@@ -5,7 +5,7 @@ from pathlib import Path
 import tempfile
 import unittest
 
-from data_catalog import scan, validate_delete, checked_path
+from studio.core.data_catalog import scan, validate_delete, checked_path
 
 
 class DataCatalogTests(unittest.TestCase):

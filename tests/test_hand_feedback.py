@@ -6,7 +6,7 @@ import pytest
 torch=pytest.importorskip('torch')
 pytest.importorskip('roma')
 from torch.nn import functional as F
-from hand_feedback import HandFeedbackCall
+from studio.hand.hand_feedback import HandFeedbackCall
 from studio_paths import path
 
 

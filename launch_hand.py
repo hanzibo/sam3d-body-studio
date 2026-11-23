@@ -8,4 +8,4 @@ from studio_paths import path, environment
 root = Path(__file__).resolve().parent
 env = environment('fast')
 env['PYTHONPATH'] = os.pathsep.join((str(path('official_repo')),str(root)))
-os.execve(str(path('fast_python')),[str(path('fast_python')),'-u',str(root/'hand_worker.py'),*sys.argv[1:]],env)
+os.execve(str(path('fast_python')),[str(path('fast_python')),'-u','-m','studio.hand.hand_worker',*sys.argv[1:]],env)

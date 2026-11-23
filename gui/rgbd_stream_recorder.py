@@ -8,7 +8,7 @@ import shutil
 import time
 from PyQt5 import QtCore, QtGui, QtWidgets
 from studio_paths import ROOT, environment, path
-from rgbd_sequence import PRESETS, action_plan, safe_name
+from studio.rgbd.rgbd_sequence import PRESETS, action_plan, safe_name
 
 
 class StreamRecorder(QtWidgets.QWidget):
@@ -17,7 +17,7 @@ class StreamRecorder(QtWidgets.QWidget):
     def __init__(self, preview_class, camera_python=None, capture_script=None, output_root=None):
         super().__init__()
         self.camera_python=str(camera_python or path('camera_python'))
-        self.capture_script=str(capture_script or ROOT/'rgbd_stream_capture.py')
+        self.capture_entry=[str(capture_script)] if capture_script is not None else ['-m','studio.cameras.rgbd_stream_capture']
         self.output_root=Path(output_root or ROOT/'outputs/rgbd-sequences')
         self.state='idle';self.pending=None;self.summary=None;self.buffer='';self.frames=0;self.last_frame=0.
         self.started=0.;self.last_action='';self.log_lines=[];self.stop_requested=False
@@ -116,7 +116,7 @@ class StreamRecorder(QtWidgets.QWidget):
         env=QtCore.QProcessEnvironment()
         for k,v in environment('camera').items():env.insert(k,v)
         self.process.setProcessEnvironment(env);self.process.setWorkingDirectory(str(ROOT))
-        self.process.start(self.camera_python,['-u',self.capture_script,'--output',str(self.pending),'--name',self.name.text().strip()])
+        self.process.start(self.camera_python,['-u',*self.capture_entry,'--output',str(self.pending),'--name',self.name.text().strip()])
         self.location.setText('本次计划保存到：'+str(self.pending));self.status.setText('正在连接 Gemini 336L…');self.refresh()
 
     def begin_record(self):

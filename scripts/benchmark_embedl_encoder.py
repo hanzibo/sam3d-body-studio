@@ -13,7 +13,7 @@ import time
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
-from gpu_lease import acquire_gpu_lease
+from studio.core.gpu_lease import acquire_gpu_lease
 from studio_paths import environment, path
 
 
@@ -185,13 +185,13 @@ def main():
     sys.argv = [str(loader), '--image', str(a.image), '--output', str(a.output), '--compile',
                 '--trt-backbone', str(path('backbone_engine_512')), '--trt-yolo', str(path('yolo_engine')),
                 '--image-size', '512', '--inference-type', 'body', '--warmup', '1', '--runs', '1']
-    from offline_dinov3 import local_dinov3_source
+    from studio.core.offline_dinov3 import local_dinov3_source
     ns = {'__name__':'__main__', '__file__':str(loader)}
     with local_dinov3_source():
         exec(compile(loader.read_text().split('faces=estimator.faces.copy()')[0],str(loader),'exec'),ns)
-    from fast_feedback import install_fast_feedback_cache
-    from fast_keypoints import install_fast_keypoint_path
-    from fast_execution import install_final_body_replay, install_body_io
+    from studio.body.fast_feedback import install_fast_feedback_cache
+    from studio.body.fast_keypoints import install_fast_keypoint_path
+    from studio.body.fast_execution import install_final_body_replay, install_body_io
     model=ns['model']
     feedback=install_fast_feedback_cache(model)
     keypoints=install_fast_keypoint_path(model)
@@ -213,7 +213,7 @@ def main():
     report['timing']={k:summary(v) for k,v in values.items()}
     report['scope']='512 single-person body; YOLO TRT + crop + DINO + compiled FP32 decoder/MHR + CPU outputs; excludes load/compile/render/disk IO; same feedback/keypoint/final-graph/IO optimizations'
     report['optimizations']=dict(feedback=dict(feedback),keypoints=dict(keypoints),final=final.status(),io=dict(io))
-    report['adapter_sha256']={name:digest(ROOT/name) for name in ['fast_feedback.py','fast_keypoints.py','fast_execution.py']}
+    report['adapter_sha256']={name:digest(ROOT/'studio/body'/name) for name in ['fast_feedback.py','fast_keypoints.py','fast_execution.py']}
     report['settings']=ns['settings']
     report['int8_output_adapter']='ONNX native output converted to FP16 to match the existing backbone contract'
     report['engine_sha256']={name:digest(filename) for name,filename in [('fp16',path('backbone_engine_512')),('int8',engine_path)]}

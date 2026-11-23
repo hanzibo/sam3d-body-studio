@@ -6,7 +6,7 @@ from pathlib import Path
 import shutil
 
 from PyQt5 import QtCore, QtGui, QtWidgets
-from data_catalog import scan, checked_path, validate_delete, human_size
+from studio.core.data_catalog import scan, checked_path, validate_delete, human_size
 
 ROOT = Path(__file__).resolve().parents[1]
 TEXT_SUFFIXES = {'.json', '.jsonl', '.csv', '.txt', '.log', '.yaml', '.yml', '.md'}

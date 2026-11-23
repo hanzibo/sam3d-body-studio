@@ -7,7 +7,7 @@ import uuid
 import numpy as np
 from PyQt5 import QtCore,QtGui,QtWidgets
 from studio_paths import path
-from hand_sequence import read_sequence
+from studio.hand.hand_sequence import read_sequence
 from overlay_view import OverlayView
 
 

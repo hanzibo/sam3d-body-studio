@@ -10,7 +10,7 @@ import sys
 import numpy as np
 ROOT=Path(__file__).resolve().parents[1]
 sys.path.insert(0,str(ROOT))
-from pose_data import joint_angles
+from studio.body.pose_data import joint_angles
 
 
 def compare_prediction(reference, candidate):
@@ -103,11 +103,11 @@ def main():
     print(json.dumps({k:v for k,v in summary.items() if k not in ['cases']},ensure_ascii=False,indent=2),flush=True)
     if not a.render:return
     from studio_paths import environment,path
-    from gpu_lease import acquire_gpu_lease
+    from studio.core.gpu_lease import acquire_gpu_lease
     lease=acquire_gpu_lease('exclusive');os.environ.update(environment('fast'))
     sys.path.insert(0,str(path('fast_repo')))
     import cv2
-    from calibrated_visualization import render_mesh
+    from studio.body.calibrated_visualization import render_mesh
     out=root/'visuals';out.mkdir(exist_ok=True);montage=[]
     for case in manifest['cases']:
         image=cv2.imread(case['image']);k=case['intrinsics']

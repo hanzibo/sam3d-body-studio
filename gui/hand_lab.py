@@ -7,8 +7,8 @@ from pathlib import Path
 import uuid
 import numpy as np
 from PyQt5 import QtCore, QtGui, QtWidgets
-from hand_geometry import validate_bbox
-from gui_camera import select_camera_intrinsics
+from studio.hand.hand_geometry import validate_bbox
+from studio.cameras.gui_camera import select_camera_intrinsics
 from overlay_view import OverlayView
 from hand_sequence_panel import HandSequencePanel
 from hand_live import HandLivePanel
@@ -303,7 +303,7 @@ class HandLab(QtWidgets.QWidget):
         if name:self.startup_warmup_source.setText(name)
 
     def execution_config(self):
-        from hand_config import HandExecution
+        from studio.hand.hand_config import HandExecution
         return HandExecution(backbone=self.backbone_choice.currentData(),detector=self.detector_choice.currentData(),decoder_compile=self.decoder_compile.isChecked(),mhr_compile=self.mhr_compile.isChecked(),mhr_graph=self.mhr_graph.isChecked(),compile_mode=self.compile_mode.currentData(),feedback_cache=self.feedback_cache.isChecked(),intermediate_keypoints=self.intermediate_keypoints.isChecked(),final_hand_vertices=self.final_hand_vertices.isChecked(),intermediate_compile=self.intermediate_compile.isChecked(),intermediate_predictions=self.prediction_count.currentData()).to_dict()
 
     def start(self):

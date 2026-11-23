@@ -87,25 +87,25 @@ Gemini 彩色 MJPG（SDK 独立进程）
 
 | 顺序 | 文件 | 重点 |
 | --- | --- | --- |
-| 1 | [hand_config.py](/home/hzb/Work/sam3d-body-deploy/hand_config.py) | 加载配置及严格校验 |
-| 2 | [launch_hand.py](/home/hzb/Work/sam3d-body-deploy/launch_hand.py)、[hand_worker.py](/home/hzb/Work/sam3d-body-deploy/hand_worker.py) | 环境隔离、启动、JSON 请求/事件、结果保存 |
-| 3 | [hand_stream.py](/home/hzb/Work/sam3d-body-deploy/hand_stream.py) | 每帧协议、滤波上下文、NPZ 完整/精简包、原子替换 |
-| 4 | [hand_automatic.py](/home/hzb/Work/sam3d-body-deploy/hand_automatic.py) | 检测、单手强制侧、框关联、`pack_scene` |
-| 5 | [hand_engine.py](/home/hzb/Work/sam3d-body-deploy/hand_engine.py)、[hand_geometry.py](/home/hzb/Work/sam3d-body-deploy/hand_geometry.py) | `predict_many`、实际字段、骨架子集、坐标/镜像 |
-| 6 | [hand_temporal.py](/home/hzb/Work/sam3d-body-deploy/hand_temporal.py)、[one_euro.py](/home/hzb/Work/sam3d-body-deploy/one_euro.py) | 姿态/位置滤波和重置 |
+| 1 | [studio/hand/hand_config.py](/home/hzb/Work/sam3d-body-deploy/studio/hand/hand_config.py) | 加载配置及严格校验 |
+| 2 | [launch_hand.py](/home/hzb/Work/sam3d-body-deploy/launch_hand.py)、[studio/hand/hand_worker.py](/home/hzb/Work/sam3d-body-deploy/studio/hand/hand_worker.py) | 环境隔离、启动、JSON 请求/事件、结果保存 |
+| 3 | [studio/hand/hand_stream.py](/home/hzb/Work/sam3d-body-deploy/studio/hand/hand_stream.py) | 每帧协议、滤波上下文、NPZ 完整/精简包、原子替换 |
+| 4 | [studio/hand/hand_automatic.py](/home/hzb/Work/sam3d-body-deploy/studio/hand/hand_automatic.py) | 检测、单手强制侧、框关联、`pack_scene` |
+| 5 | [studio/hand/hand_engine.py](/home/hzb/Work/sam3d-body-deploy/studio/hand/hand_engine.py)、[studio/hand/hand_geometry.py](/home/hzb/Work/sam3d-body-deploy/studio/hand/hand_geometry.py) | `predict_many`、实际字段、骨架子集、坐标/镜像 |
+| 6 | [studio/hand/hand_temporal.py](/home/hzb/Work/sam3d-body-deploy/studio/hand/hand_temporal.py)、[studio/core/one_euro.py](/home/hzb/Work/sam3d-body-deploy/studio/core/one_euro.py) | 姿态/位置滤波和重置 |
 | 7 | [gui/hand_live.py](/home/hzb/Work/sam3d-body-deploy/gui/hand_live.py) | 最新帧调度、一请求在途、显示独立调度、计时 |
 | 8 | [gui/hand_lab.py](/home/hzb/Work/sam3d-body-deploy/gui/hand_lab.py) | 启动/释放、快捷方案、GUI 控件及互斥 |
 
 其他相关文件：
 
-- `/home/hzb/Work/sam3d-body-deploy/hand_acceleration.py`：TRT 编码器、MHR 设备化/Graph、编译安装。
-- `/home/hzb/Work/sam3d-body-deploy/hand_decoder.py`：中间预测调度与回调分段整体编译。
-- `/home/hzb/Work/sam3d-body-deploy/hand_feedback.py`：反馈复制缓存、关键点依赖裁剪、最终手部顶点路径。
-- `/home/hzb/Work/sam3d-body-deploy/hand_detector_preprocess.py`：检测器 RGB 固定缓冲预处理。
-- `/home/hzb/Work/sam3d-body-deploy/hand_warmup.py`：已有照片离线预热。
-- `/home/hzb/Work/sam3d-body-deploy/hand_sequence.py`、`hand_sequence_metrics.py`、`gui/hand_sequence_panel.py`：离线 RGB 序列推理、导出与计时，不是相机采集程序。
-- `/home/hzb/Work/sam3d-body-deploy/camera_worker.py`、`launch_camera.sh`、`gui/camera_client.py`、`gui/camera_receiver.py`、`orbbec_color.py`：相机完整链路。
-- `/home/hzb/Work/sam3d-body-deploy/gpu_lease.py`、`engine_registry.py`、`studio_paths.py`：互斥、引擎信任、环境/路径。
+- `/home/hzb/Work/sam3d-body-deploy/studio/hand/hand_acceleration.py`：TRT 编码器、MHR 设备化/Graph、编译安装。
+- `/home/hzb/Work/sam3d-body-deploy/studio/hand/hand_decoder.py`：中间预测调度与回调分段整体编译。
+- `/home/hzb/Work/sam3d-body-deploy/studio/hand/hand_feedback.py`：反馈复制缓存、关键点依赖裁剪、最终手部顶点路径。
+- `/home/hzb/Work/sam3d-body-deploy/studio/hand/hand_detector_preprocess.py`：检测器 RGB 固定缓冲预处理。
+- `/home/hzb/Work/sam3d-body-deploy/studio/hand/hand_warmup.py`：已有照片离线预热。
+- `/home/hzb/Work/sam3d-body-deploy/studio/hand/hand_sequence.py`、`studio/hand/hand_sequence_metrics.py`、`gui/hand_sequence_panel.py`：离线 RGB 序列推理、导出与计时，不是相机采集程序。
+- `/home/hzb/Work/sam3d-body-deploy/studio/cameras/camera_worker.py`、`launch_camera.sh`、`gui/camera_client.py`、`gui/camera_receiver.py`、`studio/cameras/orbbec_color.py`：相机完整链路。
+- `/home/hzb/Work/sam3d-body-deploy/studio/core/gpu_lease.py`、`engine_registry.py`、`studio_paths.py`：互斥、引擎信任、环境/路径。
 - `/home/hzb/Work/sam3d-body-deploy/gui/overlay_view.py`：彩色网格叠加；控制数据消费不应依赖它的渲染完成。
 
 较早的 `docs/HAND_LAB.md` 有阶段性的原生耗时及“尚未接实时流”描述；当前实现与 `docs/HAND_LIVE.md`、本文优先，不能把早期状态当现状。

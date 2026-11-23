@@ -11,7 +11,7 @@ import numpy as np
 ROOT=Path(__file__).resolve().parents[1];sys.path[:0]=[str(ROOT/'gui'),str(ROOT)]
 from PyQt5 import QtCore,QtGui
 from app import MainWindow,create_application
-from rgbd_batch import PoseSet
+from studio.rgbd.rgbd_batch import PoseSet
 import rgbd_validation as module
 
 with tempfile.TemporaryDirectory() as tmp:

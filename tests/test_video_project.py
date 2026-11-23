@@ -11,9 +11,9 @@ import unittest
 import shutil
 try:
     import numpy as np
-    from video_project import add_track,put_segment,segment_key,run_key,save_json,require_masks,mask_at,segment_folder
-    from launch_config import LaunchConfig
-    from fast_selection import SinglePersonDetector
+    from studio.video.video_project import add_track,put_segment,segment_key,run_key,save_json,require_masks,mask_at,segment_folder
+    from studio.core.launch_config import LaunchConfig
+    from studio.body.fast_selection import SinglePersonDetector
 except ImportError:
     np=None
 
@@ -67,8 +67,8 @@ class VideoTests(unittest.TestCase):
     def test_vfr_frame_pts_and_last_duration_survive_export(self):
         import cv2
         from unittest.mock import patch
-        from video_project import annotation_key
-        from video_render import render_video
+        from studio.video.video_project import annotation_key
+        from studio.video.video_render import render_video
         with tempfile.TemporaryDirectory() as tmp:
             p=Path(tmp);(p/'frames').mkdir();r=p/'runs/test';r.mkdir(parents=True)
             project=dict(schema='studio_video_v1',source_sha256='test',source='unused',width=100,height=80,
@@ -76,18 +76,18 @@ class VideoTests(unittest.TestCase):
             save_json(p/'project.json',project)
             save_json(r/'run.json',dict(status='complete',source_sha256='test',annotations=annotation_key(project),successful=0,records=[]))
             for i in range(3):cv2.imwrite(str(p/'frames'/f'{i:06d}.png'),np.zeros((80,100,3),np.uint8))
-            with patch('gpu_lease.acquire_gpu_lease'):
+            with patch('studio.core.gpu_lease.acquire_gpu_lease'):
                 render_video(p,r,'skeleton',lambda *a,**k:None)
             report=json.loads((r/'render-skeleton/complete.json').read_text())
             self.assertEqual(report['frames'],3)
             self.assertAlmostEqual(float(report['probe']['streams'][0]['duration']),.24,places=5)
 
     def test_exclusive_video_lease_rejects_body_until_exit(self):
-        import gpu_lease
+        import studio.core.gpu_lease as gpu_lease
         from unittest.mock import patch
         with tempfile.TemporaryDirectory() as folder:
             target=Path(folder)/'isolated.lock'
-            prefix=f'import gpu_lease; from pathlib import Path; gpu_lease.LOCK_PATH=Path({str(target)!r}); '
+            prefix=f'import studio.core.gpu_lease as gpu_lease; from pathlib import Path; gpu_lease.LOCK_PATH=Path({str(target)!r}); '
             with patch.object(gpu_lease,'LOCK_PATH',target):
                 lease=gpu_lease.acquire_gpu_lease('exclusive')
                 try:

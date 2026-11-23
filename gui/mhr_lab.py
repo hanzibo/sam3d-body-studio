@@ -61,7 +61,7 @@ class LabClient(QtCore.QObject):
         self.process.setWorkingDirectory(str(ROOT))
         env=QtCore.QProcessEnvironment.systemEnvironment();env.remove('PYTHONPATH');env.insert('PYTHONDONTWRITEBYTECODE','1')
         self.process.setProcessEnvironment(env)
-        self.process.start(PYTHON,['-u',str(ROOT/'mhr_lab_worker.py'),'--output',self.temp.name,'--device',self.device])
+        self.process.start(PYTHON,['-u','-m','studio.mhr.mhr_lab_worker','--output',self.temp.name,'--device',self.device])
         self.watchdog.start()
 
     def submit(self, kind, **kw):

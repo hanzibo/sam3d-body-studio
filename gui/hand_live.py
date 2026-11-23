@@ -10,7 +10,7 @@ import time
 import uuid
 import numpy as np
 from PyQt5 import QtCore,QtGui,QtWidgets
-from gui_camera import select_camera_intrinsics
+from studio.cameras.gui_camera import select_camera_intrinsics
 from overlay_view import OverlayView
 ROOT=Path(__file__).resolve().parents[1]
 

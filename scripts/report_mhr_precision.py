@@ -90,11 +90,11 @@ def main():
     print(json.dumps(summary,ensure_ascii=False,indent=2),flush=True)
     if not a.render:return
     from studio_paths import environment,path
-    from gpu_lease import acquire_gpu_lease
+    from studio.core.gpu_lease import acquire_gpu_lease
     lease=acquire_gpu_lease('exclusive');os.environ.update(environment('fast'))
     sys.path.insert(0,str(path('fast_repo')))
     import cv2
-    from calibrated_visualization import render_mesh
+    from studio.body.calibrated_visualization import render_mesh
     manifest=json.loads((root/'full/manifest.json').read_text())
     out=root/'visuals';out.mkdir(exist_ok=True);montage=[]
     labels=[k for k in names if k in full['timings']]

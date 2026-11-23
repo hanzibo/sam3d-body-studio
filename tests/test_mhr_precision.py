@@ -4,8 +4,8 @@ from types import SimpleNamespace
 import unittest
 import torch
 from studio_paths import path
-from mhr_precision import MixedMHR, HalfMHR, install_mhr_precision
-from fast_keypoints import SelectedMHR70
+from studio.body.mhr_precision import MixedMHR, HalfMHR, install_mhr_precision
+from studio.body.fast_keypoints import SelectedMHR70
 
 
 class PrecisionTests(unittest.TestCase):

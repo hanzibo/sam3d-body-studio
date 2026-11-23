@@ -5,8 +5,8 @@ import sys
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 import numpy as np
-from depth_pose_refinement import MhrSurfaceModel
-from depth_pose_experiment import load_arrays, derived_arrays
+from studio.rgbd.depth_pose_refinement import MhrSurfaceModel
+from studio.rgbd.depth_pose_experiment import load_arrays, derived_arrays
 
 root = Path(sys.argv[1])
 model = MhrSurfaceModel()

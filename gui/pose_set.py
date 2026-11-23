@@ -7,7 +7,7 @@ from pathlib import Path
 import shutil
 import time
 from PyQt5 import QtCore,QtGui,QtWidgets
-from rgbd_batch import PoseSet,digest
+from studio.rgbd.rgbd_batch import PoseSet,digest
 
 ROOT=Path(__file__).resolve().parents[1]
 def stamp():return datetime.now().strftime('%Y%m%d-%H%M%S-%f')

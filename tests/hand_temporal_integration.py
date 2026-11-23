@@ -4,10 +4,10 @@ import json,sys,time
 from pathlib import Path
 import cv2,numpy as np
 ROOT=Path(__file__).resolve().parents[1];sys.path.insert(0,str(ROOT))
-from gpu_lease import acquire_gpu_lease
-from hand_engine import HandEngine
-from hand_config import HandExecution
-from hand_temporal import HandTemporalFilter
+from studio.core.gpu_lease import acquire_gpu_lease
+from studio.hand.hand_engine import HandEngine
+from studio.hand.hand_config import HandExecution
+from studio.hand.hand_temporal import HandTemporalFilter
 lease=acquire_gpu_lease('exclusive')
 config=HandExecution(backbone='trt_int8',detector='trt_fp16',decoder_compile=True,mhr_compile=True,mhr_graph=True,feedback_cache=True,intermediate_keypoints=True,final_hand_vertices=True,intermediate_compile=True,intermediate_predictions=3)
 e=HandEngine(lambda s:print(s,flush=True),config)

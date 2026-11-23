@@ -5,7 +5,7 @@ from pathlib import Path
 import sys
 import numpy as np
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]))
-from rgbd_tracking_points import project
+from studio.rgbd.rgbd_tracking_points import project
 
 
 def audit(directory):

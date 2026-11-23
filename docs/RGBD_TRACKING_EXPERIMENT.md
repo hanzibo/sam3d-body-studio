@@ -21,10 +21,10 @@
 
 ```bash
 PY=/run/media/hzb/Data/conda-envs/sam3d-body/bin/python
-$PY rgbd_tracking.py prepare outputs/rgbd-sequences/某序列 outputs/depth-fusion/tracking-v1/某实验 --hz 10
-$PY rgbd_tracking.py segment outputs/depth-fusion/tracking-v1/某实验
-$PY rgbd_tracking.py track outputs/depth-fusion/tracking-v1/某实验 --steps 15
-$PY rgbd_tracking.py evaluate outputs/depth-fusion/tracking-v1/某实验 --steps 15
+$PY studio/rgbd/rgbd_tracking.py prepare outputs/rgbd-sequences/某序列 outputs/depth-fusion/tracking-v1/某实验 --hz 10
+$PY studio/rgbd/rgbd_tracking.py segment outputs/depth-fusion/tracking-v1/某实验
+$PY studio/rgbd/rgbd_tracking.py track outputs/depth-fusion/tracking-v1/某实验 --steps 15
+$PY studio/rgbd/rgbd_tracking.py evaluate outputs/depth-fusion/tracking-v1/某实验 --steps 15
 ```
 
 准备阶段缓存当前帧 YOLO 框/17关键点，记录其实际耗时。分割阶段独立加载 SAM3 并退出。候选拟合不读取掩膜；`oracle` 仅指以 SAM3 掩膜限制测量点的离线对照，不是姿态真值。

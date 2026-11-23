@@ -4,7 +4,7 @@ from types import SimpleNamespace
 import cv2
 import numpy as np
 import pytest
-from hand_stream import process_hand_frame
+from studio.hand.hand_stream import process_hand_frame
 class Automatic:
  def __init__(self,hands=1):
   self.resets=0;self.calls=[];self.batches=[];self.hands=hands

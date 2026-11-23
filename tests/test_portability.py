@@ -52,7 +52,7 @@ class Portability(unittest.TestCase):
 
     def test_standard_profile_rejects_fast_features(self):
         from dataclasses import replace
-        from launch_config import LaunchConfig
+        from studio.core.launch_config import LaunchConfig
         with self.assertRaises(ValueError):replace(LaunchConfig(),backend='standard').validate()
         base=LaunchConfig(backend='standard',image_size=512,trt_backbone=False,trt_detector=False,
                           decoder_compile=False,mhr_compile=False,interm_compile=False)

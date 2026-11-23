@@ -1,8 +1,8 @@
 # SPDX-License-Identifier: GPL-3.0-only
 import unittest
 import numpy as np
-from rgbd_comparison_data import FullGeometry,static_jitter,measured_cloud
-from rgbd_geometry import register_depth
+from studio.rgbd.rgbd_comparison_data import FullGeometry,static_jitter,measured_cloud
+from studio.rgbd.rgbd_geometry import register_depth
 
 class ComparisonTests(unittest.TestCase):
     def test_full_geometry_matches_independent_calibrated_registration(self):

@@ -1,9 +1,9 @@
 # SPDX-License-Identifier: GPL-3.0-only
 import unittest
 import numpy as np
-from rgbd_tracking_points import point_membership,sampled_indices,ProjectiveSurface
-from rgbd_tracking_report import membership_metrics
-from depth_pose_refinement import PoseDepthConfig
+from studio.rgbd.rgbd_tracking_points import point_membership,sampled_indices,ProjectiveSurface
+from studio.rgbd.rgbd_tracking_report import membership_metrics
+from studio.rgbd.depth_pose_refinement import PoseDepthConfig
 
 class TrackingPointTests(unittest.TestCase):
     def test_membership_uses_measurement_uv_and_bounds(self):

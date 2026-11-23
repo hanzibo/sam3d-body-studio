@@ -10,7 +10,7 @@ from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
 sys.path.insert(0,str(ROOT))
 from studio_paths import environment, path
-from gpu_lease import acquire_gpu_lease
+from studio.core.gpu_lease import acquire_gpu_lease
 
 def main():
     p=argparse.ArgumentParser(description=__doc__)
@@ -31,7 +31,7 @@ def main():
               '--inference-type','body','--warmup',str(a.warmup),'--runs',str(a.runs)]
     code=loader.read_text().split('faces=estimator.faces.copy()')[0]
     ns={'__name__':'__main__','__file__':str(loader)}
-    from offline_dinov3 import local_dinov3_source
+    from studio.core.offline_dinov3 import local_dinov3_source
     with local_dinov3_source():
         exec(compile(code,str(loader),'exec'),ns)
     torch=ns['torch'];np=ns['np'];model=ns['model'];estimator=ns['estimator']

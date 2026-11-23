@@ -19,7 +19,7 @@ import pyqtgraph as pg
 import pyqtgraph.opengl as gl
 from pyqtgraph.opengl.GLGraphicsItem import GLGraphicsItem
 from OpenGL import GL
-from pose_data import EDGES
+from studio.body.pose_data import EDGES
 from mesh_geometry import FastMeshData
 from pose_set import PoseSetPanel
 from record_history import RecordDialog
@@ -396,7 +396,7 @@ class RgbdValidation(QtWidgets.QWidget):
         path=self.segmentation_pending['path'];mode=self.segmentation_pending.get('mode','segment');self.segment_timer.stop()
         # Set mode before clearing pending: no gap in the frontend GPU interlock.
         self.mode=mode;self.segmentation_pending=None
-        self.launch(SAM3_PYTHON,'sam3_segment.py',['--request',path],mode);host.update_camera_controls()
+        self.launch(SAM3_PYTHON,'studio.segmentation.sam3_segment',['--request',path],mode);host.update_camera_controls()
     def setup_candidates(self,output,report,selected=None):
         self.segmentation_result=dict(output=str(output),report=report)
         self.candidates.blockSignals(True);self.candidates.clear()
@@ -464,12 +464,12 @@ class RgbdValidation(QtWidgets.QWidget):
         self.candidates.setEnabled(self.segmentation_result is not None and not busy)
         if hasattr(self,'batch'):self.batch.refresh()
 
-    def launch(self,python,script,args,mode):
+    def launch(self,python,module,args,mode):
         self.mode=mode;self.done=False;self.operation_cancelled=False;self.buffer='';self.log_text='';self.started=time.monotonic()
         env=QtCore.QProcessEnvironment.systemEnvironment()
         for key in ('PYTHONPATH','QT_QPA_PLATFORM_PLUGIN_PATH','QT_QPA_FONTDIR'):env.remove(key)
         self.process.setProcessEnvironment(env);self.process.setWorkingDirectory(str(ROOT))
-        self.process.start(python,['-u',str(ROOT/script),*args]);self.timeout.start();self.refresh_controls()
+        self.process.start(python,['-u','-m',module,*args]);self.timeout.start();self.refresh_controls()
     def capture(self):
         if not self.capture_btn.isEnabled():return
         if not self.batch.confirm_capture():return
@@ -503,9 +503,9 @@ class RgbdValidation(QtWidgets.QWidget):
         if action=='preview':args.append('--preview')
         if self.host.camera_backend.currentData() == 'kinect':
             from studio_paths import path
-            self.launch(str(path('kinect_python')),'kinect_rgbd_capture.py',args,action)
+            self.launch(str(path('kinect_python')),'studio.cameras.kinect_rgbd_capture',args,action)
         else:
-            self.launch(CAMERA_PYTHON,'rgbd_capture.py',args,action)
+            self.launch(CAMERA_PYTHON,'studio.cameras.rgbd_capture',args,action)
         self.host.update_camera_controls()
     def read_output(self):
         self.buffer+=bytes(self.process.readAllStandardOutput()).decode('utf8',errors='replace')
@@ -829,7 +829,7 @@ class RgbdValidation(QtWidgets.QWidget):
         self.status.setText('正在拟合整体位置并验证独立空间块，原始预测不会覆盖…' if refine else '正在评估原始位置与尺度…')
         args=['--sample',str(self.sample),'--prediction',self.active_result['prediction'],'--mask',str(self.sample/'mask.png'),'--output',str(out)]
         if refine:args.append('--refine')
-        self.launch(sys.executable,'rgbd_evaluate.py',args,'evaluate')
+        self.launch(sys.executable,'studio.rgbd.rgbd_evaluate',args,'evaluate')
     def display_evaluation(self,result):
         m=result.get('metrics')
         if not m or m.get('mask_sha256')!=self.mask_hash():

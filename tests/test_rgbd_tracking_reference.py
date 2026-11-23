@@ -5,9 +5,9 @@ import tempfile
 import unittest
 import cv2
 import numpy as np
-from video_project import SCHEMA,segment_folder,segment_key,save_json
-from rgbd_tracking_reference import export_reviewed_reference,reference_directory
-from rgbd_tracking_points import SequenceGeometry,project
+from studio.video.video_project import SCHEMA,segment_folder,segment_key,save_json
+from studio.rgbd.rgbd_tracking_reference import export_reviewed_reference,reference_directory
+from studio.rgbd.rgbd_tracking_points import SequenceGeometry,project
 
 class ReferenceTests(unittest.TestCase):
     def test_manual_revisions_preserve_previous_masks_and_source_indices(self):

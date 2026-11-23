@@ -6,7 +6,7 @@ import json
 from pathlib import Path
 import uuid
 from PyQt5 import QtCore, QtWidgets
-from launch_config import LaunchConfig, PRESETS, ROOT
+from studio.core.launch_config import LaunchConfig, PRESETS, ROOT
 
 class ProfilePanel(QtWidgets.QGroupBox):
     changed=QtCore.pyqtSignal()

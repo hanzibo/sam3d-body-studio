@@ -9,12 +9,12 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 import numpy as np
 import torch
-from gpu_lease import acquire_gpu_lease
-from depth_pose_refinement import MhrSurfaceModel
-from depth_pose_accelerated import CudaPoseFitter, corrective_features
-from depth_pose_render import FittingDepthRenderer
-from rgbd_evaluate import DepthRenderer
-from depth_pose_experiment import load_arrays
+from studio.core.gpu_lease import acquire_gpu_lease
+from studio.rgbd.depth_pose_refinement import MhrSurfaceModel
+from studio.rgbd.depth_pose_accelerated import CudaPoseFitter, corrective_features
+from studio.rgbd.depth_pose_render import FittingDepthRenderer
+from studio.rgbd.rgbd_evaluate import DepthRenderer
+from studio.rgbd.depth_pose_experiment import load_arrays
 
 
 def main(root):

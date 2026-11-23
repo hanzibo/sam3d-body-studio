@@ -12,7 +12,7 @@ from PyQt5 import QtCore, QtGui
 ROOT=Path(__file__).resolve().parents[1]
 sys.path[:0]=[str(ROOT/'gui'),str(ROOT)]
 from app import MainWindow, create_application
-from mask_prompt import read_prompt
+from studio.segmentation.mask_prompt import read_prompt
 
 with tempfile.TemporaryDirectory() as folder:
     QtCore.QSettings.setPath(QtCore.QSettings.NativeFormat,QtCore.QSettings.UserScope,folder)
@@ -46,7 +46,7 @@ with tempfile.TemporaryDirectory() as folder:
     fake=Path(folder)/'fake.py'
     event=dict(type='segmented',report=dict(selected=0,candidates=[dict(index=0,score=.9)]))
     fake.write_text("import time; print("+repr('@@RGBD '+json.dumps(event))+",flush=True); time.sleep(.8)")
-    seg.launch('segment',sys.executable,fake,[])
+    seg.launch('segment',sys.executable,[str(fake)],[])
     def wait_for(predicate):
         deadline=time.monotonic()+5
         while not predicate() and time.monotonic()<deadline:
@@ -61,12 +61,12 @@ with tempfile.TemporaryDirectory() as folder:
     assert seg.raw is None and seg.candidates.isEnabled()
     seg.candidates.setCurrentIndex(0);assert seg.raw is not None
     fake.write_text('import time; time.sleep(30)')
-    seg.launch('segment',sys.executable,fake,[]);seg.cancel()
+    seg.launch('segment',sys.executable,[str(fake)],[]);seg.cancel()
     assert w.sam3_blocks_models()  # terminate is asynchronous
     wait_for(lambda:not seg.active)
     assert '已取消' in seg.status.text()
     # Failed executable must recover controls as well.
-    seg.launch('segment',Path(folder)/'missing-python',fake,[])
+    seg.launch('segment',Path(folder)/'missing-python',[str(fake)],[])
     wait_for(lambda:not seg.active)
     assert not w.sam3_blocks_models()
     w.close();app.processEvents()

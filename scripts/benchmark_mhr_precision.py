@@ -17,10 +17,10 @@ from benchmark_embedl_encoder import memory_guard
 
 def geometry(a):
     import torch
-    from gpu_lease import acquire_gpu_lease
+    from studio.core.gpu_lease import acquire_gpu_lease
     from studio_paths import path,environment
-    from fast_keypoints import SelectedMHR70
-    from mhr_precision import MixedMHR,HalfMHR,install_mhr_precision
+    from studio.body.fast_keypoints import SelectedMHR70
+    from studio.body.mhr_precision import MixedMHR,HalfMHR,install_mhr_precision
     lease=acquire_gpu_lease('exclusive');os.environ.update(environment('fast'))
     torch.set_num_threads(4)
     checkpoint=path('fast_checkpoint_dir')
@@ -98,7 +98,7 @@ def geometry(a):
 def full(a):
     from compare_backbones_standard import run,sha256
     from report_standard_reference import compare_prediction
-    from launch_config import PRESETS
+    from studio.core.launch_config import PRESETS
     manifest=json.loads((a.reference/'manifest.json').read_text())
     for case in manifest['cases']:assert sha256(case['image'])==case['image_sha256']
     (a.output/'manifest.json').write_text(json.dumps(manifest,ensure_ascii=False,indent=2))
@@ -146,7 +146,7 @@ def main():
     if not 1<=a.runs<=200:raise ValueError('runs must be 1–200')
     a.output.mkdir(parents=True,exist_ok=False)
     (a.output/'protocol.json').write_text(json.dumps(dict(stage=a.stage,memory_guard=guard,modes=a.modes,runs=a.runs,reference=str(a.reference)),indent=2))
-    for file in [Path(__file__),ROOT/'mhr_precision.py']:(a.output/file.name).write_bytes(file.read_bytes())
+    for file in [Path(__file__),ROOT/'studio/body/mhr_precision.py']:(a.output/file.name).write_bytes(file.read_bytes())
     (geometry if a.stage=='geometry' else full)(a)
 
 
